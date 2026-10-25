@@ -1,0 +1,182 @@
+export const en = {
+  // Navigation & Branding
+  brandName: 'PyInterview Pro',
+  brandSubtitle: 'Python Fundamentals → Algorithms → NumPy/Pandas → ML Engineering',
+  navHome: 'Home',
+  navCatalog: 'All 30 Questions',
+  navArena: 'Practice Arena',
+  navPatterns: 'Algo Patterns',
+  navVisualizers: 'Algorithm Visualizers',
+  navCheatsheet: 'Cheatsheet',
+  navQuiz: '100 Qs Bank',
+  resetProgress: 'Clear Local Data',
+
+  // Language & A11y switcher
+  language: 'Language',
+  selectLanguage: 'Select interface language',
+  a11yPreferences: 'Accessibility & Preferences',
+  a11yPreferencesDesc: 'Customize language, display theme, and accessibility settings.',
+  themeSection: 'Appearance Theme',
+  themeDark: 'Dark',
+  themeLight: 'Light',
+  themeSystem: 'System',
+  close: 'Close',
+
+  // Practice Console / REPL
+  tabTestResults: 'Test Results',
+  tabConsole: 'Console',
+  tabInteractiveRepl: 'Interactive REPL',
+  runScriptBtn: 'Run',
+  consoleScriptRunning: 'Executing solution.py...',
+  consoleScriptEmptyNotice: 'Click "Run" to execute your code and view any print() outputs or errors here.',
+  consoleNoOutput: 'Process finished with exit code 0 (no output printed). Note: If your print(...) is inside a function, make sure the function is called or keep the starter function name.',
+  consoleScriptClearBtn: 'Clear',
+  consolePromptPlaceholder: 'Type Python code or expression (e.g. two_sum([2, 7], 9) or print(x))...',
+  consoleRunBtn: 'Evaluate',
+  consoleClearBtn: 'Clear Console',
+  consoleSyncNotice: 'Synced with editor functions and session variables',
+  consoleEmptyNotice: 'Interactive Python 3.12 REPL. Evaluate expressions, test functions, and inspect variables in real time.',
+  consoleResetEnv: 'Reset REPL Session',
+  consoleQuickExamples: 'Quick Test',
+
+  // Status
+  pythonEngineReady: 'Pyodide Python 3.12 Ready',
+  pythonEngineInitializing: 'Initializing Python 3.12...',
+  pythonEngineError: 'Engine Error',
+
+  // Algo Patterns Page
+  patternsHeroBadge: 'Cognitive Blueprint Mastery',
+  patternsHeroTitle: 'The Underlying Patterns of Coding Interviews',
+  patternsHeroDesc:
+    'Top algorithmic performers don\'t memorize 500 individual questions; they recognize the ~10 recurring algorithmic patterns. Master the intuition, origin story, multi-angle explanations, and interactive visualizations below.',
+  searchPatternsPlaceholder: 'Search patterns (e.g., Two Pointers, BFS, DP, Heap, Monotonic)...',
+  allCategories: 'All Categories',
+  filterByDifficulty: 'Difficulty',
+  allDifficulties: 'All Levels',
+  patternsFound: 'patterns found',
+  selectPatternToExplore: 'Select a pattern from the sidebar or click a card below to inspect its blueprint.',
+  explorePatternBtn: 'Explore Pattern',
+  openInPracticeArena: 'Solve Question in Arena',
+  openInteractiveVisualizer: 'Open Visualizer Hub',
+
+  // Pattern Tabs
+  tabIntuition: '1. Intuition & Metaphor',
+  tabBlueprint: '2. Pattern Blueprint & Recipe',
+  tabVisual: '3. Interactive Visual Walkthrough',
+  tabTraps: '4. Traps & Interview Variants',
+
+  // Tab 1 Sections
+  whyCreatedHeader: 'Why Was This Algorithm Created?',
+  fundamentalBottleneckHeader: 'The Fundamental Bottleneck Overcome',
+  ahaMetaphorHeader: 'The "Aha!" Mental Metaphor',
+  whyNaiveFailsHeader: 'Why Brute-Force Approaches Fail',
+  mathInsightHeader: 'Mathematical / Theoretical Invariant',
+  historicalOrigin: 'Historical Origin',
+
+  // Tab 2 Sections
+  triggerSignalsHeader: 'When To Use This Pattern (Trigger Signals)',
+  howToSpotIn10s: 'How to recognize this pattern within 10 seconds of reading a problem prompt:',
+  algorithmicRecipeHeader: 'Algorithmic Recipe (Step-by-Step)',
+  productionTemplateHeader: 'Clean Python Implementation Template',
+  complexityHeader: 'Complexity Analysis',
+  timeComplexity: 'Time Complexity',
+  spaceComplexity: 'Space Complexity',
+
+  // Tab 3 Sections
+  interactiveVisualizerHeader: 'Visual Trace & State Inspection',
+  presetSelector: 'Select Scenario Preset:',
+  stepCounter: 'Step',
+  of: 'of',
+  play: 'Auto Play',
+  pause: 'Pause',
+  prevStep: 'Previous Step',
+  nextStep: 'Next Step',
+  resetSimulation: 'Reset',
+  stateInspector: 'Live State Snapshot',
+  visualExplanation: 'Step Explanation',
+
+  // Tab 4 Sections
+  interviewTrapsHeader: 'Subtle Edge Cases & Candidate Traps',
+  mitigation: 'How to mitigate in an interview',
+  interviewVariantsHeader: 'Classic Interview Variations',
+  twistToWatch: 'The core twist',
+
+  // Home Page linking
+  homePatternBannerTitle: 'Learn Algorithms via Patterns, Not Rote Memorization',
+  homePatternBannerDesc: 'Stop grinding LeetCode blindly. Discover the 10 structural blueprints behind our 30 interview questions with 4 distinct explanation layers and interactive step visualizers.',
+  homeExplorePatternsBtn: 'Explore Algo Patterns Hub',
+
+  // General UI
+  practiceProblem: 'Practice Problem',
+  relatedQuestion: 'Related Arena Problem',
+  difficulty: 'Difficulty',
+  category: 'Category',
+
+  // 100 Qs Question Bank (AI & ML)
+  quizHeroBadge: 'Production ML & Full-Stack AI Question Bank',
+  quizHeroTitle: '100 Staff-Level AI Engineering Questions',
+  quizHeroDesc:
+    '70 deep technical multiple-choice questions with instant feedback and comprehensive explanations, plus 30 real-world system design scenarios with grading rubrics.',
+  quizModeQuiz: 'Interactive Quiz',
+  quizModeFlashcard: 'Flashcards',
+  quizModeList: 'Browse All',
+  quizFilterAll: 'All 100 Questions',
+  quizFilterClassicalML: 'Classical ML & Fraud',
+  quizFilterLowLatency: 'Ultra-Low-Latency & ONNX',
+  quizFilterMLOps: 'MLOps & Observability',
+  quizFilterAgentic: 'Agentic Workflows & LLMs',
+  quizFilterDistributed: 'Distributed Systems & Security',
+  quizFilterStreamingUI: 'Streaming UI & A11y',
+  quizFilterSystemDesign: 'System Design Scenarios',
+  quizStatsCompleted: 'Completed',
+  quizStatsAccuracy: 'Accuracy Rate',
+  quizStatsScore: 'Score',
+  quizStatsBookmarked: 'Saved',
+  quizStatsMastery: 'Mastery Progress',
+  quizProgressResetBtn: 'Reset Quiz Data',
+  quizProgressResetConfirm:
+    'Are you sure you want to reset all answers, notes, and progress in the 100 Questions Bank? This action cannot be undone.',
+  quizSearchPlaceholder: 'Search questions, options, explanations, criteria...',
+  quizFilterStatus: 'Filter by Status',
+  quizFilterAllStatus: 'All Statuses',
+  quizFilterCorrect: 'Correct Only',
+  quizFilterIncorrect: 'Incorrect Only',
+  quizStatusCorrect: 'Correct',
+  quizStatusIncorrect: 'Incorrect',
+  quizFilterBookmarked: 'Saved / Bookmarked Only',
+  quizFilterUnanswered: 'Unanswered Only',
+  quizNoQuestionsFound: 'No questions match your current search or filters.',
+  quizClearFilters: 'Clear Filters',
+  quizQuestionNumber: 'Question',
+  quizOf: 'of',
+  quizSectionLabel: 'Domain',
+  quizTypeMCQ: 'Multiple Choice',
+  quizTypeOpenEnded: 'System Design Scenario',
+  quizSelectOptionPrompt: 'Select the best option:',
+  quizWhyExplanation: 'Why This Answer Is Correct',
+  quizStaffCriteriaTitle: 'Staff Engineering Rubric & Criteria',
+  quizYourNotes: 'Your Proposed Architecture & Notes',
+  quizYourNotesPlaceholder:
+    'Draft your technical approach, latency budgets, failure modes, data schemas, or algorithms here before viewing the staff criteria...',
+  quizRevealCriteria: 'Reveal Staff Criteria',
+  quizHideCriteria: 'Hide Criteria',
+  quizCriteriaInstruction:
+    'Self-evaluate your answer against the official rubric. Check each criterion covered:',
+  quizCriteriaScore: 'Criteria Met',
+  quizMarkMastered: 'Mark as Mastered',
+  quizMarkIncomplete: 'Mark as Incomplete',
+  quizPrev: 'Previous',
+  quizNext: 'Next',
+  quizJumpTo: 'Jump to #',
+  quizBookmark: 'Save for Review',
+  quizBookmarked: 'Saved',
+  quizKeyboardShortcuts:
+    'Keyboard shortcuts: [1-4] or [A-D] Select option | [Space] Reveal/Flip | [←/→] Navigate',
+  flashcardFlipPrompt: 'Click card or press [Space] to flip',
+  flashcardFront: 'Front (Question)',
+  flashcardBack: 'Back (Solution & Rationale)',
+  flashcardMarkKnow: 'I Know This',
+  flashcardMarkReview: 'Review Later',
+};
+
+export type TranslationKey = keyof typeof en;

@@ -1,0 +1,182 @@
+import type { TranslationKey } from './en';
+
+export const es: Record<TranslationKey, string> = {
+  // Navegación & Marca
+  brandName: 'PyInterview Pro',
+  brandSubtitle: 'Fundamentos de Python → Algoritmos → NumPy/Pandas → Ingeniería de ML',
+  navHome: 'Inicio',
+  navCatalog: 'Las 30 Preguntas',
+  navArena: 'Arena de Práctica',
+  navPatterns: 'Patrones de Algoritmos',
+  navVisualizers: 'Visualizadores',
+  navCheatsheet: 'Guía Rápida',
+  navQuiz: 'Banco de 100 Preguntas',
+  resetProgress: 'Limpiar Datos Locales',
+
+  // Selector de Idioma & A11y
+  language: 'Idioma',
+  selectLanguage: 'Seleccionar idioma de la interfaz',
+  a11yPreferences: 'Accesibilidad y Preferencias',
+  a11yPreferencesDesc: 'Personaliza el idioma de la interfaz, el tema de visualización y preferencias.',
+  themeSection: 'Tema de Apariencia',
+  themeDark: 'Oscuro',
+  themeLight: 'Claro',
+  themeSystem: 'Sistema',
+  close: 'Cerrar',
+
+  // Consola de Práctica / REPL
+  tabTestResults: 'Resultados de Pruebas',
+  tabConsole: 'Consola',
+  tabInteractiveRepl: 'REPL Interactivo',
+  runScriptBtn: 'Ejecutar',
+  consoleScriptRunning: 'Ejecutando solution.py...',
+  consoleScriptEmptyNotice: 'Haz clic en "Ejecutar" para correr tu código y ver las salidas de print() y errores aquí.',
+  consoleNoOutput: 'Proceso finalizado con código 0 (sin salida stdout). Nota: Si tu print(...) está dentro de una función, asegúrate de que la función sea llamada o mantén el nombre inicial de la función.',
+  consoleScriptClearBtn: 'Limpiar',
+  consolePromptPlaceholder: 'Escribe código o expresión Python (ej: two_sum([2, 7], 9) o print(x))...',
+  consoleRunBtn: 'Evaluar',
+  consoleClearBtn: 'Limpiar Consola',
+  consoleSyncNotice: 'Sincronizado con funciones del editor y variables de sesión',
+  consoleEmptyNotice: 'REPL Python 3.12 interactivo. Evalúa expresiones, prueba funciones e inspecciona variables en tiempo real.',
+  consoleResetEnv: 'Reiniciar Sesión REPL',
+  consoleQuickExamples: 'Prueba Rápida',
+
+  // Estado
+  pythonEngineReady: 'Python 3.12 (Pyodide) Listo',
+  pythonEngineInitializing: 'Iniciando Python 3.12...',
+  pythonEngineError: 'Error del Motor Python',
+
+  // Página de Patrones
+  patternsHeroBadge: 'Dominio de Patrones Cognitivos',
+  patternsHeroTitle: 'Los Patrones Fundamentales para Entrevistas Técnicas',
+  patternsHeroDesc:
+    'Los mejores ingenieros no memorizan 500 problemas individuales; reconocen los ~10 patrones recurrentes. Domina la intuición, origen histórico, explicaciones en múltiples ángulos y visualizadores interactivos.',
+  searchPatternsPlaceholder: 'Buscar patrones (ej: Dos Punteros, BFS, DP, Heap, Monotónico)...',
+  allCategories: 'Todas las Categorías',
+  filterByDifficulty: 'Dificultad',
+  allDifficulties: 'Todos los Niveles',
+  patternsFound: 'patrones encontrados',
+  selectPatternToExplore: 'Selecciona un patrón del menú lateral o haz clic en una tarjeta abajo para inspeccionar su diseño.',
+  explorePatternBtn: 'Explorar Patrón',
+  openInPracticeArena: 'Resolver en la Arena',
+  openInteractiveVisualizer: 'Abrir Visualizador Completo',
+
+  // Pestañas del Patrón
+  tabIntuition: '1. Intuición y Metáfora',
+  tabBlueprint: '2. Receta y Plantilla',
+  tabVisual: '3. Recorrido Visual Interactivo',
+  tabTraps: '4. Trampas y Variaciones',
+
+  // Secciones de la Pestaña 1
+  whyCreatedHeader: '¿Por Qué Se Creó Este Algoritmo?',
+  fundamentalBottleneckHeader: 'El Cuello de Botella Fundamental Superado',
+  ahaMetaphorHeader: 'La Metáfora Mental del Momento "¡Eureka!"',
+  whyNaiveFailsHeader: 'Por Qué Falla la Fuerza Bruta',
+  mathInsightHeader: 'Invariante Matemático / Teórico',
+  historicalOrigin: 'Origen Histórico',
+
+  // Secciones de la Pestaña 2
+  triggerSignalsHeader: 'Cuándo Usar Este Patrón (Señales de Activación)',
+  howToSpotIn10s: 'Cómo reconocer este patrón en 10 segundos al leer un enunciado:',
+  algorithmicRecipeHeader: 'Receta Algorítmica (Paso a Paso)',
+  productionTemplateHeader: 'Plantilla de Código Python Limpia',
+  complexityHeader: 'Análisis de Complejidad',
+  timeComplexity: 'Complejidad Temporal',
+  spaceComplexity: 'Complejidad Espacial',
+
+  // Secciones de la Pestaña 3
+  interactiveVisualizerHeader: 'Rastreo Visual e Inspección de Estado',
+  presetSelector: 'Seleccionar Escenario:',
+  stepCounter: 'Paso',
+  of: 'de',
+  play: 'Reproducir',
+  pause: 'Pausar',
+  prevStep: 'Paso Anterior',
+  nextStep: 'Paso Siguiente',
+  resetSimulation: 'Reiniciar',
+  stateInspector: 'Instantánea de Estado en Vivo',
+  visualExplanation: 'Explicación del Paso',
+
+  // Secciones de la Pestaña 4
+  interviewTrapsHeader: 'Casos Borde Críticos y Errores Comunes',
+  mitigation: 'Cómo mitigarlo en una entrevista',
+  interviewVariantsHeader: 'Variaciones Clásicas de Entrevista',
+  twistToWatch: 'El giro clave a tener en cuenta',
+
+  // Integración con Inicio
+  homePatternBannerTitle: 'Aprende Algoritmos por Patrones, No por Memoria',
+  homePatternBannerDesc: 'Deja de memorizar ciegamente en LeetCode. Descubre los 10 planos estructurales detrás de nuestras 30 preguntas con 4 niveles de explicación y visualizadores interactivos.',
+  homeExplorePatternsBtn: 'Explorar Centro de Patrones',
+
+  // UI General
+  practiceProblem: 'Problema de Práctica',
+  relatedQuestion: 'Pregunta Relacionada en la Arena',
+  difficulty: 'Dificultad',
+  category: 'Categoría',
+
+  // Banco de 100 Preguntas (AI & ML)
+  quizHeroBadge: 'Banco de Preguntas: ML en Producción e IA Full-Stack',
+  quizHeroTitle: '100 Preguntas de Nivel Staff para Ingeniería de IA',
+  quizHeroDesc:
+    '70 preguntas técnicas de opción múltiple con retroalimentación inmediata y explicaciones exhaustivas, más 30 escenarios reales de diseño de sistemas con rúbricas de evaluación.',
+  quizModeQuiz: 'Quiz Interactivo',
+  quizModeFlashcard: 'Flashcards',
+  quizModeList: 'Ver Todas',
+  quizFilterAll: 'Las 100 Preguntas',
+  quizFilterClassicalML: 'ML Clásico y Fraude',
+  quizFilterLowLatency: 'Latencia Ultrabaja y ONNX',
+  quizFilterMLOps: 'MLOps y Observabilidad',
+  quizFilterAgentic: 'Flujos Agénticos y LLMs',
+  quizFilterDistributed: 'Sistemas Distribuidos y Seguridad',
+  quizFilterStreamingUI: 'UI de Streaming y Accesibilidad',
+  quizFilterSystemDesign: 'Escenarios de Diseño de Sistemas',
+  quizStatsCompleted: 'Completadas',
+  quizStatsAccuracy: 'Tasa de Acierto',
+  quizStatsScore: 'Puntuación',
+  quizStatsBookmarked: 'Guardadas',
+  quizStatsMastery: 'Progreso de Dominio',
+  quizProgressResetBtn: 'Restablecer Datos del Quiz',
+  quizProgressResetConfirm:
+    '¿Estás seguro de que deseas restablecer todas tus respuestas, notas y progreso del Banco de 100 Preguntas? Esta acción no se puede deshacer.',
+  quizSearchPlaceholder: 'Buscar preguntas, opciones, explicaciones, criterios...',
+  quizFilterStatus: 'Filtrar por Estado',
+  quizFilterAllStatus: 'Todos los Estados',
+  quizFilterCorrect: 'Solo Aciertos',
+  quizFilterIncorrect: 'Solo Errores',
+  quizStatusCorrect: 'Correcto',
+  quizStatusIncorrect: 'Incorrecto',
+  quizFilterBookmarked: 'Solo Guardadas',
+  quizFilterUnanswered: 'Solo No Respondidas',
+  quizNoQuestionsFound: 'No se encontraron preguntas para la búsqueda o filtros actuales.',
+  quizClearFilters: 'Limpiar Filtros',
+  quizQuestionNumber: 'Pregunta',
+  quizOf: 'de',
+  quizSectionLabel: 'Dominio',
+  quizTypeMCQ: 'Opción Múltiple',
+  quizTypeOpenEnded: 'Diseño de Sistemas',
+  quizSelectOptionPrompt: 'Selecciona la mejor opción:',
+  quizWhyExplanation: 'Por qué Esta Respuesta Es Correcta',
+  quizStaffCriteriaTitle: 'Rúbrica y Criterios de Ingeniería Staff',
+  quizYourNotes: 'Tu Propuesta de Arquitectura y Notas',
+  quizYourNotesPlaceholder:
+    'Redacta tu enfoque técnico, presupuestos de latencia, modos de falla, esquemas de datos o algoritmos aquí antes de ver los criterios...',
+  quizRevealCriteria: 'Revelar Criterios del Staff',
+  quizHideCriteria: 'Ocultar Criterios',
+  quizCriteriaInstruction:
+    'Autoevalúa tu respuesta frente a la rúbrica oficial. Marca cada criterio que cubriste:',
+  quizCriteriaScore: 'Criterios Cumplidos',
+  quizMarkMastered: 'Marcar como Dominado',
+  quizMarkIncomplete: 'Marcar como Incompleto',
+  quizPrev: 'Anterior',
+  quizNext: 'Siguiente',
+  quizJumpTo: 'Ir a nº',
+  quizBookmark: 'Guardar para Revisar',
+  quizBookmarked: 'Guardada',
+  quizKeyboardShortcuts:
+    'Atajos de teclado: [1-4] o [A-D] Elegir opción | [Espacio] Revelar/Girar | [←/→] Navegar',
+  flashcardFlipPrompt: 'Haz clic en la tarjeta o presiona [Espacio] para girar',
+  flashcardFront: 'Frente (Pregunta)',
+  flashcardBack: 'Reverso (Solución y Fundamento)',
+  flashcardMarkKnow: 'Ya lo Sé',
+  flashcardMarkReview: 'Repasar Después',
+};
