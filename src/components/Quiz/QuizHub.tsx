@@ -126,6 +126,28 @@ export const QuizHub: React.FC = () => {
     });
   }, []);
 
+  const handleRateFlashcard = useCallback((questionId: number, rating: 'mastered' | 'review') => {
+    setProgress(prev => {
+      if (rating === 'mastered') {
+        const nextCompleted = Array.from(new Set([...prev.completedIds, questionId]));
+        const nextBookmarked = prev.bookmarkedIds.filter(id => id !== questionId);
+        return {
+          ...prev,
+          completedIds: nextCompleted,
+          bookmarkedIds: nextBookmarked,
+        };
+      } else {
+        const nextBookmarked = Array.from(new Set([...prev.bookmarkedIds, questionId]));
+        const nextCompleted = prev.completedIds.filter(id => id !== questionId);
+        return {
+          ...prev,
+          bookmarkedIds: nextBookmarked,
+          completedIds: nextCompleted,
+        };
+      }
+    });
+  }, []);
+
   const handleResetProgress = () => {
     if (window.confirm(t('quizProgressResetConfirm'))) {
       setProgress({
@@ -438,12 +460,9 @@ export const QuizHub: React.FC = () => {
       {viewMode === 'flashcard' && (
         <FlashcardView
           questions={quizQuestions}
-          currentIndex={currentIndex}
-          onIndexChange={newIdx => setCurrentIndex(newIdx)}
-          isBookmarked={isCurrentBookmarked}
-          isCompleted={isCurrentCompleted}
-          onToggleBookmark={() => handleToggleBookmark(currentQuestion.id)}
-          onToggleCompleted={() => handleToggleCompleted(currentQuestion.id)}
+          progress={progress}
+          onRateCard={handleRateFlashcard}
+          onToggleBookmark={handleToggleBookmark}
         />
       )}
 

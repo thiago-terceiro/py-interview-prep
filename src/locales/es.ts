@@ -179,4 +179,19 @@ export const es: Record<TranslationKey, string> = {
   flashcardBack: 'Reverso (Solución y Fundamento)',
   flashcardMarkKnow: 'Ya lo Sé',
   flashcardMarkReview: 'Repasar Después',
+  flashcardDeckAll: 'Las 100 Tarjetas',
+  flashcardDeckReview: 'Por Repasar',
+  flashcardDeckUnmastered: 'Aún No Dominadas',
+  flashcardShuffle: 'Barajar Mazo',
+  flashcardActiveRecallPrompt:
+    'Recuerdo Activo: Formula tu explicación técnica en la mente antes de girar la tarjeta.',
+  flashcardPeekOptions: 'Ver Opciones (Pista)',
+  flashcardHideOptions: 'Ocultar Opciones',
+  flashcardCoreTakeaway: 'Concepto Clave de Entrevista',
+  flashcardRateReview: 'Necesito Repasar',
+  flashcardRateMastered: 'Lo Dominé Totalmente',
+  flashcardKeyboardHints:
+    '[Espacio] Girar | [1] Repasar | [2] Dominé | [←/→] Navegar',
+  flashcardEmptyDeck: '¡Excelente! No hay tarjetas en este filtro de mazo.',
+  flashcardResetDeck: 'Ver Todas las Tarjetas',
 };

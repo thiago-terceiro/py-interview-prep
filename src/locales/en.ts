@@ -177,6 +177,21 @@ export const en = {
   flashcardBack: 'Back (Solution & Rationale)',
   flashcardMarkKnow: 'I Know This',
   flashcardMarkReview: 'Review Later',
+  flashcardDeckAll: 'All 100 Cards',
+  flashcardDeckReview: 'Needs Review',
+  flashcardDeckUnmastered: 'Unmastered Only',
+  flashcardShuffle: 'Shuffle Deck',
+  flashcardActiveRecallPrompt:
+    'Active Recall: Formulate your technical explanation in your head before flipping.',
+  flashcardPeekOptions: 'Peek at Options (Hint)',
+  flashcardHideOptions: 'Hide Options',
+  flashcardCoreTakeaway: 'Core Interview Takeaway',
+  flashcardRateReview: 'Needs Review',
+  flashcardRateMastered: 'Knew It Cold',
+  flashcardKeyboardHints:
+    '[Space] Flip | [1] Needs Review | [2] Knew It | [←/→] Navigate',
+  flashcardEmptyDeck: 'Great job! No cards in this deck filter.',
+  flashcardResetDeck: 'Switch to All Cards',
 };
 
 export type TranslationKey = keyof typeof en;

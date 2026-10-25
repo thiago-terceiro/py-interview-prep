@@ -179,4 +179,19 @@ export const ptBR: Record<TranslationKey, string> = {
   flashcardBack: 'Verso (Solução & Fundamentação)',
   flashcardMarkKnow: 'Já Dominei',
   flashcardMarkReview: 'Revisar Depois',
+  flashcardDeckAll: 'Todos os 100 Cartões',
+  flashcardDeckReview: 'Precisa de Revisão',
+  flashcardDeckUnmastered: 'Ainda Não Dominados',
+  flashcardShuffle: 'Embaralhar Baralho',
+  flashcardActiveRecallPrompt:
+    'Evocação Ativa: Formule sua explicação técnica na mente antes de virar o cartão.',
+  flashcardPeekOptions: 'Espiar Alternativas (Dica)',
+  flashcardHideOptions: 'Ocultar Alternativas',
+  flashcardCoreTakeaway: 'Conceito-Chave para Entrevista',
+  flashcardRateReview: 'Precisa Revisar',
+  flashcardRateMastered: 'Dominei com Certeza',
+  flashcardKeyboardHints:
+    '[Espaço] Virar | [1] Revisar | [2] Dominei | [←/→] Navegar',
+  flashcardEmptyDeck: 'Excelente! Nenhum cartão neste filtro de baralho.',
+  flashcardResetDeck: 'Ver Todos os Cartões',
 };
