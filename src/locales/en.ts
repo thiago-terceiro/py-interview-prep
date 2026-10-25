@@ -172,7 +172,7 @@ export const en = {
   quizBookmarked: 'Saved',
   quizKeyboardShortcuts:
     'Keyboard shortcuts: [1-4] or [A-D] Select option | [Space] Reveal/Flip | [←/→] Navigate',
-  flashcardFlipPrompt: 'Click card or press [Space] to flip',
+  flashcardFlipPrompt: 'Click to flip • Swipe or drag to navigate',
   flashcardFront: 'Front (Question)',
   flashcardBack: 'Back (Solution & Rationale)',
   flashcardMarkKnow: 'I Know This',

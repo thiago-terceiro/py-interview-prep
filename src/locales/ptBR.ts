@@ -174,7 +174,7 @@ export const ptBR: Record<TranslationKey, string> = {
   quizBookmarked: 'Salva',
   quizKeyboardShortcuts:
     'Atalhos de teclado: [1-4] ou [A-D] Escolher opção | [Espaço] Exibir/Virar | [←/→] Navegar',
-  flashcardFlipPrompt: 'Clique no cartão ou pressione [Espaço] para virar',
+  flashcardFlipPrompt: 'Clique para virar • Deslize para navegar',
   flashcardFront: 'Frente (Pergunta)',
   flashcardBack: 'Verso (Solução & Fundamentação)',
   flashcardMarkKnow: 'Já Dominei',

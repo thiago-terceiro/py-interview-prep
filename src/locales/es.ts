@@ -174,7 +174,7 @@ export const es: Record<TranslationKey, string> = {
   quizBookmarked: 'Guardada',
   quizKeyboardShortcuts:
     'Atajos de teclado: [1-4] o [A-D] Elegir opción | [Espacio] Revelar/Girar | [←/→] Navegar',
-  flashcardFlipPrompt: 'Haz clic en la tarjeta o presiona [Espacio] para girar',
+  flashcardFlipPrompt: 'Haz clic para girar • Desliza para navegar',
   flashcardFront: 'Frente (Pregunta)',
   flashcardBack: 'Reverso (Solución y Fundamento)',
   flashcardMarkKnow: 'Ya lo Sé',
