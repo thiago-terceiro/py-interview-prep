@@ -14,22 +14,20 @@ import {
   Award,
   Sparkles,
   Check,
-  X,
 } from 'lucide-react';
 
 interface FlashcardViewProps {
   questions: QuizQuestion[];
   progress: UserQuizProgress;
-  onRateCard: (questionId: number, rating: 'mastered' | 'review') => void;
+  onRateCard?: (questionId: number, rating: 'mastered' | 'review') => void;
   onToggleBookmark: (questionId: number) => void;
 }
 
-type DeckFilter = 'all' | 'review' | 'unmastered';
+type DeckFilter = 'all' | 'review';
 
 export const FlashcardView: React.FC<FlashcardViewProps> = ({
   questions,
   progress,
-  onRateCard,
   onToggleBookmark,
 }) => {
   const { t } = useLanguage();
@@ -39,23 +37,19 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   const [activeDeckIndex, setActiveDeckIndex] = useState<number>(0);
   const [shuffledIndices, setShuffledIndices] = useState<number[] | null>(null);
 
-  // Filter deck based on selection
+  // Filter deck based on selection: All vs Marked for Review
   const filteredIndices = useMemo(() => {
     const list: number[] = [];
     questions.forEach((q, idx) => {
-      const isBookmarked = progress.bookmarkedIds.includes(q.id);
-      const isMastered = progress.completedIds.includes(q.id);
-
+      const isMarked = progress.bookmarkedIds.includes(q.id);
       if (deckFilter === 'review') {
-        if (isBookmarked) list.push(idx);
-      } else if (deckFilter === 'unmastered') {
-        if (!isMastered) list.push(idx);
+        if (isMarked) list.push(idx);
       } else {
         list.push(idx);
       }
     });
     return list;
-  }, [questions, progress, deckFilter]);
+  }, [questions, progress.bookmarkedIds, deckFilter]);
 
   // Actual sequence of question indices being studied
   const activeDeck = useMemo(() => {
@@ -65,7 +59,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     return filteredIndices;
   }, [filteredIndices, shuffledIndices]);
 
-  // Clamp current index when deck changes
+  // Reset to first card when deck changes
   useEffect(() => {
     setActiveDeckIndex(0);
     setIsFlipped(false);
@@ -76,8 +70,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   const currentQ: QuizQuestion | undefined =
     currentQIndex !== undefined ? questions[currentQIndex] : undefined;
 
-  const isBookmarked = currentQ ? progress.bookmarkedIds.includes(currentQ.id) : false;
-  const isMastered = currentQ ? progress.completedIds.includes(currentQ.id) : false;
+  const isMarkedForReview = currentQ ? progress.bookmarkedIds.includes(currentQ.id) : false;
 
   const hasPrev = activeDeckIndex > 0;
   const hasNext = activeDeckIndex < activeDeck.length - 1;
@@ -114,20 +107,6 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     setShowOptionsHint(false);
   };
 
-  const handleRate = useCallback(
-    (rating: 'mastered' | 'review') => {
-      if (!currentQ) return;
-      onRateCard(currentQ.id, rating);
-      // Auto-advance if not at end
-      if (hasNext) {
-        setIsFlipped(false);
-        setShowOptionsHint(false);
-        setActiveDeckIndex(prev => prev + 1);
-      }
-    },
-    [currentQ, onRateCard, hasNext]
-  );
-
   // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -147,15 +126,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
         handleNext();
-      } else if (e.key === '1' && isFlipped) {
-        e.preventDefault();
-        handleRate('review');
-      } else if (e.key === '2' && isFlipped) {
-        e.preventDefault();
-        handleRate('mastered');
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (currentQ) {
+          e.preventDefault();
+          onToggleBookmark(currentQ.id);
+        }
       }
     },
-    [handleFlip, handlePrev, handleNext, handleRate, isFlipped]
+    [handleFlip, handlePrev, handleNext, currentQ, onToggleBookmark]
   );
 
   useEffect(() => {
@@ -173,7 +151,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
           <button
             onClick={() => setDeckFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               deckFilter === 'all'
                 ? 'bg-sky-600 text-white shadow-sm'
                 : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
@@ -184,27 +162,15 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
           <button
             onClick={() => setDeckFilter('review')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               deckFilter === 'review'
-                ? 'bg-amber-600 text-white shadow-sm'
+                ? 'bg-sky-600 text-white shadow-sm'
                 : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
             }`}
           >
             <Bookmark className="w-3.5 h-3.5" />
             <span>{t('flashcardDeckReview')}</span>
             <span className="text-[11px] opacity-80">({progress.bookmarkedIds.length})</span>
-          </button>
-
-          <button
-            onClick={() => setDeckFilter('unmastered')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              deckFilter === 'unmastered'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
-            }`}
-          >
-            {t('flashcardDeckUnmastered')} (
-            {questions.length - progress.completedIds.length})
           </button>
         </div>
 
@@ -225,7 +191,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       {/* Empty Deck State */}
       {activeDeck.length === 0 ? (
         <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-12 text-center text-slate-300 space-y-3">
-          <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto" />
+          <CheckCircle2 className="w-12 h-12 text-sky-400 mx-auto" />
           <p className="text-base font-semibold">{t('flashcardEmptyDeck')}</p>
           <button
             onClick={() => setDeckFilter('all')}
@@ -236,31 +202,24 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         </div>
       ) : !currentQ ? null : (
         <>
-          {/* Deck Status Bar */}
-          <div className="flex items-center justify-between px-2 text-xs font-mono text-slate-400">
+          {/* Deck Counter & Fixed Flip Instruction OUTSIDE and ABOVE the card */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 px-2 text-xs font-mono text-slate-400">
             <span className="font-bold text-sky-400">
               Card {activeDeckIndex + 1} of {activeDeck.length}
             </span>
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:inline text-slate-500">
-                {currentQ.section}
-              </span>
-              <button
-                onClick={() => onToggleBookmark(currentQ.id)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs transition ${
-                  isBookmarked
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-                    : 'bg-[#161b22] text-slate-400 border-slate-800 hover:text-slate-200'
-                }`}
-                title={isBookmarked ? t('quizBookmarked') : t('quizBookmark')}
-              >
-                <Bookmark className={`w-3 h-3 ${isBookmarked ? 'fill-amber-400 text-amber-400' : ''}`} />
-                <span>{isBookmarked ? t('quizBookmarked') : t('quizBookmark')}</span>
-              </button>
+
+            {/* Fixed Flip Prompt ABOVE the card */}
+            <div className="flex items-center gap-1.5 text-slate-400 select-none">
+              <RotateCcw className="w-3.5 h-3.5 text-sky-400" />
+              <span>{t('flashcardFlipPrompt')}</span>
             </div>
+
+            <span className="hidden sm:inline text-slate-500 truncate max-w-xs">
+              {currentQ.section}
+            </span>
           </div>
 
-          {/* Main 3D Active-Recall Flashcard */}
+          {/* Main Flashcard Card */}
           <article
             onClick={handleFlip}
             role="button"
@@ -271,10 +230,10 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
             onKeyDown={e => {
               if (e.key === 'Enter') handleFlip();
             }}
-            className="w-full min-h-[460px] bg-[#161b22] hover:border-sky-500/40 border border-slate-800 rounded-2xl p-6 sm:p-9 shadow-2xl cursor-pointer select-none flex flex-col justify-between transition-all duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+            className="w-full min-h-[440px] sm:min-h-[460px] bg-[#161b22] hover:border-sky-500/40 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl cursor-pointer select-none flex flex-col justify-between transition-all duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
           >
-            {/* Top Indicator */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-800/80">
+            {/* Top Indicator Inside Card (No arrow, no duplicate flip phrase) */}
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
               <div className="flex items-center gap-2">
                 <span
                   className={`text-xs font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-lg border ${
@@ -285,34 +244,27 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                 >
                   {isFlipped ? t('flashcardBack') : t('flashcardFront')}
                 </span>
-                <span className="text-xs font-mono text-slate-400">
+                <span className="text-xs font-mono text-slate-300 font-bold">
                   #{currentQ.id}
                 </span>
-                {isMastered && (
-                  <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
-                    <Check className="w-3 h-3 stroke-[3]" />
-                    <span>Mastered</span>
-                  </span>
-                )}
               </div>
 
-              <span className="text-xs text-slate-500 font-mono flex items-center gap-1 group-hover:text-sky-400 transition-colors">
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>{t('flashcardFlipPrompt')}</span>
+              <span className="text-xs text-slate-400 font-medium truncate max-w-[200px] sm:max-w-xs">
+                {currentQ.section}
               </span>
             </div>
 
             {/* Card Body */}
-            <div className="my-auto py-6">
+            <div className="my-auto py-5">
               {!isFlipped ? (
-                /* ================= FRONT: ACTIVE RECALL (NO MULTIPLE CHOICE GIVEN) ================= */
-                <div className="space-y-6">
+                /* ================= FRONT: ACTIVE RECALL PROMPT ================= */
+                <div className="space-y-5">
                   {/* Active Recall Coaching Pill */}
                   <div className="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-500/30 flex items-start gap-3">
                     <Brain className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
                     <div>
                       <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider font-mono">
-                        Active Recall Mode
+                        Active Recall
                       </div>
                       <p className="text-xs text-slate-300 leading-snug mt-0.5">
                         {t('flashcardActiveRecallPrompt')}
@@ -380,11 +332,11 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                 </div>
               ) : (
                 /* ================= BACK: CORE TAKEAWAY, FORMULA & EXPLANATION ================= */
-                <div className="space-y-5 animate-fadeIn">
+                <div className="space-y-4 animate-fadeIn">
                   {isMCQ ? (
                     <div>
                       {/* Bold Punchline / Core Takeaway */}
-                      <div className="p-4 sm:p-5 rounded-xl bg-emerald-950/30 border border-emerald-500/50 mb-4 shadow-lg shadow-emerald-950/20">
+                      <div className="p-4 sm:p-5 rounded-xl bg-emerald-950/30 border border-emerald-500/50 mb-3 shadow-lg shadow-emerald-950/20">
                         <div className="flex items-center gap-2 text-emerald-400 text-xs font-mono font-bold uppercase tracking-wider mb-1.5">
                           <CheckCircle2 className="w-4 h-4" />
                           <span>{t('flashcardCoreTakeaway')}</span>
@@ -398,7 +350,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                       </div>
 
                       {/* Technical Invariant & Rationale */}
-                      <div className="p-4 sm:p-5 rounded-xl bg-[#0d1117] border border-slate-800">
+                      <div className="p-4 rounded-xl bg-[#0d1117] border border-slate-800">
                         <div className="text-xs font-bold text-sky-400 uppercase tracking-wider font-mono mb-2 flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5" />
                           <span>{t('quizWhyExplanation')}</span>
@@ -437,45 +389,37 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
               )}
             </div>
 
-            {/* Bottom Card Controls & Spaced Repetition Buttons */}
+            {/* Bottom Card Footer: Only the ONE BLUE "Mark for Review" button */}
             <div
               onClick={e => e.stopPropagation()}
-              className="pt-4 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3"
+              className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3"
             >
-              {isFlipped ? (
-                /* Self-Assessment Buttons (When back is revealed) */
-                <div className="flex items-center gap-2.5 w-full sm:w-auto">
-                  <button
-                    onClick={() => handleRate('review')}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-rose-950/40 hover:bg-rose-900/50 text-rose-300 border border-rose-500/40 transition-all active:scale-95"
-                  >
-                    <X className="w-4 h-4 text-rose-400" />
-                    <span>{t('flashcardRateReview')}</span>
-                    <span className="hidden sm:inline font-mono opacity-60 text-[10px]">
-                      [1]
-                    </span>
-                  </button>
-
-                  <button
-                    onClick={() => handleRate('mastered')}
-                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/25 transition-all active:scale-95"
-                  >
+              {/* Single Blue Button to mark for review */}
+              <button
+                onClick={() => onToggleBookmark(currentQ.id)}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 ${
+                  isMarkedForReview
+                    ? 'bg-sky-600 text-white shadow-sky-600/30 ring-2 ring-sky-400/50'
+                    : 'bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 border border-sky-500/40 hover:border-sky-400'
+                }`}
+                title={isMarkedForReview ? t('flashcardMarkedReview') : t('flashcardMarkReview')}
+                aria-label={isMarkedForReview ? t('flashcardMarkedReview') : t('flashcardMarkReview')}
+              >
+                {isMarkedForReview ? (
+                  <>
                     <Check className="w-4 h-4 stroke-[3]" />
-                    <span>{t('flashcardRateMastered')}</span>
-                    <span className="hidden sm:inline font-mono opacity-80 text-[10px]">
-                      [2]
-                    </span>
-                  </button>
-                </div>
-              ) : (
-                <div className="text-xs text-slate-400 font-mono flex items-center gap-1">
-                  <RotateCcw className="w-3.5 h-3.5 text-sky-400" />
-                  <span>Tap card or press [Space] to flip</span>
-                </div>
-              )}
+                    <span>{t('flashcardMarkedReview')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Bookmark className="w-4 h-4" />
+                    <span>{t('flashcardMarkReview')}</span>
+                  </>
+                )}
+              </button>
 
-              <span className="text-xs font-mono text-slate-500 hidden md:inline ml-auto">
-                {t('flashcardKeyboardHints')}
+              <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
+                Press [R] to toggle review
               </span>
             </div>
           </article>
