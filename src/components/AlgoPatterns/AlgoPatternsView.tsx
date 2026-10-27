@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { algoPatterns } from '../../data/algoPatterns';
 import { PatternDetail } from './PatternDetail';
 import type { PatternCategory, PatternDifficulty } from '../../types/patterns';
@@ -13,18 +13,31 @@ import {
 interface AlgoPatternsViewProps {
   onOpenArenaQuestion: (questionId: string) => void;
   onOpenVisualizerHub?: (visualizerId: string) => void;
+  onSelectPattern?: (patternId: string) => void;
   initialPatternId?: string;
 }
 
 export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
   onOpenArenaQuestion,
   onOpenVisualizerHub,
+  onSelectPattern,
   initialPatternId,
 }) => {
   const { t } = useLanguage();
   const [selectedPatternId, setSelectedPatternId] = useState<string>(
     initialPatternId || algoPatterns[0].id
   );
+
+  useEffect(() => {
+    if (initialPatternId && initialPatternId !== selectedPatternId) {
+      setSelectedPatternId(initialPatternId);
+    }
+  }, [initialPatternId]);
+
+  const handlePatternClick = (id: string) => {
+    setSelectedPatternId(id);
+    onSelectPattern?.(id);
+  };
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<PatternCategory | 'all'>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<PatternDifficulty | 'all'>('all');
@@ -168,7 +181,7 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
               return (
                 <div
                   key={pattern.id}
-                  onClick={() => setSelectedPatternId(pattern.id)}
+                  onClick={() => handlePatternClick(pattern.id)}
                   className={`p-4 rounded-xl border cursor-pointer transition-all duration-150 text-left group ${
                     isSelected
                       ? 'bg-slate-800 border-sky-500/50 shadow-lg shadow-sky-500/10'

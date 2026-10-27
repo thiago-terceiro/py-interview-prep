@@ -45,6 +45,7 @@ export const QuizHub: React.FC = () => {
   const [viewMode, setViewMode] = useState<QuizViewMode>('quiz');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [showQuestionMap, setShowQuestionMap] = useState<boolean>(false);
+  const [showResetModal, setShowResetModal] = useState<boolean>(false);
 
   // Sync progress state to localStorage
   useEffect(() => {
@@ -149,20 +150,23 @@ export const QuizHub: React.FC = () => {
   }, []);
 
   const handleResetProgress = () => {
-    if (window.confirm(t('quizProgressResetConfirm'))) {
-      setProgress({
-        selectedAnswers: {},
-        openEndedNotes: {},
-        openEndedCheckedCriteria: {},
-        bookmarkedIds: [],
-        completedIds: [],
-      });
-      setCurrentIndex(0);
-      try {
-        localStorage.removeItem(QUIZ_STORAGE_KEY);
-      } catch (e) {
-        console.warn('Failed to clear quiz progress in localStorage:', e);
-      }
+    setShowResetModal(true);
+  };
+
+  const handleConfirmReset = () => {
+    setProgress({
+      selectedAnswers: {},
+      openEndedNotes: {},
+      openEndedCheckedCriteria: {},
+      bookmarkedIds: [],
+      completedIds: [],
+    });
+    setCurrentIndex(0);
+    setShowResetModal(false);
+    try {
+      localStorage.removeItem(QUIZ_STORAGE_KEY);
+    } catch (e) {
+      console.warn('Failed to clear quiz progress in localStorage:', e);
     }
   };
 
@@ -476,6 +480,58 @@ export const QuizHub: React.FC = () => {
           }}
           onToggleBookmark={id => handleToggleBookmark(id)}
         />
+      )}
+
+      {/* Accessible Confirmation Modal for Resetting Quiz Progress */}
+      {showResetModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setShowResetModal(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="quiz-reset-modal-title"
+        >
+          <div
+            className="bg-[#161b22] border border-slate-700/80 rounded-2xl p-5 max-w-sm w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
+                <RotateCcw className="w-5 h-5 text-rose-400" />
+              </div>
+              <div>
+                <h3 id="quiz-reset-modal-title" className="text-sm font-bold text-slate-100 dark:text-white">
+                  {t('quizProgressResetTitle')}
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {t('quizProgressResetSubtitle')}
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed font-sans">
+              {t('quizProgressResetConfirm')}
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition cursor-pointer active:scale-95"
+              >
+                {t('resetModalCancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReset}
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-600/20 transition cursor-pointer active:scale-95"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                {t('quizProgressResetBtn')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

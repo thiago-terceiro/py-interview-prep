@@ -169,7 +169,10 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
     }
   };
 
+  const isCodeModified = userCode.trim() !== question.starterCode.trim();
+
   const handleResetCode = () => {
+    if (!isCodeModified) return;
     setShowResetModal(true);
   };
 
@@ -643,11 +646,13 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
                 <button
                   type="button"
                   onClick={handleResetCode}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-medium transition cursor-pointer active:scale-95"
-                  title="Reset to starter template"
+                  disabled={!isCodeModified || isRunning || isScriptRunning}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-slate-800 text-slate-300 hover:text-white disabled:hover:text-slate-300 text-xs font-medium transition cursor-pointer active:scale-95 disabled:active:scale-100"
+                  title={t('resetCodeTitle')}
+                  aria-label={t('resetCodeTitle')}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
-                  Reset
+                  {t('resetCodeBtn')}
                 </button>
 
                 <button
@@ -1212,20 +1217,20 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
               </div>
               <div>
                 <h3 id="reset-modal-title" className="text-sm font-bold text-slate-100 dark:text-white light:text-slate-900">
-                  Reset Code to Starter?
+                  {t('resetModalTitle')}
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Revert back to starter boilerplate
+                  {t('resetModalSubtitle')}
                 </p>
               </div>
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed font-sans">
-              This will discard all edits you've written for{' '}
+              {t('resetModalDescPre')}{' '}
               <strong className="text-slate-100 dark:text-white light:text-slate-900 font-semibold">
                 {question.title}
               </strong>{' '}
-              and reload the original template.
+              {t('resetModalDescPost')}
             </p>
 
             <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
@@ -1234,7 +1239,7 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
                 onClick={() => setShowResetModal(false)}
                 className="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition cursor-pointer active:scale-95"
               >
-                Cancel
+                {t('resetModalCancel')}
               </button>
               <button
                 type="button"
@@ -1242,7 +1247,7 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
                 className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-600/20 transition cursor-pointer active:scale-95"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                Reset Code
+                {t('resetModalConfirm')}
               </button>
             </div>
           </div>

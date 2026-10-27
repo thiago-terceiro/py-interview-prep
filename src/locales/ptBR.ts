@@ -40,6 +40,14 @@ export const ptBR: Record<TranslationKey, string> = {
   consoleEmptyNotice: 'REPL Python 3.12 interativo. Avalie expressões, teste funções e inspecione variáveis em tempo real.',
   consoleResetEnv: 'Reiniciar Sessão REPL',
   consoleQuickExamples: 'Teste Rápido',
+  resetCodeBtn: 'Redefinir',
+  resetCodeTitle: 'Redefinir para o código inicial',
+  resetModalTitle: 'Redefinir código para o inicial?',
+  resetModalSubtitle: 'Reverter para o código base original',
+  resetModalDescPre: 'Isso descartará todas as alterações feitas em',
+  resetModalDescPost: 'e recarregará o modelo inicial.',
+  resetModalCancel: 'Cancelar',
+  resetModalConfirm: 'Redefinir Código',
 
   // Status
   pythonEngineReady: 'Python 3.12 (Pyodide) Pronto',
@@ -136,6 +144,8 @@ export const ptBR: Record<TranslationKey, string> = {
   quizStatsBookmarked: 'Salvas',
   quizStatsMastery: 'Progresso de Domínio',
   quizProgressResetBtn: 'Redefinir Dados do Quiz',
+  quizProgressResetTitle: 'Redefinir Progresso do Quiz?',
+  quizProgressResetSubtitle: 'Reverter todas as 100 questões ao estado não respondido',
   quizProgressResetConfirm:
     'Tem certeza de que deseja redefinir todas as respostas, anotações e progresso do Banco de 100 Questões? Esta ação não pode ser desfeita.',
   quizSearchPlaceholder: 'Buscar perguntas, opções, explicações, critérios...',

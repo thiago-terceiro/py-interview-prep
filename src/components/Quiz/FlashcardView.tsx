@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { QuizQuestion, UserQuizProgress } from '../../types/quiz';
 import { useLanguage } from '../../context/LanguageContext';
 import {
-  RotateCcw,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -40,6 +39,10 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   // Swipe & Click-and-drag gesture state
   const [dragOffset, setDragOffset] = useState<number>(0);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [animatingCard, setAnimatingCard] = useState<{
+    dir: 'left' | 'right';
+    phase: 'exit' | 'enter';
+  } | null>(null);
   const dragStartXRef = useRef<number>(0);
   const dragStartYRef = useRef<number>(0);
   const dragStartTimeRef = useRef<number>(0);
@@ -91,22 +94,36 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   }, []);
 
   const handlePrev = useCallback(() => {
-    if (hasPrev) {
-      setIsFlipped(false);
-      setShowOptionsHint(false);
+    if (hasPrev && !animatingCard) {
       setDragOffset(0);
-      setActiveDeckIndex(prev => prev - 1);
+      setAnimatingCard({ dir: 'right', phase: 'exit' });
+      setTimeout(() => {
+        setIsFlipped(false);
+        setShowOptionsHint(false);
+        setActiveDeckIndex(prev => prev - 1);
+        setAnimatingCard({ dir: 'right', phase: 'enter' });
+        setTimeout(() => {
+          setAnimatingCard(null);
+        }, 220);
+      }, 180);
     }
-  }, [hasPrev]);
+  }, [hasPrev, animatingCard]);
 
   const handleNext = useCallback(() => {
-    if (hasNext) {
-      setIsFlipped(false);
-      setShowOptionsHint(false);
+    if (hasNext && !animatingCard) {
       setDragOffset(0);
-      setActiveDeckIndex(prev => prev + 1);
+      setAnimatingCard({ dir: 'left', phase: 'exit' });
+      setTimeout(() => {
+        setIsFlipped(false);
+        setShowOptionsHint(false);
+        setActiveDeckIndex(prev => prev + 1);
+        setAnimatingCard({ dir: 'left', phase: 'enter' });
+        setTimeout(() => {
+          setAnimatingCard(null);
+        }, 220);
+      }, 180);
     }
-  }, [hasNext]);
+  }, [hasNext, animatingCard]);
 
   const handleShuffle = () => {
     const arr = [...filteredIndices];
@@ -236,9 +253,11 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       if (deltaX < 0 && hasNext) {
         // Swiped / Dragged Left -> Next Card
         handleNext();
+        return;
       } else if (deltaX > 0 && hasPrev) {
         // Swiped / Dragged Right -> Previous Card
         handlePrev();
+        return;
       }
     }
 
@@ -323,7 +342,6 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
             {/* Fixed Flip Prompt ABOVE the card */}
             <div className="flex items-center gap-1.5 text-slate-400 select-none">
-              <RotateCcw className="w-3.5 h-3.5 text-sky-400" />
               <span>{t('flashcardFlipPrompt')}</span>
             </div>
 
@@ -334,20 +352,6 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
           {/* Swipeable & Draggable Flashcard Article */}
           <div className="relative overflow-visible">
-            {/* Visual Edge Indicators during drag */}
-            {dragOffset < -25 && hasNext && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none px-3 py-1.5 rounded-full bg-sky-500 text-white text-xs font-bold font-mono shadow-lg shadow-sky-500/30 flex items-center gap-1 animate-fadeIn">
-                <span>Next</span>
-                <ChevronRight className="w-4 h-4" />
-              </div>
-            )}
-            {dragOffset > 25 && hasPrev && (
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-none px-3 py-1.5 rounded-full bg-sky-500 text-white text-xs font-bold font-mono shadow-lg shadow-sky-500/30 flex items-center gap-1 animate-fadeIn">
-                <ChevronLeft className="w-4 h-4" />
-                <span>Prev</span>
-              </div>
-            )}
-
             <article
               ref={cardRef}
               onClick={handleCardClick}
@@ -364,16 +368,28 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                 if (e.key === 'Enter') handleFlip();
               }}
               style={{
-                transform: `translateX(${dragOffset}px) rotate(${dragOffset * 0.035}deg)`,
-                opacity: Math.max(0.7, 1 - Math.abs(dragOffset) / 900),
+                transform: animatingCard
+                  ? animatingCard.phase === 'exit'
+                    ? `translateX(${animatingCard.dir === 'left' ? '-115%' : '115%'})`
+                    : 'translateX(0)'
+                  : `translateX(${dragOffset}px)`,
+                opacity: animatingCard
+                  ? animatingCard.phase === 'exit'
+                    ? 0
+                    : 1
+                  : Math.max(0.2, 1 - Math.abs(dragOffset) / 600),
                 transition: isDragging
                   ? 'none'
-                  : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s ease',
+                  : 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease',
                 touchAction: 'pan-y',
               }}
               className={`w-full min-h-[440px] sm:min-h-[460px] bg-[#161b22] hover:border-sky-500/40 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl select-none flex flex-col justify-between transition-colors duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-                isDragging ? 'cursor-grabbing' : 'cursor-grab'
-              }`}
+                animatingCard && animatingCard.phase === 'enter'
+                  ? animatingCard.dir === 'left'
+                    ? 'animate-in slide-in-from-right-8 duration-200'
+                    : 'animate-in slide-in-from-left-8 duration-200'
+                  : ''
+              } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             >
               {/* Top Indicator Inside Card */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">

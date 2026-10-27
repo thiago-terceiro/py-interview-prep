@@ -8,13 +8,25 @@ import { Sparkles, ArrowRight, Code2 } from 'lucide-react';
 
 interface VisualizerHubProps {
   onOpenQuestion?: (questionId: string) => void;
+  onSelectTab?: (tab: 'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent') => void;
   initialTab?: 'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent';
 }
 
-export const VisualizerHub: React.FC<VisualizerHubProps> = ({ onOpenQuestion, initialTab = 'two-pointers' }) => {
+export const VisualizerHub: React.FC<VisualizerHubProps> = ({ onOpenQuestion, onSelectTab, initialTab = 'two-pointers' }) => {
   const [activeTab, setActiveTab] = useState<
     'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent'
   >(initialTab);
+
+  React.useEffect(() => {
+    if (initialTab && initialTab !== activeTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  const handleTabChange = (tabId: 'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent') => {
+    setActiveTab(tabId);
+    onSelectTab?.(tabId);
+  };
 
   const visualizers = [
     {
@@ -104,7 +116,7 @@ export const VisualizerHub: React.FC<VisualizerHubProps> = ({ onOpenQuestion, in
         {visualizers.map(v => (
           <button
             key={v.id}
-            onClick={() => setActiveTab(v.id as any)}
+            onClick={() => handleTabChange(v.id as any)}
             className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
               activeTab === v.id
                 ? 'bg-slate-800 text-white font-bold border border-slate-700 shadow-md'

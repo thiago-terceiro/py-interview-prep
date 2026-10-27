@@ -1,4 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import {
+  createRootRoute,
+  createRoute,
+  createRouter,
+  createHashHistory,
+  RouterProvider,
+  Outlet,
+  Link,
+  useNavigate,
+  useParams,
+  useSearch,
+  useRouterState,
+} from '@tanstack/react-router';
 import { allQuestions, getQuestionById } from './data/questions';
 import { HomePage } from './components/HomePage';
 import { QuestionCatalog } from './components/QuestionCatalog';
@@ -31,46 +44,143 @@ const STORAGE_KEY = 'py_interview_pro_progress_v1';
 
 export type TabType = 'home' | 'catalog' | 'arena' | 'patterns' | 'visualizers' | 'cheatsheet' | 'quiz';
 
-const AppContent: React.FC = () => {
+export interface AppContextType {
+  solvedQuestionIds: string[];
+  codeDrafts: Record<string, string>;
+  activeQuestionId: string;
+  setActiveQuestionId: (id: string) => void;
+  handleCodeChange: (newCode: string) => void;
+  handleQuestionSolved: (questionId: string) => void;
+  handleToggleQuestionSolved: (questionId: string) => void;
+  handleSelectQuestion: (questionId: string) => void;
+  handleOpenPattern: (patternId: string) => void;
+  handleOpenVisualizer: (visualizerId: string) => void;
+  handleSelectTrackFromHome: (track: Track) => void;
+  handleResetAllProgress: () => void;
+}
+
+export const AppNavigationContext = React.createContext<AppContextType | null>(null);
+
+export const useAppNavigation = () => {
+  const ctx = React.useContext(AppNavigationContext);
+  if (!ctx) {
+    throw new Error('useAppNavigation must be used within AppNavigationContext.Provider');
+  }
+  return ctx;
+};
+
+// --- Route Definitions ---
+
+const rootRoute = createRootRoute({
+  component: RootLayout,
+});
+
+const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: HomeRouteComponent,
+});
+
+const catalogRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/catalog',
+  validateSearch: (search: Record<string, unknown>): { track?: Track | 'all' } => ({
+    track: typeof search.track === 'string' ? (search.track as Track | 'all') : undefined,
+  }),
+  component: CatalogRouteComponent,
+});
+
+const arenaRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/arena',
+  component: ArenaRouteComponent,
+});
+
+const arenaQuestionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/arena/$questionId',
+  component: ArenaQuestionRouteComponent,
+});
+
+const patternsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/patterns',
+  component: PatternsRouteComponent,
+});
+
+const patternsItemRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/patterns/$patternId',
+  component: PatternsItemRouteComponent,
+});
+
+const visualizersRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/visualizers',
+  component: VisualizersRouteComponent,
+});
+
+const visualizersTabRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/visualizers/$tab',
+  component: VisualizersTabRouteComponent,
+});
+
+const cheatsheetRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/cheatsheet',
+  component: CheatsheetRouteComponent,
+});
+
+const quizRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/quiz',
+  component: QuizRouteComponent,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  catalogRoute,
+  arenaRoute,
+  arenaQuestionRoute,
+  patternsRoute,
+  patternsItemRoute,
+  visualizersRoute,
+  visualizersTabRoute,
+  cheatsheetRoute,
+  quizRoute,
+]);
+
+// Use hash history for full compatibility with GitHub Pages and static deployments
+const hashHistory = createHashHistory();
+
+export const router = createRouter({
+  routeTree,
+  history: hashHistory,
+});
+
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+// --- Layout & Nav Components ---
+
+function RootLayout() {
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<TabType>('home');
-  const [activeQuestionId, setActiveQuestionId] = useState<string>('py-01-flatten-nested-list');
-  const [activePatternId, setActivePatternId] = useState<string>('two-pointers');
-  const [selectedCatalogTrack, setSelectedCatalogTrack] = useState<Track | 'all'>('all');
-  const [initialVisualizerTab, setInitialVisualizerTab] = useState<
-    'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent'
-  >('two-pointers');
+  const routerState = useRouterState();
+  const currentPath = routerState.location.pathname;
 
-  const [solvedQuestionIds, setSolvedQuestionIds] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return parsed.solvedQuestionIds || [];
-      }
-    } catch (e) {
-      console.warn('Failed to load saved progress:', e);
-    }
-    return [];
-  });
-
-  const [codeDrafts, setCodeDrafts] = useState<Record<string, string>>(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return parsed.codeDrafts || {};
-      }
-    } catch (e) {
-      console.warn('Failed to load code drafts:', e);
-    }
-    return {};
-  });
+  const {
+    solvedQuestionIds,
+    handleResetAllProgress,
+  } = useAppNavigation();
 
   const [pyStatus, setPyStatus] = useState<PyodideStatus>('idle');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
-  // Subscribe to Pyodide status
+  // Pyodide status subscription
   useEffect(() => {
     const unsub = pyodideRunner.subscribeStatus(status => setPyStatus(status));
     pyodideRunner.init().catch(err => {
@@ -79,91 +189,69 @@ const AppContent: React.FC = () => {
     return () => unsub();
   }, []);
 
-  // Save progress & drafts to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          solvedQuestionIds,
-          codeDrafts,
-          lastActiveQuestionId: activeQuestionId,
-        })
-      );
-    } catch (e) {
-      console.warn('Failed to persist progress:', e);
-    }
-  }, [solvedQuestionIds, codeDrafts, activeQuestionId]);
+  const isArenaActive = currentPath.startsWith('/arena');
 
-  const activeQuestion = getQuestionById(activeQuestionId) || allQuestions[0];
-  const currentCode = codeDrafts[activeQuestion.id] ?? activeQuestion.starterCode;
-
-  const handleCodeChange = (newCode: string) => {
-    setCodeDrafts(prev => ({
-      ...prev,
-      [activeQuestion.id]: newCode,
-    }));
-  };
-
-  const handleQuestionSolved = (questionId: string) => {
-    if (!solvedQuestionIds.includes(questionId)) {
-      setSolvedQuestionIds(prev => [...prev, questionId]);
-    }
-  };
-
-  const handleToggleQuestionSolved = (questionId: string) => {
-    setSolvedQuestionIds(prev =>
-      prev.includes(questionId)
-        ? prev.filter(id => id !== questionId)
-        : [...prev, questionId]
-    );
-  };
-
-  const handleSelectQuestion = (questionId: string) => {
-    setActiveQuestionId(questionId);
-    setActiveTab('arena');
-    setMobileMenuOpen(false);
-  };
-
-  const handleOpenPattern = (patternId: string) => {
-    setActivePatternId(patternId);
-    setActiveTab('patterns');
-    setMobileMenuOpen(false);
-  };
-
-  const handleOpenVisualizer = (visualizerId: string) => {
-    const validTabs: Array<
-      'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent'
-    > = ['two-pointers', 'sliding-window', 'binary-search', 'bfs-grid', 'gradient-descent'];
-    if (validTabs.includes(visualizerId as any)) {
-      setInitialVisualizerTab(visualizerId as any);
-      setActiveTab('visualizers');
-      setMobileMenuOpen(false);
-    }
-  };
-
-  const handleSelectTrackFromHome = (track: Track) => {
-    setSelectedCatalogTrack(track);
-    setActiveTab('catalog');
-  };
-
-  const handleResetAllProgress = () => {
-    if (window.confirm('Reset all solved progress and code drafts?')) {
-      setSolvedQuestionIds([]);
-      setCodeDrafts({});
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  };
+  const navLinks = [
+    {
+      to: '/',
+      label: t('navHome'),
+      icon: Home,
+      iconColor: 'text-sky-400',
+      isActive: currentPath === '/',
+    },
+    {
+      to: '/catalog',
+      label: t('navCatalog'),
+      icon: Trophy,
+      iconColor: 'text-amber-400',
+      isActive: currentPath.startsWith('/catalog'),
+    },
+    {
+      to: '/arena',
+      label: t('navArena'),
+      icon: Code2,
+      iconColor: 'text-emerald-400',
+      isActive: isArenaActive,
+    },
+    {
+      to: '/patterns',
+      label: t('navPatterns'),
+      icon: Brain,
+      iconColor: 'text-indigo-400',
+      isActive: currentPath.startsWith('/patterns'),
+    },
+    {
+      to: '/visualizers',
+      label: t('navVisualizers'),
+      icon: Sparkles,
+      iconColor: 'text-sky-400',
+      isActive: currentPath.startsWith('/visualizers'),
+    },
+    {
+      to: '/cheatsheet',
+      label: t('navCheatsheet'),
+      icon: BookOpen,
+      iconColor: 'text-purple-400',
+      isActive: currentPath.startsWith('/cheatsheet'),
+    },
+    {
+      to: '/quiz',
+      label: t('navQuiz'),
+      icon: GraduationCap,
+      iconColor: 'text-sky-400',
+      isActive: currentPath.startsWith('/quiz'),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col selection:bg-indigo-500/30 selection:text-white">
       {/* Top Main Navigation Bar */}
       <header className="sticky top-0 z-50 bg-[#0d1117]/95 backdrop-blur-md border-b border-slate-800">
         <div className="max-w-[1700px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
-          {/* Logo & Brand (Clickable to Home) */}
-          <div
-            onClick={() => setActiveTab('home')}
-            className="flex items-center gap-3 cursor-pointer select-none group"
+          {/* Logo & Brand (Clickable Link to Home) */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 select-none group text-inherit no-underline"
             title="Go to Home"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
@@ -184,100 +272,27 @@ const AppContent: React.FC = () => {
                 Python Fundamentals → Algorithms → NumPy/Pandas → ML Engineering
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Nav Links */}
           <nav className="hidden lg:flex items-center gap-1.5 bg-[#161b22] border border-slate-800 p-1 rounded-xl">
-            {/* Home Tab */}
-            <button
-              onClick={() => setActiveTab('home')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'home'
-                  ? 'bg-slate-800 text-white shadow-sm border-slate-700'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <Home className="w-3.5 h-3.5 text-sky-400" />
-              {t('navHome')}
-            </button>
-
-            {/* 1. All 30 Questions */}
-            <button
-              onClick={() => setActiveTab('catalog')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'catalog'
-                  ? 'bg-slate-800 text-white shadow-sm border-slate-700'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <Trophy className="w-3.5 h-3.5 text-amber-400" />
-              {t('navCatalog')}
-            </button>
-
-            {/* 2. Practice Arena */}
-            <button
-              onClick={() => setActiveTab('arena')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'arena'
-                  ? 'bg-slate-800 text-white shadow-sm border-slate-700'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <Code2 className="w-3.5 h-3.5 text-emerald-400" />
-              {t('navArena')}
-            </button>
-
-            {/* 3. Algo Patterns (NEW Core Hub) */}
-            <button
-              onClick={() => setActiveTab('patterns')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'patterns'
-                  ? 'bg-slate-800 text-sky-300 shadow-sm border-indigo-500/50'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <Brain className="w-3.5 h-3.5 text-indigo-400" />
-              {t('navPatterns')}
-            </button>
-
-            {/* 4. Algorithm Visualizers */}
-            <button
-              onClick={() => setActiveTab('visualizers')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'visualizers'
-                  ? 'bg-slate-800 text-white shadow-sm border-slate-700'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-              {t('navVisualizers')}
-            </button>
-
-            {/* 5. Cheatsheet */}
-            <button
-              onClick={() => setActiveTab('cheatsheet')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'cheatsheet'
-                  ? 'bg-slate-800 text-white shadow-sm border-slate-700'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-purple-400" />
-              {t('navCheatsheet')}
-            </button>
-
-            {/* 6. 100 Qs Bank (AI & ML) */}
-            <button
-              onClick={() => setActiveTab('quiz')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 ${
-                activeTab === 'quiz'
-                  ? 'bg-slate-800 text-sky-300 shadow-sm border-sky-500/50'
-                  : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
-              }`}
-            >
-              <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
-              {t('navQuiz')}
-            </button>
+            {navLinks.map(link => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 no-underline ${
+                    link.isActive
+                      ? 'bg-slate-800 text-white shadow-sm border-slate-700'
+                      : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${link.iconColor}`} />
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right Header Controls: Engine Pill + Solved Pill + Language + Theme */}
@@ -321,7 +336,7 @@ const AppContent: React.FC = () => {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(m => !m)}
-              className="lg:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white"
+              className="lg:hidden p-2 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -332,79 +347,28 @@ const AppContent: React.FC = () => {
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-t border-slate-800 bg-[#0d1117] px-4 py-3 space-y-2">
+            {navLinks.map(link => {
+              const Icon = link.icon;
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium no-underline ${
+                    link.isActive ? 'bg-slate-800 text-white' : 'text-slate-200 hover:bg-slate-800'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${link.iconColor}`} />
+                  {link.label}
+                </Link>
+              );
+            })}
             <button
               onClick={() => {
-                setActiveTab('home');
                 setMobileMenuOpen(false);
+                handleResetAllProgress();
               }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800"
-            >
-              <Home className="w-4 h-4 text-sky-400" />
-              {t('navHome')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('catalog');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800"
-            >
-              <Trophy className="w-4 h-4 text-amber-400" />
-              {t('navCatalog')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('arena');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800"
-            >
-              <Code2 className="w-4 h-4 text-emerald-400" />
-              {t('navArena')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('patterns');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-sky-300 hover:bg-slate-800"
-            >
-              <Brain className="w-4 h-4 text-indigo-400" />
-              {t('navPatterns')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('visualizers');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800"
-            >
-              <Sparkles className="w-4 h-4 text-sky-400" />
-              {t('navVisualizers')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('cheatsheet');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-200 hover:bg-slate-800"
-            >
-              <BookOpen className="w-4 h-4 text-purple-400" />
-              {t('navCheatsheet')}
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('quiz');
-                setMobileMenuOpen(false);
-              }}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-sky-300 hover:bg-slate-800"
-            >
-              <GraduationCap className="w-4 h-4 text-sky-400" />
-              {t('navQuiz')}
-            </button>
-            <button
-              onClick={handleResetAllProgress}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/20"
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-rose-400 hover:bg-rose-950/20 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
               {t('resetProgress')}
@@ -413,63 +377,15 @@ const AppContent: React.FC = () => {
         )}
       </header>
 
-      {/* Main Tab View */}
+      {/* Main Routed Outlet View */}
       <main className="flex-1 w-full max-w-[1700px] mx-auto p-4 sm:p-6">
-        {activeTab === 'home' && (
-          <HomePage
-            solvedCount={solvedQuestionIds.length}
-            onNavigate={tab => setActiveTab(tab)}
-            onSelectTrack={handleSelectTrackFromHome}
-          />
-        )}
-
-        {activeTab === 'catalog' && (
-          <QuestionCatalog
-            solvedQuestionIds={solvedQuestionIds}
-            onSelectQuestion={handleSelectQuestion}
-            onToggleQuestionSolved={handleToggleQuestionSolved}
-            onOpenVisualizer={handleOpenVisualizer}
-            initialTrack={selectedCatalogTrack}
-          />
-        )}
-
-        {activeTab === 'arena' && (
-          <ProblemArena
-            question={activeQuestion}
-            allQuestions={allQuestions}
-            userCode={currentCode}
-            onCodeChange={handleCodeChange}
-            onQuestionSolved={handleQuestionSolved}
-            onSelectQuestion={handleSelectQuestion}
-            onOpenVisualizer={handleOpenVisualizer}
-            onOpenPattern={handleOpenPattern}
-          />
-        )}
-
-        {activeTab === 'patterns' && (
-          <AlgoPatternsView
-            initialPatternId={activePatternId}
-            onOpenArenaQuestion={handleSelectQuestion}
-            onOpenVisualizerHub={handleOpenVisualizer}
-          />
-        )}
-
-        {activeTab === 'visualizers' && (
-          <VisualizerHub
-            initialTab={initialVisualizerTab}
-            onOpenQuestion={handleSelectQuestion}
-          />
-        )}
-
-        {activeTab === 'cheatsheet' && <CheatsheetView />}
-
-        {activeTab === 'quiz' && <QuizHub />}
+        <Outlet />
       </main>
 
       {/* Footer */}
       <footer
         className={`border-t border-slate-800/80 bg-[#0d1117] py-4 px-4 text-center text-xs text-slate-500 ${
-          activeTab === 'arena' ? 'hidden' : 'block'
+          isArenaActive ? 'hidden' : 'block'
         }`}
       >
         <div className="flex flex-wrap items-center justify-center gap-4">
@@ -481,7 +397,7 @@ const AppContent: React.FC = () => {
           <span>•</span>
           <button
             onClick={handleResetAllProgress}
-            className="text-slate-500 hover:text-rose-400 transition"
+            className="text-slate-500 hover:text-rose-400 transition cursor-pointer"
           >
             {t('resetProgress')}
           </button>
@@ -489,13 +405,305 @@ const AppContent: React.FC = () => {
       </footer>
     </div>
   );
-};
+}
+
+// --- Route Components ---
+
+function HomeRouteComponent() {
+  const { solvedQuestionIds, handleSelectTrackFromHome } = useAppNavigation();
+  const navigate = useNavigate();
+
+  return (
+    <HomePage
+      solvedCount={solvedQuestionIds.length}
+      onNavigate={tab => {
+        if (tab === 'arena') navigate({ to: '/arena' });
+        else if (tab === 'catalog') navigate({ to: '/catalog' });
+        else if (tab === 'visualizers') navigate({ to: '/visualizers' });
+        else if (tab === 'cheatsheet') navigate({ to: '/cheatsheet' });
+        else if (tab === 'patterns') navigate({ to: '/patterns' });
+        else if (tab === 'quiz') navigate({ to: '/quiz' });
+      }}
+      onSelectTrack={handleSelectTrackFromHome}
+    />
+  );
+}
+
+function CatalogRouteComponent() {
+  const {
+    solvedQuestionIds,
+    handleSelectQuestion,
+    handleToggleQuestionSolved,
+    handleOpenVisualizer,
+  } = useAppNavigation();
+  const search = useSearch({ from: '/catalog' });
+
+  return (
+    <QuestionCatalog
+      solvedQuestionIds={solvedQuestionIds}
+      onSelectQuestion={handleSelectQuestion}
+      onToggleQuestionSolved={handleToggleQuestionSolved}
+      onOpenVisualizer={handleOpenVisualizer}
+      initialTrack={search.track || 'all'}
+    />
+  );
+}
+
+function ArenaQuestionRouteComponent() {
+  const { questionId } = useParams({ from: '/arena/$questionId' });
+  const {
+    activeQuestionId,
+    setActiveQuestionId,
+    codeDrafts,
+    handleCodeChange,
+    handleQuestionSolved,
+    handleSelectQuestion,
+    handleOpenVisualizer,
+    handleOpenPattern,
+  } = useAppNavigation();
+
+  useEffect(() => {
+    if (questionId && questionId !== activeQuestionId) {
+      setActiveQuestionId(questionId);
+    }
+  }, [questionId, activeQuestionId, setActiveQuestionId]);
+
+  const targetId = questionId || activeQuestionId;
+  const activeQuestion = getQuestionById(targetId) || allQuestions[0];
+  const currentCode = codeDrafts[activeQuestion.id] ?? activeQuestion.starterCode;
+
+  return (
+    <ProblemArena
+      question={activeQuestion}
+      allQuestions={allQuestions}
+      userCode={currentCode}
+      onCodeChange={handleCodeChange}
+      onQuestionSolved={handleQuestionSolved}
+      onSelectQuestion={handleSelectQuestion}
+      onOpenVisualizer={handleOpenVisualizer}
+      onOpenPattern={handleOpenPattern}
+    />
+  );
+}
+
+function ArenaRouteComponent() {
+  const {
+    activeQuestionId,
+    codeDrafts,
+    handleCodeChange,
+    handleQuestionSolved,
+    handleSelectQuestion,
+    handleOpenVisualizer,
+    handleOpenPattern,
+  } = useAppNavigation();
+
+  const activeQuestion = getQuestionById(activeQuestionId) || allQuestions[0];
+  const currentCode = codeDrafts[activeQuestion.id] ?? activeQuestion.starterCode;
+
+  return (
+    <ProblemArena
+      question={activeQuestion}
+      allQuestions={allQuestions}
+      userCode={currentCode}
+      onCodeChange={handleCodeChange}
+      onQuestionSolved={handleQuestionSolved}
+      onSelectQuestion={handleSelectQuestion}
+      onOpenVisualizer={handleOpenVisualizer}
+      onOpenPattern={handleOpenPattern}
+    />
+  );
+}
+
+function PatternsItemRouteComponent() {
+  const { patternId } = useParams({ from: '/patterns/$patternId' });
+  const { handleSelectQuestion, handleOpenVisualizer, handleOpenPattern } = useAppNavigation();
+
+  return (
+    <AlgoPatternsView
+      initialPatternId={patternId}
+      onOpenArenaQuestion={handleSelectQuestion}
+      onOpenVisualizerHub={handleOpenVisualizer}
+      onSelectPattern={handleOpenPattern}
+    />
+  );
+}
+
+function PatternsRouteComponent() {
+  const { handleSelectQuestion, handleOpenVisualizer, handleOpenPattern } = useAppNavigation();
+
+  return (
+    <AlgoPatternsView
+      onOpenArenaQuestion={handleSelectQuestion}
+      onOpenVisualizerHub={handleOpenVisualizer}
+      onSelectPattern={handleOpenPattern}
+    />
+  );
+}
+
+function VisualizersTabRouteComponent() {
+  const { tab } = useParams({ from: '/visualizers/$tab' });
+  const { handleSelectQuestion, handleOpenVisualizer } = useAppNavigation();
+
+  const validTabs: Array<
+    'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent'
+  > = ['two-pointers', 'sliding-window', 'binary-search', 'bfs-grid', 'gradient-descent'];
+
+  const initialTab = validTabs.includes(tab as any) ? (tab as any) : 'two-pointers';
+
+  return (
+    <VisualizerHub
+      initialTab={initialTab}
+      onOpenQuestion={handleSelectQuestion}
+      onSelectTab={handleOpenVisualizer}
+    />
+  );
+}
+
+function VisualizersRouteComponent() {
+  const { handleSelectQuestion, handleOpenVisualizer } = useAppNavigation();
+
+  return (
+    <VisualizerHub
+      initialTab="two-pointers"
+      onOpenQuestion={handleSelectQuestion}
+      onSelectTab={handleOpenVisualizer}
+    />
+  );
+}
+
+function CheatsheetRouteComponent() {
+  return <CheatsheetView />;
+}
+
+function QuizRouteComponent() {
+  return <QuizHub />;
+}
+
+// --- App State & Router Provider Wrapper ---
 
 export const App: React.FC = () => {
+  const [activeQuestionId, setActiveQuestionId] = useState<string>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.lastActiveQuestionId) return parsed.lastActiveQuestionId;
+      }
+    } catch (e) {
+      console.warn('Failed to load last question from localStorage:', e);
+    }
+    return 'py-01-flatten-nested-list';
+  });
+
+  const [solvedQuestionIds, setSolvedQuestionIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.solvedQuestionIds || [];
+      }
+    } catch (e) {
+      console.warn('Failed to load saved progress:', e);
+    }
+    return [];
+  });
+
+  const [codeDrafts, setCodeDrafts] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed.codeDrafts || {};
+      }
+    } catch (e) {
+      console.warn('Failed to load code drafts:', e);
+    }
+    return {};
+  });
+
+  // Save progress & drafts to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          solvedQuestionIds,
+          codeDrafts,
+          lastActiveQuestionId: activeQuestionId,
+        })
+      );
+    } catch (e) {
+      console.warn('Failed to persist progress:', e);
+    }
+  }, [solvedQuestionIds, codeDrafts, activeQuestionId]);
+
+  const handleCodeChange = (newCode: string) => {
+    setCodeDrafts(prev => ({
+      ...prev,
+      [activeQuestionId]: newCode,
+    }));
+  };
+
+  const handleQuestionSolved = (questionId: string) => {
+    if (!solvedQuestionIds.includes(questionId)) {
+      setSolvedQuestionIds(prev => [...prev, questionId]);
+    }
+  };
+
+  const handleToggleQuestionSolved = (questionId: string) => {
+    setSolvedQuestionIds(prev =>
+      prev.includes(questionId)
+        ? prev.filter(id => id !== questionId)
+        : [...prev, questionId]
+    );
+  };
+
+  const handleSelectQuestion = (questionId: string) => {
+    setActiveQuestionId(questionId);
+    router.navigate({ to: '/arena/$questionId', params: { questionId } });
+  };
+
+  const handleOpenPattern = (patternId: string) => {
+    router.navigate({ to: '/patterns/$patternId', params: { patternId } });
+  };
+
+  const handleOpenVisualizer = (visualizerId: string) => {
+    router.navigate({ to: '/visualizers/$tab', params: { tab: visualizerId } });
+  };
+
+  const handleSelectTrackFromHome = (track: Track) => {
+    router.navigate({ to: '/catalog', search: { track } });
+  };
+
+  const handleResetAllProgress = () => {
+    if (window.confirm('Reset all solved progress and code drafts?')) {
+      setSolvedQuestionIds([]);
+      setCodeDrafts({});
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  };
+
+  const navigationContextValue: AppContextType = {
+    solvedQuestionIds,
+    codeDrafts,
+    activeQuestionId,
+    setActiveQuestionId,
+    handleCodeChange,
+    handleQuestionSolved,
+    handleToggleQuestionSolved,
+    handleSelectQuestion,
+    handleOpenPattern,
+    handleOpenVisualizer,
+    handleSelectTrackFromHome,
+    handleResetAllProgress,
+  };
+
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <AppContent />
+        <AppNavigationContext.Provider value={navigationContextValue}>
+          <RouterProvider router={router} />
+        </AppNavigationContext.Provider>
       </LanguageProvider>
     </ThemeProvider>
   );

@@ -38,6 +38,14 @@ export const en = {
   consoleEmptyNotice: 'Interactive Python 3.12 REPL. Evaluate expressions, test functions, and inspect variables in real time.',
   consoleResetEnv: 'Reset REPL Session',
   consoleQuickExamples: 'Quick Test',
+  resetCodeBtn: 'Reset',
+  resetCodeTitle: 'Reset to starter template',
+  resetModalTitle: 'Reset Code to Starter?',
+  resetModalSubtitle: 'Revert back to starter boilerplate',
+  resetModalDescPre: 'This will discard all edits you\'ve written for',
+  resetModalDescPost: 'and reload the original template.',
+  resetModalCancel: 'Cancel',
+  resetModalConfirm: 'Reset Code',
 
   // Status
   pythonEngineReady: 'Pyodide Python 3.12 Ready',
@@ -134,6 +142,8 @@ export const en = {
   quizStatsBookmarked: 'Saved',
   quizStatsMastery: 'Mastery Progress',
   quizProgressResetBtn: 'Reset Quiz Data',
+  quizProgressResetTitle: 'Reset Quiz Progress?',
+  quizProgressResetSubtitle: 'Revert all 100 questions to unanswered state',
   quizProgressResetConfirm:
     'Are you sure you want to reset all answers, notes, and progress in the 100 Questions Bank? This action cannot be undone.',
   quizSearchPlaceholder: 'Search questions, options, explanations, criteria...',

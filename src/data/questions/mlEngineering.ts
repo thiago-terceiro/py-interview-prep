@@ -401,29 +401,50 @@ def _run_tests():
     y = np.arange(10) * 10
     
     # Test 1: No shuffle remainder check
-    batches = list(batch_generator(X, y, batch_size=4, shuffle=False))
-    p1 = len(batches) == 3 and len(batches[0][0]) == 4 and len(batches[2][0]) == 2
-    _test_items.append({
-        "input": "10 samples, batch_size=4, shuffle=False",
-        "expected": "3 batches with sizes [4, 4, 2]",
-        "actual": f"Batch sizes: {[len(b[0]) for b in batches]}",
-        "passed": bool(p1)
-    })
+    try:
+        gen1 = batch_generator(X, y, batch_size=4, shuffle=False)
+        batches = list(gen1) if gen1 is not None else None
+        p1 = batches is not None and len(batches) == 3 and len(batches[0][0]) == 4 and len(batches[2][0]) == 2
+        _test_items.append({
+            "input": "10 samples, batch_size=4, shuffle=False",
+            "expected": "3 batches with sizes [4, 4, 2]",
+            "actual": f"Batch sizes: {[len(b[0]) for b in batches]}" if batches is not None else "None",
+            "passed": bool(p1)
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "10 samples, batch_size=4, shuffle=False",
+            "expected": "3 batches with sizes [4, 4, 2]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
 
     # Test 2: Alignment check under shuffle
-    batches_shuffled = list(batch_generator(X, y, batch_size=3, shuffle=True, seed=42))
-    all_aligned = True
-    for bx, by in batches_shuffled:
-        if not np.all(bx.ravel() * 10 == by):
-            all_aligned = False
-            break
-            
-    _test_items.append({
-        "input": "Alignment check after random shuffling",
-        "expected": "Each batch retains X*10 == y alignment",
-        "actual": f"All aligned: {all_aligned}",
-        "passed": bool(all_aligned)
-    })
+    try:
+        gen2 = batch_generator(X, y, batch_size=3, shuffle=True, seed=42)
+        batches_shuffled = list(gen2) if gen2 is not None else None
+        all_aligned = batches_shuffled is not None and len(batches_shuffled) > 0
+        if batches_shuffled:
+            for bx, by in batches_shuffled:
+                if not np.all(bx.ravel() * 10 == by):
+                    all_aligned = False
+                    break
+                
+        _test_items.append({
+            "input": "Alignment check after random shuffling",
+            "expected": "Each batch retains X*10 == y alignment",
+            "actual": f"All aligned: {all_aligned}" if batches_shuffled is not None else "None",
+            "passed": bool(all_aligned)
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "Alignment check after random shuffling",
+            "expected": "Each batch retains X*10 == y alignment",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
 
 _run_tests()
 `,

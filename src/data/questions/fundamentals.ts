@@ -579,37 +579,67 @@ def chunked(iterable: Iterable[Any], size: int):
     testHarness: `
 def _run_tests():
     # Test 1: list
-    res1 = list(chunked([1, 2, 3, 4, 5, 6, 7], 3))
-    exp1 = [[1, 2, 3], [4, 5, 6], [7]]
-    _test_items.append({
-        "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
-        "expected": str(exp1),
-        "actual": str(res1),
-        "passed": res1 == exp1
-    })
+    try:
+        out1 = chunked([1, 2, 3, 4, 5, 6, 7], 3)
+        res1 = list(out1) if out1 is not None else None
+        exp1 = [[1, 2, 3], [4, 5, 6], [7]]
+        _test_items.append({
+            "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
+            "expected": str(exp1),
+            "actual": str(res1),
+            "passed": res1 == exp1
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
+            "expected": "[[1, 2, 3], [4, 5, 6], [7]]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
 
     # Test 2: Generator stream (infinite range with break)
     def num_gen():
         for i in range(10):
             yield i
-    res2 = list(chunked(num_gen(), 4))
-    exp2 = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
-    _test_items.append({
-        "input": "chunked(generator_0_to_9, 4)",
-        "expected": str(exp2),
-        "actual": str(res2),
-        "passed": res2 == exp2
-    })
+    try:
+        out2 = chunked(num_gen(), 4)
+        res2 = list(out2) if out2 is not None else None
+        exp2 = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
+        _test_items.append({
+            "input": "chunked(generator_0_to_9, 4)",
+            "expected": str(exp2),
+            "actual": str(res2),
+            "passed": res2 == exp2
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "chunked(generator_0_to_9, 4)",
+            "expected": "[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
 
     # Test 3: Empty input
-    res3 = list(chunked([], 2))
-    exp3 = []
-    _test_items.append({
-        "input": "chunked([], 2)",
-        "expected": str(exp3),
-        "actual": str(res3),
-        "passed": res3 == exp3
-    })
+    try:
+        out3 = chunked([], 2)
+        res3 = list(out3) if out3 is not None else None
+        exp3 = []
+        _test_items.append({
+            "input": "chunked([], 2)",
+            "expected": str(exp3),
+            "actual": str(res3),
+            "passed": res3 == exp3
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "chunked([], 2)",
+            "expected": "[]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
 
 _run_tests()
 `,

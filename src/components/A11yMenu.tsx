@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  Accessibility,
+  SlidersHorizontal,
   Languages,
   Sun,
   Moon,
@@ -83,7 +83,7 @@ export const A11yMenu: React.FC = () => {
             : 'bg-[#161b22] text-slate-300 hover:text-white border-slate-800 hover:border-slate-700 hover:bg-slate-800'
         }`}
       >
-        <Accessibility className="w-4 h-4 text-sky-400" />
+        <SlidersHorizontal className="w-4 h-4 text-sky-400" />
       </button>
 
       {/* Preferences Popover Dropdown */}
@@ -98,7 +98,7 @@ export const A11yMenu: React.FC = () => {
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400">
-                <Accessibility className="w-4 h-4" />
+                <SlidersHorizontal className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="text-xs font-bold text-white tracking-wide">
