@@ -105,212 +105,7 @@ _run_tests()
     ],
     visualizerId: 'two-pointers'
   },
-  {
-    id: 'py-09-longest-substring-without-repeats',
-    number: 9,
-    title: 'Longest Substring Without Repeating Characters',
-    slug: 'longest-substring-without-repeating-characters',
-    track: 'algorithms',
-    difficulty: 'Medium',
-    tags: ['Sliding Window', 'Hash Map', 'Strings'],
-    summary: 'Find the length of the longest substring with all unique characters using an O(N) sliding window.',
-    description: `Given a string \`s\`, find the length of the **longest substring** without duplicate characters.
 
-A **substring** is a contiguous non-empty sequence of characters within a string.`,
-    examples: [
-      {
-        input: 's = "abcabcbb"',
-        output: '3',
-        explanation: 'The answer is "abc", with the length of 3.'
-      },
-      {
-        input: 's = "pwwkew"',
-        output: '3',
-        explanation: 'The answer is "wke", with the length of 3. Note that "pwke" is a subsequence, not a substring.'
-      }
-    ],
-    constraints: [
-      '0 <= s.length <= 5 * 10^4',
-      's consists of English letters, digits, symbols and spaces.'
-    ],
-    starterCode: `def length_of_longest_substring(s: str) -> int:
-    """
-    Returns the length of the longest substring without repeating characters.
-    """
-    # Write your solution here
-    pass
-`,
-    solutionCode: `def length_of_longest_substring(s: str) -> int:
-    seen = {}  # char -> last seen index
-    left = 0
-    max_len = 0
-    
-    for right, char in enumerate(s):
-        if char in seen and seen[char] >= left:
-            left = seen[char] + 1
-        seen[char] = right
-        max_len = max(max_len, right - left + 1)
-        
-    return max_len
-`,
-    testHarness: `
-def _run_tests():
-    cases = [
-        ("abcabcbb", 3),
-        ("bbbbb", 1),
-        ("pwwkew", 3),
-        ("", 0),
-        ("abba", 2),
-        ("dvdf", 3)
-    ]
-    for s_inp, expected in cases:
-        try:
-            actual = length_of_longest_substring(s_inp)
-            passed = actual == expected
-            _test_items.append({
-                "input": f's = "{s_inp}"',
-                "expected": str(expected),
-                "actual": str(actual),
-                "passed": passed
-            })
-        except Exception as e:
-            _test_items.append({
-                "input": f's = "{s_inp}"',
-                "expected": str(expected),
-                "actual": f"Error: {e}",
-                "passed": False,
-                "error": str(e)
-            })
-
-_run_tests()
-`,
-    explanation: {
-      approach: 'Use a dynamic sliding window `[left, right]`. Maintain a hash map of each character to its most recent index. When character `s[right]` was seen at index `>= left`, skip `left` directly to `seen[s[right]] + 1`. Update `max_len = max(max_len, right - left + 1)`.',
-      timeComplexity: 'O(N) linear time since both pointers only advance forward.',
-      spaceComplexity: 'O(min(N, M)) where M is the character alphabet size (e.g. 128 for ASCII).',
-      keyTakeaway: 'Storing the last-seen index in a map allows the `left` pointer to jump immediately instead of shrinking one step at a time.'
-    },
-    hints: [
-      'Use a dictionary to keep track of the most recent index of each character.',
-      'When you encounter a duplicate character whose last position is >= left, jump left to that position + 1.',
-      'Check the classic edge case: "abba". When at the second "a", its last index (0) is less than left (2), so left shouldn\'t move backwards!'
-    ],
-    visualizerId: 'sliding-window'
-  },
-  {
-    id: 'py-10-search-rotated-sorted-array',
-    number: 10,
-    title: 'Search in Rotated Sorted Array',
-    slug: 'search-rotated-sorted-array',
-    track: 'algorithms',
-    difficulty: 'Medium',
-    tags: ['Binary Search', 'Arrays', 'O(log N)'],
-    summary: 'Search for a target value in a sorted array that has been rotated at an unknown pivot in O(log N) time.',
-    description: `There is an integer array \`nums\` sorted in ascending order (with distinct values).
-
-Prior to being passed to your function, \`nums\` is possibly rotated at an unknown pivot index \`k\` (\`1 <= k < nums.length\`) such that the resulting array is \`[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]\`.
-
-Given the array \`nums\` after the possible rotation and an integer \`target\`, return the index of \`target\` if it is in \`nums\`, or \`-1\` if it is not in \`nums\`.
-
-You must write an algorithm with **O(log n)** runtime complexity.`,
-    examples: [
-      {
-        input: 'nums = [4, 5, 6, 7, 0, 1, 2], target = 0',
-        output: '4',
-        explanation: '0 is located at index 4.'
-      },
-      {
-        input: 'nums = [4, 5, 6, 7, 0, 1, 2], target = 3',
-        output: '-1',
-        explanation: '3 does not exist in the array.'
-      }
-    ],
-    constraints: [
-      '1 <= nums.length <= 5000',
-      '-10^4 <= nums[i] <= 10^4',
-      'All values of nums are unique.',
-      'nums is guaranteed to be rotated at some pivot.'
-    ],
-    starterCode: `from typing import List
-
-def search(nums: List[int], target: int) -> int:
-    """
-    Search in rotated sorted array in O(log N) time.
-    """
-    # Write your solution here
-    pass
-`,
-    solutionCode: `from typing import List
-
-def search(nums: List[int], target: int) -> int:
-    low, high = 0, len(nums) - 1
-    
-    while low <= high:
-        mid = (low + high) // 2
-        if nums[mid] == target:
-            return mid
-        
-        # Check if left half is normally sorted
-        if nums[low] <= nums[mid]:
-            if nums[low] <= target < nums[mid]:
-                high = mid - 1
-            else:
-                low = mid + 1
-        # Otherwise right half must be sorted
-        else:
-            if nums[mid] < target <= nums[high]:
-                low = mid + 1
-            else:
-                high = mid - 1
-                
-    return -1
-`,
-    testHarness: `
-def _run_tests():
-    import copy
-    cases = [
-        ([4, 5, 6, 7, 0, 1, 2], 0, 4),
-        ([4, 5, 6, 7, 0, 1, 2], 3, -1),
-        ([1], 0, -1),
-        ([1], 1, 0),
-        ([3, 1], 1, 1),
-        ([5, 1, 3], 5, 0)
-    ]
-    for nums, tgt, expected in cases:
-        inp_str = f"nums = {str(nums)}, target = {tgt}"
-        try:
-            actual = search(copy.deepcopy(nums), tgt)
-            passed = actual == expected
-            _test_items.append({
-                "input": inp_str,
-                "expected": str(expected),
-                "actual": str(actual),
-                "passed": passed
-            })
-        except Exception as e:
-            _test_items.append({
-                "input": inp_str,
-                "expected": str(expected),
-                "actual": f"Error: {e}",
-                "passed": False,
-                "error": str(e)
-            })
-
-_run_tests()
-`,
-    explanation: {
-      approach: 'In any rotated sorted array, splitting at `mid` always leaves at least one half sorted. Check whether `nums[low] <= nums[mid]`. If true, the left half is sorted: if target lies within `[nums[low], nums[mid])`, search left, else search right. If the right half is sorted, apply symmetric logic.',
-      timeComplexity: 'O(log N) binary search.',
-      spaceComplexity: 'O(1) extra space.',
-      keyTakeaway: 'Even when an array is modified, identifying which partition maintains invariant sorted order enables binary search.'
-    },
-    hints: [
-      'In a rotated sorted array, at least one half (left or right of mid) is always strictly sorted.',
-      'Check if `nums[low] <= nums[mid]`. If so, left is sorted; test whether `target` falls within `nums[low]` and `nums[mid]`.',
-      'If left is not sorted, right must be sorted.'
-    ],
-    visualizerId: 'binary-search'
-  },
   {
     id: 'py-11-valid-parentheses',
     number: 11,
@@ -406,6 +201,7 @@ _run_tests()
       'Check if stack is completely empty at the end.'
     ]
   },
+
   {
     id: 'py-12-reverse-linked-list',
     number: 12,
@@ -525,6 +321,215 @@ _run_tests()
       'Move `prev` and `curr` forward one step.'
     ]
   },
+
+  {
+    id: 'py-09-longest-substring-without-repeats',
+    number: 9,
+    title: 'Longest Substring Without Repeating Characters',
+    slug: 'longest-substring-without-repeating-characters',
+    track: 'algorithms',
+    difficulty: 'Medium',
+    tags: ['Sliding Window', 'Hash Map', 'Strings'],
+    summary: 'Find the length of the longest substring with all unique characters using an O(N) sliding window.',
+    description: `Given a string \`s\`, find the length of the **longest substring** without duplicate characters.
+
+A **substring** is a contiguous non-empty sequence of characters within a string.`,
+    examples: [
+      {
+        input: 's = "abcabcbb"',
+        output: '3',
+        explanation: 'The answer is "abc", with the length of 3.'
+      },
+      {
+        input: 's = "pwwkew"',
+        output: '3',
+        explanation: 'The answer is "wke", with the length of 3. Note that "pwke" is a subsequence, not a substring.'
+      }
+    ],
+    constraints: [
+      '0 <= s.length <= 5 * 10^4',
+      's consists of English letters, digits, symbols and spaces.'
+    ],
+    starterCode: `def length_of_longest_substring(s: str) -> int:
+    """
+    Returns the length of the longest substring without repeating characters.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `def length_of_longest_substring(s: str) -> int:
+    seen = {}  # char -> last seen index
+    left = 0
+    max_len = 0
+    
+    for right, char in enumerate(s):
+        if char in seen and seen[char] >= left:
+            left = seen[char] + 1
+        seen[char] = right
+        max_len = max(max_len, right - left + 1)
+        
+    return max_len
+`,
+    testHarness: `
+def _run_tests():
+    cases = [
+        ("abcabcbb", 3),
+        ("bbbbb", 1),
+        ("pwwkew", 3),
+        ("", 0),
+        ("abba", 2),
+        ("dvdf", 3)
+    ]
+    for s_inp, expected in cases:
+        try:
+            actual = length_of_longest_substring(s_inp)
+            passed = actual == expected
+            _test_items.append({
+                "input": f's = "{s_inp}"',
+                "expected": str(expected),
+                "actual": str(actual),
+                "passed": passed
+            })
+        except Exception as e:
+            _test_items.append({
+                "input": f's = "{s_inp}"',
+                "expected": str(expected),
+                "actual": f"Error: {e}",
+                "passed": False,
+                "error": str(e)
+            })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Use a dynamic sliding window `[left, right]`. Maintain a hash map of each character to its most recent index. When character `s[right]` was seen at index `>= left`, skip `left` directly to `seen[s[right]] + 1`. Update `max_len = max(max_len, right - left + 1)`.',
+      timeComplexity: 'O(N) linear time since both pointers only advance forward.',
+      spaceComplexity: 'O(min(N, M)) where M is the character alphabet size (e.g. 128 for ASCII).',
+      keyTakeaway: 'Storing the last-seen index in a map allows the `left` pointer to jump immediately instead of shrinking one step at a time.'
+    },
+    hints: [
+      'Use a dictionary to keep track of the most recent index of each character.',
+      'When you encounter a duplicate character whose last position is >= left, jump left to that position + 1.',
+      'Check the classic edge case: "abba". When at the second "a", its last index (0) is less than left (2), so left shouldn\'t move backwards!'
+    ],
+    visualizerId: 'sliding-window'
+  },
+
+  {
+    id: 'py-10-search-rotated-sorted-array',
+    number: 10,
+    title: 'Search in Rotated Sorted Array',
+    slug: 'search-rotated-sorted-array',
+    track: 'algorithms',
+    difficulty: 'Medium',
+    tags: ['Binary Search', 'Arrays', 'O(log N)'],
+    summary: 'Search for a target value in a sorted array that has been rotated at an unknown pivot in O(log N) time.',
+    description: `There is an integer array \`nums\` sorted in ascending order (with distinct values).
+
+Prior to being passed to your function, \`nums\` is possibly rotated at an unknown pivot index \`k\` (\`1 <= k < nums.length\`) such that the resulting array is \`[nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]\`.
+
+Given the array \`nums\` after the possible rotation and an integer \`target\`, return the index of \`target\` if it is in \`nums\`, or \`-1\` if it is not in \`nums\`.
+
+You must write an algorithm with **O(log n)** runtime complexity.`,
+    examples: [
+      {
+        input: 'nums = [4, 5, 6, 7, 0, 1, 2], target = 0',
+        output: '4',
+        explanation: '0 is located at index 4.'
+      },
+      {
+        input: 'nums = [4, 5, 6, 7, 0, 1, 2], target = 3',
+        output: '-1',
+        explanation: '3 does not exist in the array.'
+      }
+    ],
+    constraints: [
+      '1 <= nums.length <= 5000',
+      '-10^4 <= nums[i] <= 10^4',
+      'All values of nums are unique.',
+      'nums is guaranteed to be rotated at some pivot.'
+    ],
+    starterCode: `from typing import List
+
+def search(nums: List[int], target: int) -> int:
+    """
+    Search in rotated sorted array in O(log N) time.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `from typing import List
+
+def search(nums: List[int], target: int) -> int:
+    low, high = 0, len(nums) - 1
+    
+    while low <= high:
+        mid = (low + high) // 2
+        if nums[mid] == target:
+            return mid
+        
+        # Check if left half is normally sorted
+        if nums[low] <= nums[mid]:
+            if nums[low] <= target < nums[mid]:
+                high = mid - 1
+            else:
+                low = mid + 1
+        # Otherwise right half must be sorted
+        else:
+            if nums[mid] < target <= nums[high]:
+                low = mid + 1
+            else:
+                high = mid - 1
+                
+    return -1
+`,
+    testHarness: `
+def _run_tests():
+    import copy
+    cases = [
+        ([4, 5, 6, 7, 0, 1, 2], 0, 4),
+        ([4, 5, 6, 7, 0, 1, 2], 3, -1),
+        ([1], 0, -1),
+        ([1], 1, 0),
+        ([3, 1], 1, 1),
+        ([5, 1, 3], 5, 0)
+    ]
+    for nums, tgt, expected in cases:
+        inp_str = f"nums = {str(nums)}, target = {tgt}"
+        try:
+            actual = search(copy.deepcopy(nums), tgt)
+            passed = actual == expected
+            _test_items.append({
+                "input": inp_str,
+                "expected": str(expected),
+                "actual": str(actual),
+                "passed": passed
+            })
+        except Exception as e:
+            _test_items.append({
+                "input": inp_str,
+                "expected": str(expected),
+                "actual": f"Error: {e}",
+                "passed": False,
+                "error": str(e)
+            })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'In any rotated sorted array, splitting at `mid` always leaves at least one half sorted. Check whether `nums[low] <= nums[mid]`. If true, the left half is sorted: if target lies within `[nums[low], nums[mid])`, search left, else search right. If the right half is sorted, apply symmetric logic.',
+      timeComplexity: 'O(log N) binary search.',
+      spaceComplexity: 'O(1) extra space.',
+      keyTakeaway: 'Even when an array is modified, identifying which partition maintains invariant sorted order enables binary search.'
+    },
+    hints: [
+      'In a rotated sorted array, at least one half (left or right of mid) is always strictly sorted.',
+      'Check if `nums[low] <= nums[mid]`. If so, left is sorted; test whether `target` falls within `nums[low]` and `nums[mid]`.',
+      'If left is not sorted, right must be sorted.'
+    ],
+    visualizerId: 'binary-search'
+  },
+
   {
     id: 'py-13-number-of-islands',
     number: 13,
@@ -654,6 +659,7 @@ _run_tests()
     ],
     visualizerId: 'bfs-grid'
   },
+
   {
     id: 'py-14-coin-change',
     number: 14,
@@ -751,6 +757,7 @@ _run_tests()
       'Recurrence relation: `dp[i] = min(dp[i], dp[i - c] + 1)` for each coin `c <= i`.'
     ]
   },
+
   {
     id: 'py-15-kth-largest-element',
     number: 15,
@@ -844,6 +851,7 @@ _run_tests()
       'After processing all numbers, return `heap[0]`.'
     ]
   },
+
   {
     id: 'py-16-subarray-sum-equals-k',
     number: 16,
@@ -941,5 +949,5 @@ _run_tests()
       'Rearrange: `prefix[i-1] = prefix[j] - k`.',
       'Remember to initialize your frequency hash map with `0: 1` to account for subarrays starting at index 0.'
     ]
-  }
+  },
 ];

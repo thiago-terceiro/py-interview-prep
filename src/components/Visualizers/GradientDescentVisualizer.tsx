@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, TrendingDown } from 'lucide-react';
 
 interface GDStep {
@@ -12,10 +12,15 @@ interface GDStep {
 export const GradientDescentVisualizer: React.FC = () => {
   const [learningRate, setLearningRate] = useState<number>(0.2);
   const initialWeight = 5.5;
-  const [steps, setSteps] = useState<GDStep[]>([]);
-
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [prevLr, setPrevLr] = useState<number>(learningRate);
+
+  if (learningRate !== prevLr) {
+    setPrevLr(learningRate);
+    setCurrentStepIndex(0);
+    setIsPlaying(false);
+  }
 
   // Target objective function: L(w) = (w - 2.0)^2 + 1.0
   // Optimal w* = 2.0, min loss = 1.0
@@ -23,7 +28,7 @@ export const GradientDescentVisualizer: React.FC = () => {
   const lossFunc = (w: number) => (w - 2.0) ** 2 + 1.0;
   const gradFunc = (w: number) => 2 * (w - 2.0);
 
-  useEffect(() => {
+  const steps = useMemo<GDStep[]>(() => {
     const computedSteps: GDStep[] = [];
     let w = initialWeight;
     const maxSteps = 15;
@@ -55,16 +60,14 @@ export const GradientDescentVisualizer: React.FC = () => {
       w = w - learningRate * grad;
     }
 
-    setSteps(computedSteps);
-    setCurrentStepIndex(0);
-    setIsPlaying(false);
+    return computedSteps;
   }, [learningRate, initialWeight]);
 
   useEffect(() => {
     if (!isPlaying) return;
     if (currentStepIndex >= steps.length - 1) {
-      setIsPlaying(false);
-      return;
+      const timer = setTimeout(() => setIsPlaying(false), 0);
+      return () => clearTimeout(timer);
     }
     const timer = setTimeout(() => {
       setCurrentStepIndex(prev => prev + 1);

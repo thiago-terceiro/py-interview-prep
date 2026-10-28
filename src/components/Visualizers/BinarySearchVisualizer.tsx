@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, Target, ArrowDown } from 'lucide-react';
 
 interface BSStep {
@@ -10,14 +10,22 @@ interface BSStep {
   message: string;
 }
 
+const DEFAULT_ROTATED_ARRAY = [4, 5, 6, 7, 0, 1, 2];
+
 export const BinarySearchVisualizer: React.FC = () => {
-  const array = [4, 5, 6, 7, 0, 1, 2];
+  const array = DEFAULT_ROTATED_ARRAY;
   const [target, setTarget] = useState<number>(0);
-  const [steps, setSteps] = useState<BSStep[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [prevTarget, setPrevTarget] = useState<number>(target);
 
-  useEffect(() => {
+  if (target !== prevTarget) {
+    setPrevTarget(target);
+    setCurrentStepIndex(0);
+    setIsPlaying(false);
+  }
+
+  const steps = useMemo<BSStep[]>(() => {
     const computedSteps: BSStep[] = [];
     let low = 0;
     let high = array.length - 1;
@@ -98,16 +106,14 @@ export const BinarySearchVisualizer: React.FC = () => {
       });
     }
 
-    setSteps(computedSteps);
-    setCurrentStepIndex(0);
-    setIsPlaying(false);
-  }, [target]);
+    return computedSteps;
+  }, [array, target]);
 
   useEffect(() => {
     if (!isPlaying) return;
     if (currentStepIndex >= steps.length - 1) {
-      setIsPlaying(false);
-      return;
+      const timer = setTimeout(() => setIsPlaying(false), 0);
+      return () => clearTimeout(timer);
     }
     const timer = setTimeout(() => {
       setCurrentStepIndex(prev => prev + 1);

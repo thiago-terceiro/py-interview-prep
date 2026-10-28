@@ -3,224 +3,6 @@ import type { Question } from '../../types';
 
 export const mlEngineeringQuestions: Question[] = [
   {
-    id: 'py-24-cross-entropy-softmax',
-    number: 24,
-    title: 'Numerically Stable Softmax & Cross-Entropy Loss',
-    slug: 'cross-entropy-softmax',
-    track: 'ml-engineering',
-    difficulty: 'Medium',
-    tags: ['Machine Learning', 'Deep Learning', 'Loss Functions', 'NumPy'],
-    summary: 'Implement numerically stable softmax and categorical cross-entropy loss with gradients.',
-    description: `Directly computing $\\frac{e^{z_i}}{\\sum e^{z_j}}$ causes floating point overflow when logits $z_i$ are large (e.g. $e^{1000} \\to \\infty$).
-
-In ML engineering interviews, you are expected to know the **Log-Sum-Exp trick**: subtract $\\max(z)$ from logits before exponentiating.
-
-Write two functions:
-1. \`softmax(logits: np.ndarray) -> np.ndarray\`: Given 2D logits of shape \`(N, C)\`, compute softmax probabilities stably along \`axis=-1\`.
-2. \`cross_entropy_loss(probs: np.ndarray, y_true: np.ndarray, eps: float = 1e-15) -> float\`:
-   Given predicted probabilities \`probs\` of shape \`(N, C)\` and integer true labels \`y_true\` of shape \`(N,)\`, compute the mean negative log-likelihood:
-   $$\\mathcal{L} = -\\frac{1}{N} \\sum_{i=1}^N \\log(\\text{probs}_{i, y_i} + \\epsilon)$$`,
-    examples: [
-      {
-        input: 'logits = np.array([[1000.0, 1000.0]])',
-        output: 'probs = array([[0.5, 0.5]]), no NaN/Inf overflow',
-        explanation: 'Subtracting max logit 1000 yields [0, 0], giving exp([0, 0]) = [1, 1] / 2 = [0.5, 0.5].'
-      }
-    ],
-    constraints: [
-      'logits is 2D array of shape (N, C).',
-      'y_true is 1D array of integers 0 <= y[i] < C.',
-      'Must not trigger runtime warnings or produce NaNs.'
-    ],
-    starterCode: `import numpy as np
-
-def softmax(logits: np.ndarray) -> np.ndarray:
-    """
-    Computes numerically stable softmax along the last axis.
-    """
-    # Write your solution here
-    pass
-
-def cross_entropy_loss(probs: np.ndarray, y_true: np.ndarray, eps: float = 1e-15) -> float:
-    """
-    Computes average categorical cross-entropy loss.
-    """
-    # Write your solution here
-    pass
-`,
-    solutionCode: `import numpy as np
-
-def softmax(logits: np.ndarray) -> np.ndarray:
-    # Subtract max per row to prevent overflow
-    shifted = logits - np.max(logits, axis=-1, keepdims=True)
-    exp_z = np.exp(shifted)
-    return exp_z / np.sum(exp_z, axis=-1, keepdims=True)
-
-def cross_entropy_loss(probs: np.ndarray, y_true: np.ndarray, eps: float = 1e-15) -> float:
-    n_samples = probs.shape[0]
-    # Pick the probability assigned to the true class
-    true_class_probs = probs[np.arange(n_samples), y_true]
-    clipped = np.clip(true_class_probs, eps, 1.0)
-    return float(-np.mean(np.log(clipped)))
-`,
-    testHarness: `
-import numpy as np
-
-def _run_tests():
-    # Test 1: Extreme values to test numerical stability
-    huge_logits = np.array([[1000.0, 1000.0], [500.0, 500.0]])
-    probs1 = softmax(huge_logits)
-    p1 = np.allclose(probs1, [[0.5, 0.5], [0.5, 0.5]], atol=1e-5)
-    _test_items.append({
-        "input": "huge_logits = [[1000, 1000], [500, 500]]",
-        "expected": "[[0.5, 0.5], [0.5, 0.5]] without overflow",
-        "actual": np.array2string(np.round(probs1, 2), separator=', '),
-        "passed": bool(p1)
-    })
-
-    # Test 2: Cross entropy loss check
-    probs2 = np.array([[0.7, 0.3], [0.1, 0.9]])
-    y_true = np.array([0, 1])
-    loss = cross_entropy_loss(probs2, y_true)
-    # Expected: -0.5 * (log(0.7) + log(0.9)) ~ -0.5 * (-0.35667 - 0.10536) = 0.2310
-    exp_loss = -0.5 * (np.log(0.7) + np.log(0.9))
-    p2 = np.isclose(loss, exp_loss, atol=1e-4)
-    _test_items.append({
-        "input": "probs=[[0.7, 0.3], [0.1, 0.9]], y=[0, 1]",
-        "expected": f"Loss ~ {exp_loss:.4f}",
-        "actual": f"Loss = {loss:.4f}",
-        "passed": bool(p2)
-    })
-
-_run_tests()
-`,
-    explanation: {
-      approach: 'Softmax is shift-invariant: $\\frac{e^{z_i}}{\\sum e^{z_j}} = \\frac{e^{z_i - c}}{\\sum e^{z_j - c}}$. Setting $c = \\max(z)$ ensures the largest exponent is $e^0 = 1$, completely avoiding overflow. In cross-entropy, index true class probabilities via `probs[np.arange(N), y_true]` and clip with `eps` before `log` to avoid $\\log(0) = -\\infty$.',
-      timeComplexity: 'O(N * C) vectorized.',
-      spaceComplexity: 'O(N * C) for probabilities.',
-      keyTakeaway: 'Always subtract $\\max(z)$ in softmax and clip probabilities before $\\log$ in cross-entropy to ensure numerical stability.'
-    },
-    hints: [
-      'In softmax, compute `shifted = logits - np.max(logits, axis=-1, keepdims=True)` before `np.exp()`.',
-      'Normalize by dividing by `np.sum(..., axis=-1, keepdims=True)`.',
-      'For cross entropy, extract true class probabilities with `probs[np.arange(N), y_true]`.'
-    ]
-  },
-  {
-    id: 'py-25-linear-regression-gradient-descent',
-    number: 25,
-    title: 'Ridge Regression & Gradient Descent Step',
-    slug: 'ridge-regression-gradient-descent',
-    track: 'ml-engineering',
-    difficulty: 'Medium',
-    tags: ['Optimization', 'Gradient Descent', 'L2 Regularization', 'Matrix Math'],
-    summary: 'Implement one gradient descent optimization step for Ridge Regression with L2 penalty.',
-    description: `Ridge regression adds an $L_2$ penalty to the Mean Squared Error (MSE) objective:
-$$\\mathcal{L}(w) = \\frac{1}{2N} \\|Xw - y\\|_2^2 + \\frac{\\lambda}{2} \\|w\\|_2^2$$
-
-The gradient with respect to weight vector $w$ is:
-$$\\nabla_w \\mathcal{L} = \\frac{1}{N} X^T (Xw - y) + \\lambda w$$
-
-Write a function \`gradient_step_ridge(X, y, w, lr=0.01, l2_reg=0.1)\` that:
-1. Computes predictions $\\hat{y} = Xw$.
-2. Computes the gradient $\\nabla_w \\mathcal{L}$.
-3. Updates weights: $w_{\\text{new}} = w - \\text{lr} \\times \\nabla_w \\mathcal{L}$.
-4. Returns a tuple \`(w_new, loss)\` where \`loss\` is the scalar float objective value before the step.`,
-    examples: [
-      {
-        input: 'X shape (100, 5), y shape (100,), w shape (5,)',
-        output: 'Returns (w_new, current_loss)',
-        explanation: 'Performs matrix multiplications X @ w and X.T @ error.'
-      }
-    ],
-    constraints: [
-      'X is 2D (N, D), y is 1D (N,), w is 1D (D,).',
-      'lr > 0, l2_reg >= 0.',
-      'Must use vectorized NumPy operations (@ or np.dot).'
-    ],
-    starterCode: `import numpy as np
-from typing import Tuple
-
-def gradient_step_ridge(
-    X: np.ndarray,
-    y: np.ndarray,
-    w: np.ndarray,
-    lr: float = 0.01,
-    l2_reg: float = 0.1
-) -> Tuple[np.ndarray, float]:
-    """
-    Computes loss and updates weights using one step of gradient descent.
-    """
-    # Write your solution here
-    pass
-`,
-    solutionCode: `import numpy as np
-from typing import Tuple
-
-def gradient_step_ridge(
-    X: np.ndarray,
-    y: np.ndarray,
-    w: np.ndarray,
-    lr: float = 0.01,
-    l2_reg: float = 0.1
-) -> Tuple[np.ndarray, float]:
-    n_samples = X.shape[0]
-    
-    # 1. Prediction and error
-    y_pred = X @ w
-    error = y_pred - y
-    
-    # 2. Compute Ridge loss
-    mse_loss = (1.0 / (2.0 * n_samples)) * np.sum(error ** 2)
-    l2_penalty = (l2_reg / 2.0) * np.sum(w ** 2)
-    loss = float(mse_loss + l2_penalty)
-    
-    # 3. Compute gradient
-    grad = (1.0 / n_samples) * (X.T @ error) + (l2_reg * w)
-    
-    # 4. Gradient update
-    w_new = w - (lr * grad)
-    
-    return w_new, loss
-`,
-    testHarness: `
-import numpy as np
-
-def _run_tests():
-    # Simple deterministic test
-    X = np.array([[1.0, 2.0], [3.0, 4.0]])
-    y = np.array([5.0, 11.0])
-    w = np.array([1.0, 1.0])  # y_pred = [3, 7], error = [-2, -4]
-    
-    w_new, loss = gradient_step_ridge(X, y, w, lr=0.1, l2_reg=0.0)
-    # n=2. MSE = 0.5/2 * (4 + 16) = 5.0
-    # grad = 1/2 * [[1, 3], [2, 4]] @ [-2, -4] = 1/2 * [-14, -20] = [-7, -10]
-    # w_new = [1, 1] - 0.1 * [-7, -10] = [1.7, 2.0]
-    p1 = np.isclose(loss, 5.0) and np.allclose(w_new, [1.7, 2.0])
-    _test_items.append({
-        "input": "2x2 simple system with zero regularization",
-        "expected": "loss=5.0, w_new=[1.7, 2.0]",
-        "actual": f"loss={loss:.1f}, w_new={list(np.round(w_new, 2))}",
-        "passed": bool(p1)
-    })
-
-_run_tests()
-`,
-    explanation: {
-      approach: 'Compute error $e = Xw - y$. The MSE gradient is $\\frac{1}{N} X^T e$, and the $L_2$ regularization gradient is $\\lambda w$. Combine them into `grad` and apply the gradient step `w - lr * grad`.',
-      timeComplexity: 'O(N * D) for matrix multiplications.',
-      spaceComplexity: 'O(D) for weight vector.',
-      keyTakeaway: 'The matrix form $X^T (Xw - y)$ computes the inner product between each feature column and the residual error vector in a single BLAS GEMV call.'
-    },
-    hints: [
-      'Prediction: `y_pred = X @ w`.',
-      'Error: `error = y_pred - y`.',
-      'Gradient: `grad = (1.0 / n_samples) * (X.T @ error) + (l2_reg * w)`.',
-      'New weights: `w - lr * grad`.'
-    ],
-    visualizerId: 'gradient-descent'
-  },
-  {
     id: 'py-26-binary-classification-metrics',
     number: 26,
     title: 'Binary Classification Metrics (Precision, Recall, F1)',
@@ -328,6 +110,7 @@ _run_tests()
       'Check if denominator is 0 before dividing!'
     ]
   },
+
   {
     id: 'py-27-minibatch-generator',
     number: 27,
@@ -460,6 +243,227 @@ _run_tests()
       'Loop `range(0, len(X), batch_size)` and slice `X[batch_idx]` and `y[batch_idx]`.'
     ]
   },
+
+  {
+    id: 'py-24-cross-entropy-softmax',
+    number: 24,
+    title: 'Numerically Stable Softmax & Cross-Entropy Loss',
+    slug: 'cross-entropy-softmax',
+    track: 'ml-engineering',
+    difficulty: 'Medium',
+    tags: ['Machine Learning', 'Deep Learning', 'Loss Functions', 'NumPy'],
+    summary: 'Implement numerically stable softmax and categorical cross-entropy loss with gradients.',
+    description: `Directly computing $\\frac{e^{z_i}}{\\sum e^{z_j}}$ causes floating point overflow when logits $z_i$ are large (e.g. $e^{1000} \\to \\infty$).
+
+In ML engineering interviews, you are expected to know the **Log-Sum-Exp trick**: subtract $\\max(z)$ from logits before exponentiating.
+
+Write two functions:
+1. \`softmax(logits: np.ndarray) -> np.ndarray\`: Given 2D logits of shape \`(N, C)\`, compute softmax probabilities stably along \`axis=-1\`.
+2. \`cross_entropy_loss(probs: np.ndarray, y_true: np.ndarray, eps: float = 1e-15) -> float\`:
+   Given predicted probabilities \`probs\` of shape \`(N, C)\` and integer true labels \`y_true\` of shape \`(N,)\`, compute the mean negative log-likelihood:
+   $$\\mathcal{L} = -\\frac{1}{N} \\sum_{i=1}^N \\log(\\text{probs}_{i, y_i} + \\epsilon)$$`,
+    examples: [
+      {
+        input: 'logits = np.array([[1000.0, 1000.0]])',
+        output: 'probs = array([[0.5, 0.5]]), no NaN/Inf overflow',
+        explanation: 'Subtracting max logit 1000 yields [0, 0], giving exp([0, 0]) = [1, 1] / 2 = [0.5, 0.5].'
+      }
+    ],
+    constraints: [
+      'logits is 2D array of shape (N, C).',
+      'y_true is 1D array of integers 0 <= y[i] < C.',
+      'Must not trigger runtime warnings or produce NaNs.'
+    ],
+    starterCode: `import numpy as np
+
+def softmax(logits: np.ndarray) -> np.ndarray:
+    """
+    Computes numerically stable softmax along the last axis.
+    """
+    # Write your solution here
+    pass
+
+def cross_entropy_loss(probs: np.ndarray, y_true: np.ndarray, eps: float = 1e-15) -> float:
+    """
+    Computes average categorical cross-entropy loss.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `import numpy as np
+
+def softmax(logits: np.ndarray) -> np.ndarray:
+    # Subtract max per row to prevent overflow
+    shifted = logits - np.max(logits, axis=-1, keepdims=True)
+    exp_z = np.exp(shifted)
+    return exp_z / np.sum(exp_z, axis=-1, keepdims=True)
+
+def cross_entropy_loss(probs: np.ndarray, y_true: np.ndarray, eps: float = 1e-15) -> float:
+    n_samples = probs.shape[0]
+    # Pick the probability assigned to the true class
+    true_class_probs = probs[np.arange(n_samples), y_true]
+    clipped = np.clip(true_class_probs, eps, 1.0)
+    return float(-np.mean(np.log(clipped)))
+`,
+    testHarness: `
+import numpy as np
+
+def _run_tests():
+    # Test 1: Extreme values to test numerical stability
+    huge_logits = np.array([[1000.0, 1000.0], [500.0, 500.0]])
+    probs1 = softmax(huge_logits)
+    p1 = np.allclose(probs1, [[0.5, 0.5], [0.5, 0.5]], atol=1e-5)
+    _test_items.append({
+        "input": "huge_logits = [[1000, 1000], [500, 500]]",
+        "expected": "[[0.5, 0.5], [0.5, 0.5]] without overflow",
+        "actual": np.array2string(np.round(probs1, 2), separator=', '),
+        "passed": bool(p1)
+    })
+
+    # Test 2: Cross entropy loss check
+    probs2 = np.array([[0.7, 0.3], [0.1, 0.9]])
+    y_true = np.array([0, 1])
+    loss = cross_entropy_loss(probs2, y_true)
+    # Expected: -0.5 * (log(0.7) + log(0.9)) ~ -0.5 * (-0.35667 - 0.10536) = 0.2310
+    exp_loss = -0.5 * (np.log(0.7) + np.log(0.9))
+    p2 = np.isclose(loss, exp_loss, atol=1e-4)
+    _test_items.append({
+        "input": "probs=[[0.7, 0.3], [0.1, 0.9]], y=[0, 1]",
+        "expected": f"Loss ~ {exp_loss:.4f}",
+        "actual": f"Loss = {loss:.4f}",
+        "passed": bool(p2)
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Softmax is shift-invariant: $\\frac{e^{z_i}}{\\sum e^{z_j}} = \\frac{e^{z_i - c}}{\\sum e^{z_j - c}}$. Setting $c = \\max(z)$ ensures the largest exponent is $e^0 = 1$, completely avoiding overflow. In cross-entropy, index true class probabilities via `probs[np.arange(N), y_true]` and clip with `eps` before `log` to avoid $\\log(0) = -\\infty$.',
+      timeComplexity: 'O(N * C) vectorized.',
+      spaceComplexity: 'O(N * C) for probabilities.',
+      keyTakeaway: 'Always subtract $\\max(z)$ in softmax and clip probabilities before $\\log$ in cross-entropy to ensure numerical stability.'
+    },
+    hints: [
+      'In softmax, compute `shifted = logits - np.max(logits, axis=-1, keepdims=True)` before `np.exp()`.',
+      'Normalize by dividing by `np.sum(..., axis=-1, keepdims=True)`.',
+      'For cross entropy, extract true class probabilities with `probs[np.arange(N), y_true]`.'
+    ]
+  },
+
+  {
+    id: 'py-25-linear-regression-gradient-descent',
+    number: 25,
+    title: 'Ridge Regression & Gradient Descent Step',
+    slug: 'ridge-regression-gradient-descent',
+    track: 'ml-engineering',
+    difficulty: 'Medium',
+    tags: ['Optimization', 'Gradient Descent', 'L2 Regularization', 'Matrix Math'],
+    summary: 'Implement one gradient descent optimization step for Ridge Regression with L2 penalty.',
+    description: `Ridge regression adds an $L_2$ penalty to the Mean Squared Error (MSE) objective:
+$$\\mathcal{L}(w) = \\frac{1}{2N} \\|Xw - y\\|_2^2 + \\frac{\\lambda}{2} \\|w\\|_2^2$$
+
+The gradient with respect to weight vector $w$ is:
+$$\\nabla_w \\mathcal{L} = \\frac{1}{N} X^T (Xw - y) + \\lambda w$$
+
+Write a function \`gradient_step_ridge(X, y, w, lr=0.01, l2_reg=0.1)\` that:
+1. Computes predictions $\\hat{y} = Xw$.
+2. Computes the gradient $\\nabla_w \\mathcal{L}$.
+3. Updates weights: $w_{\\text{new}} = w - \\text{lr} \\times \\nabla_w \\mathcal{L}$.
+4. Returns a tuple \`(w_new, loss)\` where \`loss\` is the scalar float objective value before the step.`,
+    examples: [
+      {
+        input: 'X shape (100, 5), y shape (100,), w shape (5,)',
+        output: 'Returns (w_new, current_loss)',
+        explanation: 'Performs matrix multiplications X @ w and X.T @ error.'
+      }
+    ],
+    constraints: [
+      'X is 2D (N, D), y is 1D (N,), w is 1D (D,).',
+      'lr > 0, l2_reg >= 0.',
+      'Must use vectorized NumPy operations (@ or np.dot).'
+    ],
+    starterCode: `import numpy as np
+from typing import Tuple
+
+def gradient_step_ridge(
+    X: np.ndarray,
+    y: np.ndarray,
+    w: np.ndarray,
+    lr: float = 0.01,
+    l2_reg: float = 0.1
+) -> Tuple[np.ndarray, float]:
+    """
+    Computes loss and updates weights using one step of gradient descent.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `import numpy as np
+from typing import Tuple
+
+def gradient_step_ridge(
+    X: np.ndarray,
+    y: np.ndarray,
+    w: np.ndarray,
+    lr: float = 0.01,
+    l2_reg: float = 0.1
+) -> Tuple[np.ndarray, float]:
+    n_samples = X.shape[0]
+    
+    # 1. Prediction and error
+    y_pred = X @ w
+    error = y_pred - y
+    
+    # 2. Compute Ridge loss
+    mse_loss = (1.0 / (2.0 * n_samples)) * np.sum(error ** 2)
+    l2_penalty = (l2_reg / 2.0) * np.sum(w ** 2)
+    loss = float(mse_loss + l2_penalty)
+    
+    # 3. Compute gradient
+    grad = (1.0 / n_samples) * (X.T @ error) + (l2_reg * w)
+    
+    # 4. Gradient update
+    w_new = w - (lr * grad)
+    
+    return w_new, loss
+`,
+    testHarness: `
+import numpy as np
+
+def _run_tests():
+    # Simple deterministic test
+    X = np.array([[1.0, 2.0], [3.0, 4.0]])
+    y = np.array([5.0, 11.0])
+    w = np.array([1.0, 1.0])  # y_pred = [3, 7], error = [-2, -4]
+    
+    w_new, loss = gradient_step_ridge(X, y, w, lr=0.1, l2_reg=0.0)
+    # n=2. MSE = 0.5/2 * (4 + 16) = 5.0
+    # grad = 1/2 * [[1, 3], [2, 4]] @ [-2, -4] = 1/2 * [-14, -20] = [-7, -10]
+    # w_new = [1, 1] - 0.1 * [-7, -10] = [1.7, 2.0]
+    p1 = np.isclose(loss, 5.0) and np.allclose(w_new, [1.7, 2.0])
+    _test_items.append({
+        "input": "2x2 simple system with zero regularization",
+        "expected": "loss=5.0, w_new=[1.7, 2.0]",
+        "actual": f"loss={loss:.1f}, w_new={list(np.round(w_new, 2))}",
+        "passed": bool(p1)
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Compute error $e = Xw - y$. The MSE gradient is $\\frac{1}{N} X^T e$, and the $L_2$ regularization gradient is $\\lambda w$. Combine them into `grad` and apply the gradient step `w - lr * grad`.',
+      timeComplexity: 'O(N * D) for matrix multiplications.',
+      spaceComplexity: 'O(D) for weight vector.',
+      keyTakeaway: 'The matrix form $X^T (Xw - y)$ computes the inner product between each feature column and the residual error vector in a single BLAS GEMV call.'
+    },
+    hints: [
+      'Prediction: `y_pred = X @ w`.',
+      'Error: `error = y_pred - y`.',
+      'Gradient: `grad = (1.0 / n_samples) * (X.T @ error) + (l2_reg * w)`.',
+      'New weights: `w - lr * grad`.'
+    ],
+    visualizerId: 'gradient-descent'
+  },
+
   {
     id: 'py-28-kmeans-step',
     number: 28,
@@ -560,6 +564,7 @@ _run_tests()
       'Their difference broadcasts to `(N, K, D)`. Square and sum over `axis=2`.'
     ]
   },
+
   {
     id: 'py-29-bpe-tokenizer-merge',
     number: 29,
@@ -676,6 +681,7 @@ _run_tests()
       'Remember to advance `i += 2` when you merge, and `i += 1` otherwise.'
     ]
   },
+
   {
     id: 'py-30-scaled-dot-product-attention',
     number: 30,
@@ -792,5 +798,5 @@ _run_tests()
       'For causal masking, use `np.triu(np.ones((t, t), dtype=bool), k=1)` to find upper elements.',
       'Replace masked values with `-1e9` before computing softmax.'
     ]
-  }
+  },
 ];

@@ -41,7 +41,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [animatingCard, setAnimatingCard] = useState<{
     dir: 'left' | 'right';
-    phase: 'exit' | 'enter';
+    phase: 'exit' | 'enter-prep' | 'enter-active';
   } | null>(null);
   const dragStartXRef = useRef<number>(0);
   const dragStartYRef = useRef<number>(0);
@@ -73,12 +73,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   }, [filteredIndices, shuffledIndices]);
 
   // Reset to first card when deck changes
-  useEffect(() => {
+  const [prevDeckFilter, setPrevDeckFilter] = useState(deckFilter);
+  if (deckFilter !== prevDeckFilter) {
+    setPrevDeckFilter(deckFilter);
     setActiveDeckIndex(0);
     setIsFlipped(false);
     setShowOptionsHint(false);
     setDragOffset(0);
-  }, [deckFilter]);
+  }
 
   const currentQIndex = activeDeck[activeDeckIndex];
   const currentQ: QuizQuestion | undefined =
@@ -101,11 +103,16 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         setIsFlipped(false);
         setShowOptionsHint(false);
         setActiveDeckIndex(prev => prev - 1);
-        setAnimatingCard({ dir: 'right', phase: 'enter' });
-        setTimeout(() => {
-          setAnimatingCard(null);
-        }, 220);
-      }, 180);
+        setAnimatingCard({ dir: 'right', phase: 'enter-prep' });
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setAnimatingCard({ dir: 'right', phase: 'enter-active' });
+            setTimeout(() => {
+              setAnimatingCard(null);
+            }, 300);
+          });
+        });
+      }, 250);
     }
   }, [hasPrev, animatingCard]);
 
@@ -117,11 +124,16 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         setIsFlipped(false);
         setShowOptionsHint(false);
         setActiveDeckIndex(prev => prev + 1);
-        setAnimatingCard({ dir: 'left', phase: 'enter' });
-        setTimeout(() => {
-          setAnimatingCard(null);
-        }, 220);
-      }, 180);
+        setAnimatingCard({ dir: 'left', phase: 'enter-prep' });
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setAnimatingCard({ dir: 'left', phase: 'enter-active' });
+            setTimeout(() => {
+              setAnimatingCard(null);
+            }, 300);
+          });
+        });
+      }, 250);
     }
   }, [hasNext, animatingCard]);
 
@@ -370,26 +382,24 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
               style={{
                 transform: animatingCard
                   ? animatingCard.phase === 'exit'
-                    ? `translateX(${animatingCard.dir === 'left' ? '-115%' : '115%'})`
+                    ? `translateX(${animatingCard.dir === 'left' ? '-120%' : '120%'})`
+                    : animatingCard.phase === 'enter-prep'
+                    ? `translateX(${animatingCard.dir === 'left' ? '120%' : '-120%'})`
                     : 'translateX(0)'
                   : `translateX(${dragOffset}px)`,
                 opacity: animatingCard
-                  ? animatingCard.phase === 'exit'
+                  ? animatingCard.phase === 'exit' || animatingCard.phase === 'enter-prep'
                     ? 0
                     : 1
-                  : Math.max(0.2, 1 - Math.abs(dragOffset) / 600),
-                transition: isDragging
+                  : Math.max(0.1, 1 - Math.abs(dragOffset) / 600),
+                transition: isDragging || (animatingCard && animatingCard.phase === 'enter-prep')
                   ? 'none'
-                  : 'transform 0.22s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease',
+                  : 'transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease',
                 touchAction: 'pan-y',
               }}
               className={`w-full min-h-[440px] sm:min-h-[460px] bg-[#161b22] hover:border-sky-500/40 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl select-none flex flex-col justify-between transition-colors duration-150 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
-                animatingCard && animatingCard.phase === 'enter'
-                  ? animatingCard.dir === 'left'
-                    ? 'animate-in slide-in-from-right-8 duration-200'
-                    : 'animate-in slide-in-from-left-8 duration-200'
-                  : ''
-              } ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                isDragging ? 'cursor-grabbing' : 'cursor-grab'
+              }`}
             >
               {/* Top Indicator Inside Card */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
@@ -578,7 +588,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                 </button>
 
                 <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
-                  Swipe/drag to navigate • [R] to review
+                  [Space] Flip • Swipe or drag to navigate • [R] Review
                 </span>
               </div>
             </article>
@@ -615,6 +625,12 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
               <span>{t('quizNext')}</span>
               <ChevronRight className="w-4 h-4" />
             </button>
+          </div>
+
+          {/* Keyboard Shortcuts Hint */}
+          <div className="text-xs text-slate-500 font-mono hidden md:flex items-center justify-center gap-1.5 pt-3">
+            <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+            <span>{t('flashcardKeyboardShortcuts')}</span>
           </div>
         </>
       )}

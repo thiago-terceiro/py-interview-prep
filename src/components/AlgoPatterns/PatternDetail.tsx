@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import type { AlgoPattern, PatternTabType } from '../../types/patterns';
 import { PatternVisualizer } from './PatternVisualizer';
+import { SlidingTabs } from '../SlidingTabs';
 import { useLanguage } from '../../context/LanguageContext';
 import {
   Lightbulb,
@@ -76,56 +78,43 @@ export const PatternDetail: React.FC<PatternDetailProps> = ({
 
         {/* Quick Actions */}
         <div className="flex flex-wrap items-center gap-2.5 shrink-0">
-          <button
+          <Link
+            to="/arena/$questionId"
+            params={{ questionId: pattern.relatedQuestionId }}
             onClick={() => onOpenArenaQuestion(pattern.relatedQuestionId)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-lg shadow-emerald-600/20 active:scale-95"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs transition shadow-lg shadow-emerald-600/20 active:scale-95 no-underline cursor-pointer"
           >
             <Code2 className="w-4 h-4" />
             <span>{t('openInPracticeArena')}</span>
             <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          </Link>
 
-          {pattern.visualizerId && onOpenVisualizerHub && (
-            <button
-              onClick={() => onOpenVisualizerHub(pattern.visualizerId!)}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition active:scale-95"
+          {pattern.visualizerId && (
+            <Link
+              to="/visualizers/$tab"
+              params={{ tab: pattern.visualizerId }}
+              onClick={() => onOpenVisualizerHub?.(pattern.visualizerId!)}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs font-medium transition active:scale-95 no-underline cursor-pointer"
               title={t('openInteractiveVisualizer')}
             >
               <ExternalLink className="w-3.5 h-3.5 text-sky-400" />
               <span className="hidden sm:inline">{t('openInteractiveVisualizer')}</span>
-            </button>
+            </Link>
           )}
         </div>
       </div>
 
-      {/* Tabs Navigation (Perspective Switcher) */}
-      <nav
-        className="flex flex-wrap items-center gap-1.5 p-1 bg-[#0d1117] border border-slate-800 rounded-xl"
-        role="tablist"
-        aria-label="Pattern Explanation Perspectives"
-      >
-        {tabs.map(({ id, labelKey, icon: Icon }) => {
-          const isActive = activeTab === id;
-          return (
-            <button
-              key={id}
-              role="tab"
-              aria-selected={isActive}
-              aria-controls={`panel-${id}`}
-              id={`tab-${id}`}
-              onClick={() => setActiveTab(id)}
-              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold transition-all duration-150 active:scale-95 min-h-[40px] ${
-                isActive
-                  ? 'bg-slate-800 text-sky-400 shadow-sm border border-slate-700'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{t(labelKey)}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* Tabs Navigation (Perspective Switcher) with Fast-Sliding Active Container Pill */}
+      <SlidingTabs
+        tabs={tabs.map(({ id, labelKey, icon }) => ({
+          id,
+          label: t(labelKey),
+          icon,
+        }))}
+        activeTab={activeTab}
+        onChange={(id) => setActiveTab(id as PatternTabType)}
+        ariaLabel="Pattern Explanation Perspectives"
+      />
 
       {/* TAB CONTENT PANELS */}
 
@@ -390,7 +379,16 @@ export const PatternDetail: React.FC<PatternDetailProps> = ({
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {pattern.interviewVariants.map((variant, idx) => (
+              {[...pattern.interviewVariants]
+                .sort((a, b) => {
+                  const weight: Record<'Easy' | 'Medium' | 'Hard', number> = {
+                    Easy: 1,
+                    Medium: 2,
+                    Hard: 3,
+                  };
+                  return weight[a.difficulty] - weight[b.difficulty];
+                })
+                .map((variant, idx) => (
                 <div
                   key={idx}
                   className="bg-[#0d1117] border border-slate-800 rounded-xl p-4 space-y-2 flex flex-col justify-between"

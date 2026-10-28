@@ -6,6 +6,8 @@ import { QuizCard } from './QuizCard';
 import { OpenEndedCard } from './OpenEndedCard';
 import { FlashcardView } from './FlashcardView';
 import { QuizListView } from './QuizListView';
+import { PageHeaderCard } from '../PageHeaderCard';
+import { SlidingTabs, type TabItem } from '../SlidingTabs';
 import {
   GraduationCap,
   Layers,
@@ -71,6 +73,19 @@ export const QuizHub: React.FC = () => {
     },
     []
   );
+
+  const handleResetOption = useCallback((questionId: number) => {
+    setProgress(prev => {
+      const nextAnswers = { ...prev.selectedAnswers };
+      delete nextAnswers[questionId];
+      const nextCompleted = prev.completedIds.filter(id => id !== questionId);
+      return {
+        ...prev,
+        selectedAnswers: nextAnswers,
+        completedIds: nextCompleted,
+      };
+    });
+  }, []);
 
   const handleNotesChange = useCallback((questionId: number, notes: string) => {
     setProgress(prev => ({
@@ -191,30 +206,49 @@ export const QuizHub: React.FC = () => {
   const isCurrentBookmarked = progress.bookmarkedIds.includes(currentQuestion.id);
   const isCurrentCompleted = progress.completedIds.includes(currentQuestion.id);
 
+  const quizModes: TabItem<QuizViewMode>[] = [
+    {
+      id: 'quiz',
+      label: t('quizModeQuiz'),
+      icon: HelpCircle,
+    },
+    {
+      id: 'flashcard',
+      label: t('quizModeFlashcard'),
+      icon: Layers,
+    },
+    {
+      id: 'list',
+      label: t('quizModeList'),
+      icon: ListFilter,
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Hero Header */}
-      <header className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-sky-950/40 via-indigo-950/30 to-purple-950/40 border border-slate-800 p-6 sm:p-8">
-        <div className="relative z-10 max-w-4xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/20 text-sky-400 text-xs font-mono font-semibold mb-3">
-            <GraduationCap className="w-4 h-4" />
-            <span>{t('quizHeroBadge')}</span>
+    <div className="max-w-[1700px] w-full mx-auto space-y-6 pb-16">
+      {/* Reusable Fixed-Height Header Card - Zero CLS */}
+      <PageHeaderCard
+        badgeIcon={GraduationCap}
+        badgeText="100 Technical Qs Knowledge Bank"
+        badgeColor="text-indigo-400"
+        title={t('quizHeroTitle')}
+        description={t('quizHeroDesc')}
+        action={
+          <div className="flex items-center gap-3 bg-[#0d1117]/80 border border-slate-800 px-4 py-2.5 rounded-xl shrink-0">
+            <div>
+              <div className="text-[11px] text-slate-400">Completed</div>
+              <div className="text-xl font-black text-white font-mono">
+                {completedTotal} <span className="text-xs font-normal text-slate-500">/ {totalQuestions}</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-center">
+              <span className="text-xs font-bold text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+                {overallPercent}%
+              </span>
+            </div>
           </div>
-
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
-            {t('quizHeroTitle')}
-          </h1>
-
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-3xl">
-            {t('quizHeroDesc')}
-          </p>
-        </div>
-
-        {/* Decorative corner icon */}
-        <div className="absolute right-4 bottom-4 opacity-5 pointer-events-none hidden md:block">
-          <GraduationCap className="w-48 h-48 text-white" />
-        </div>
-      </header>
+        }
+      />
 
       {/* Stats Bar */}
       <section
@@ -286,44 +320,14 @@ export const QuizHub: React.FC = () => {
 
       {/* Mode Switcher & Question Navigator Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#161b22] border border-slate-800 p-2 sm:p-3 rounded-2xl">
-        {/* Mode Buttons */}
-        <nav className="flex items-center gap-1.5 w-full sm:w-auto" aria-label="Quiz Navigation Modes">
-          <button
-            onClick={() => setViewMode('quiz')}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              viewMode === 'quiz'
-                ? 'bg-sky-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-            }`}
-          >
-            <HelpCircle className="w-4 h-4" />
-            <span>{t('quizModeQuiz')}</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('flashcard')}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              viewMode === 'flashcard'
-                ? 'bg-sky-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-            }`}
-          >
-            <Layers className="w-4 h-4" />
-            <span>{t('quizModeFlashcard')}</span>
-          </button>
-
-          <button
-            onClick={() => setViewMode('list')}
-            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              viewMode === 'list'
-                ? 'bg-sky-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-            }`}
-          >
-            <ListFilter className="w-4 h-4" />
-            <span>{t('quizModeList')}</span>
-          </button>
-        </nav>
+        {/* Mode Buttons with Fast-Sliding Active Container Pill */}
+        <SlidingTabs
+          tabs={quizModes}
+          activeTab={viewMode}
+          onChange={(mode) => setViewMode(mode)}
+          ariaLabel="Quiz Navigation Modes"
+          className="w-full sm:w-auto"
+        />
 
         {/* Question Map Dropdown Toggle (1..100) */}
         {viewMode !== 'list' && (
@@ -431,6 +435,7 @@ export const QuizHub: React.FC = () => {
               selectedOption={progress.selectedAnswers[currentQuestion.id]}
               isBookmarked={isCurrentBookmarked}
               onSelectOption={opt => handleSelectOption(currentQuestion.id, opt)}
+              onResetOption={() => handleResetOption(currentQuestion.id)}
               onToggleBookmark={() => handleToggleBookmark(currentQuestion.id)}
               onPrev={() => setCurrentIndex(prev => Math.max(0, prev - 1))}
               onNext={() => setCurrentIndex(prev => Math.min(totalQuestions - 1, prev + 1))}

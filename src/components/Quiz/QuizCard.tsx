@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Sparkles,
   Info,
+  RotateCcw,
 } from 'lucide-react';
 
 interface QuizCardProps {
@@ -16,6 +17,7 @@ interface QuizCardProps {
   selectedOption?: 'A' | 'B' | 'C' | 'D';
   isBookmarked: boolean;
   onSelectOption: (option: 'A' | 'B' | 'C' | 'D') => void;
+  onResetOption?: () => void;
   onToggleBookmark: () => void;
   onPrev?: () => void;
   onNext?: () => void;
@@ -30,6 +32,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   selectedOption,
   isBookmarked,
   onSelectOption,
+  onResetOption,
   onToggleBookmark,
   onPrev,
   onNext,
@@ -52,28 +55,30 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         return;
       }
 
-      const key = e.key.toUpperCase();
-      if (key === 'A' || key === '1') {
-        e.preventDefault();
-        onSelectOption('A');
-      } else if (key === 'B' || key === '2') {
-        e.preventDefault();
-        onSelectOption('B');
-      } else if (key === 'C' || key === '3') {
-        e.preventDefault();
-        onSelectOption('C');
-      } else if (key === 'D' || key === '4') {
-        e.preventDefault();
-        onSelectOption('D');
-      } else if (e.key === 'ArrowLeft' && hasPrev && onPrev) {
+      if (e.key === 'ArrowLeft' && hasPrev && onPrev) {
         e.preventDefault();
         onPrev();
       } else if (e.key === 'ArrowRight' && hasNext && onNext) {
         e.preventDefault();
         onNext();
+      } else if (!isAnswered) {
+        const key = e.key.toUpperCase();
+        if (key === 'A' || key === '1') {
+          e.preventDefault();
+          onSelectOption('A');
+        } else if (key === 'B' || key === '2') {
+          e.preventDefault();
+          onSelectOption('B');
+        } else if (key === 'C' || key === '3') {
+          e.preventDefault();
+          onSelectOption('C');
+        } else if (key === 'D' || key === '4') {
+          e.preventDefault();
+          onSelectOption('D');
+        }
       }
     },
-    [onSelectOption, onPrev, onNext, hasPrev, hasNext]
+    [onSelectOption, onPrev, onNext, hasPrev, hasNext, isAnswered]
   );
 
   useEffect(() => {
@@ -101,6 +106,18 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {isAnswered && onResetOption && (
+              <button
+                onClick={onResetOption}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors bg-slate-800/80 text-slate-400 hover:text-slate-200 hover:bg-slate-700/80 border border-slate-700/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                title={t('quizResetAnswer')}
+                aria-label={t('quizResetAnswer')}
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t('quizResetAnswer')}</span>
+              </button>
+            )}
+
             <button
               onClick={onToggleBookmark}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
@@ -154,10 +171,18 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             return (
               <button
                 key={key}
-                onClick={() => onSelectOption(key)}
-                className={`w-full text-left p-3.5 sm:p-4 rounded-xl border flex items-start gap-3.5 transition-all text-sm sm:text-base leading-snug group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${buttonStyle}`}
+                onClick={() => {
+                  if (!isAnswered) {
+                    onSelectOption(key);
+                  }
+                }}
+                disabled={isAnswered}
+                className={`w-full text-left p-3.5 sm:p-4 rounded-xl border flex items-start gap-3.5 transition-all text-sm sm:text-base leading-snug group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
+                  isAnswered ? 'cursor-default' : ''
+                } ${buttonStyle}`}
                 role="radio"
                 aria-checked={isThisSelected}
+                aria-disabled={isAnswered}
                 aria-label={`${key}: ${optionText}`}
               >
                 {/* Key indicator pill */}
@@ -228,7 +253,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
       <footer className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
         <div className="text-xs text-slate-500 font-mono hidden md:flex items-center gap-1">
           <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-          <span>{t('quizKeyboardShortcuts')}</span>
+          <span>{t('quizMcqKeyboardShortcuts')}</span>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end ml-auto">

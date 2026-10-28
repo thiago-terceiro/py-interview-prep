@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, AlertCircle } from 'lucide-react';
 
 interface WindowStep {
@@ -13,11 +13,17 @@ interface WindowStep {
 
 export const SlidingWindowVisualizer: React.FC = () => {
   const [inputString, setInputString] = useState<string>('abcabcbb');
-  const [steps, setSteps] = useState<WindowStep[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [prevInput, setPrevInput] = useState<string>(inputString);
 
-  useEffect(() => {
+  if (inputString !== prevInput) {
+    setPrevInput(inputString);
+    setCurrentStepIndex(0);
+    setIsPlaying(false);
+  }
+
+  const steps = useMemo<WindowStep[]>(() => {
     const computedSteps: WindowStep[] = [];
     const seen: Record<string, number> = {};
     let left = 0;
@@ -57,17 +63,14 @@ export const SlidingWindowVisualizer: React.FC = () => {
         });
       }
     }
-
-    setSteps(computedSteps);
-    setCurrentStepIndex(0);
-    setIsPlaying(false);
+    return computedSteps;
   }, [inputString]);
 
   useEffect(() => {
     if (!isPlaying) return;
     if (currentStepIndex >= steps.length - 1) {
-      setIsPlaying(false);
-      return;
+      const timer = setTimeout(() => setIsPlaying(false), 0);
+      return () => clearTimeout(timer);
     }
     const timer = setTimeout(() => {
       setCurrentStepIndex(prev => prev + 1);

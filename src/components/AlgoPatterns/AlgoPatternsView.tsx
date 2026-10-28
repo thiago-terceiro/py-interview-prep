@@ -1,6 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { algoPatterns } from '../../data/algoPatterns';
 import { PatternDetail } from './PatternDetail';
+import { PageHeaderCard } from '../PageHeaderCard';
 import type { PatternCategory, PatternDifficulty } from '../../types/patterns';
 import { useLanguage } from '../../context/LanguageContext';
 import {
@@ -27,12 +28,14 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
   const [selectedPatternId, setSelectedPatternId] = useState<string>(
     initialPatternId || algoPatterns[0].id
   );
+  const [prevInitialPatternId, setPrevInitialPatternId] = useState(initialPatternId);
 
-  useEffect(() => {
-    if (initialPatternId && initialPatternId !== selectedPatternId) {
+  if (initialPatternId !== prevInitialPatternId) {
+    setPrevInitialPatternId(initialPatternId);
+    if (initialPatternId) {
       setSelectedPatternId(initialPatternId);
     }
-  }, [initialPatternId]);
+  }
 
   const handlePatternClick = (id: string) => {
     setSelectedPatternId(id);
@@ -54,7 +57,7 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
   ];
 
   const filteredPatterns = useMemo(() => {
-    return algoPatterns.filter(pattern => {
+    const list = algoPatterns.filter(pattern => {
       const matchesSearch =
         searchQuery.trim() === '' ||
         pattern.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -68,50 +71,60 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
 
       return matchesSearch && matchesCategory && matchesDifficulty;
     });
+
+    const difficultyWeight: Record<PatternDifficulty, number> = {
+      Foundational: 1,
+      Intermediate: 2,
+      Advanced: 3,
+    };
+
+    return list.sort((a, b) => {
+      const diff = difficultyWeight[a.difficulty] - difficultyWeight[b.difficulty];
+      if (diff !== 0) return diff;
+      return a.number - b.number;
+    });
   }, [searchQuery, selectedCategory, selectedDifficulty]);
 
   const activePattern =
     algoPatterns.find(p => p.id === selectedPatternId) || filteredPatterns[0] || algoPatterns[0];
 
   return (
-    <div className="max-w-[1700px] mx-auto space-y-8 pb-16">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-indigo-950/40 via-[#0d1117] to-slate-900 border border-slate-800 p-6 sm:p-8 rounded-3xl relative overflow-hidden shadow-2xl">
-        <div className="max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold">
-            <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>{t('patternsHeroBadge')}</span>
+    <div className="max-w-[1700px] mx-auto space-y-6 pb-16">
+      {/* Reusable Fixed-Height Header Card - Zero CLS */}
+      <PageHeaderCard
+        badgeIcon={Zap}
+        badgeText={t('patternsHeroBadge')}
+        badgeColor="text-indigo-400"
+        title={t('patternsHeroTitle')}
+        description={t('patternsHeroDesc')}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 text-xs px-3 py-1.5 rounded-xl font-medium font-mono">
+              {algoPatterns.length} Core Blueprints
+            </span>
           </div>
+        }
+      />
 
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-            {t('patternsHeroTitle')}
-          </h1>
-
-          <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-            {t('patternsHeroDesc')}
-          </p>
-
-          {/* Quick Metrics Bar */}
-          <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-2 text-xs text-slate-400">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>
-                <strong className="text-white font-mono">{algoPatterns.length}</strong> Core Patterns
-              </span>
-            </div>
-            <span>•</span>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-sky-400"></span>
-              <span>
-                <strong className="text-white font-mono">4</strong> Cognitive Layers per Pattern
-              </span>
-            </div>
-            <span>•</span>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
-              <span>Interactive Step-by-Step Visualizers</span>
-            </div>
-          </div>
+      {/* Quick Metrics Bar - Pushed down outside card for identical height */}
+      <div className="flex flex-wrap items-center gap-4 sm:gap-6 px-1 text-xs text-slate-400">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>
+            <strong className="text-white font-mono">{algoPatterns.length}</strong> Core Patterns
+          </span>
+        </div>
+        <span>•</span>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-sky-400"></span>
+          <span>
+            <strong className="text-white font-mono">4</strong> Cognitive Layers per Pattern
+          </span>
+        </div>
+        <span>•</span>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-indigo-400"></span>
+          <span>Interactive Step-by-Step Visualizers</span>
         </div>
       </div>
 
@@ -155,11 +168,12 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
             value={selectedDifficulty}
             onChange={e => setSelectedDifficulty(e.target.value as any)}
             className="bg-[#0d1117] border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-sky-500"
+            aria-label={t('filterByDifficulty')}
           >
             <option value="all">{t('allDifficulties')}</option>
-            <option value="Foundational">Foundational</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
+            <option value="Foundational">{t('patternFoundational')}</option>
+            <option value="Intermediate">{t('patternIntermediate')}</option>
+            <option value="Advanced">{t('patternAdvanced')}</option>
           </select>
         </div>
       </div>

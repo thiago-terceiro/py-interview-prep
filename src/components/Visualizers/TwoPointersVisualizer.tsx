@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, CheckCircle2, ArrowDown } from 'lucide-react';
 
 interface Step {
@@ -14,12 +14,18 @@ export const TwoPointersVisualizer: React.FC = () => {
   const defaultArray = [2, 7, 11, 15, 18, 21, 24];
   const [array] = useState<number[]>(defaultArray);
   const [target, setTarget] = useState<number>(26);
-  const [steps, setSteps] = useState<Step[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [prevTarget, setPrevTarget] = useState<number>(target);
+
+  if (target !== prevTarget) {
+    setPrevTarget(target);
+    setCurrentStepIndex(0);
+    setIsPlaying(false);
+  }
 
   // Compute all execution steps
-  useEffect(() => {
+  const steps = useMemo<Step[]>(() => {
     const computedSteps: Step[] = [];
     let l = 0;
     let r = array.length - 1;
@@ -70,17 +76,15 @@ export const TwoPointersVisualizer: React.FC = () => {
       });
     }
 
-    setSteps(computedSteps);
-    setCurrentStepIndex(0);
-    setIsPlaying(false);
+    return computedSteps;
   }, [array, target]);
 
   // Autoplay timer
   useEffect(() => {
     if (!isPlaying) return;
     if (currentStepIndex >= steps.length - 1) {
-      setIsPlaying(false);
-      return;
+      const timer = setTimeout(() => setIsPlaying(false), 0);
+      return () => clearTimeout(timer);
     }
     const timer = setTimeout(() => {
       setCurrentStepIndex(prev => prev + 1);

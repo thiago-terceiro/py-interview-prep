@@ -1,7 +1,7 @@
 export const en = {
   // Navigation & Branding
   brandName: 'PyInterview Pro',
-  brandSubtitle: 'Python Fundamentals → Algorithms → NumPy/Pandas → ML Engineering',
+  brandSubtitle: 'Python Fundamentals → Algorithms → ML Engineering',
   navHome: 'Home',
   navCatalog: 'All 30 Questions',
   navArena: 'Practice Arena',
@@ -119,10 +119,27 @@ export const en = {
   relatedQuestion: 'Related Arena Problem',
   difficulty: 'Difficulty',
   category: 'Category',
+  sortBy: 'Sort by',
+  sortDifficultyAsc: 'Difficulty (Easy → Hard)',
+  sortDifficultyDesc: 'Difficulty (Hard → Easy)',
+  sortNumberAsc: 'Question Number (#1 → #30)',
+  sortNumberDesc: 'Question Number (#30 → #1)',
+  sortTitleAsc: 'Title (A → Z)',
+  levelFilter: 'Level:',
+  levelAll: 'All',
+  levelEasy: 'Easy',
+  levelMedium: 'Medium',
+  levelHard: 'Hard',
+  statusAll: 'All',
+  statusUnsolved: 'Unsolved',
+  statusSolved: 'Solved',
+  patternFoundational: 'Foundational',
+  patternIntermediate: 'Intermediate',
+  patternAdvanced: 'Advanced',
 
   // 100 Qs Question Bank (AI & ML)
   quizHeroBadge: 'Production ML & Full-Stack AI Question Bank',
-  quizHeroTitle: '100 Staff-Level AI Engineering Questions',
+  quizHeroTitle: '100 Production ML & Full-Stack AI Questions',
   quizHeroDesc:
     '70 deep technical multiple-choice questions with instant feedback and comprehensive explanations, plus 30 real-world system design scenarios with grading rubrics.',
   quizModeQuiz: 'Interactive Quiz',
@@ -164,11 +181,11 @@ export const en = {
   quizTypeOpenEnded: 'System Design Scenario',
   quizSelectOptionPrompt: 'Select the best option:',
   quizWhyExplanation: 'Why This Answer Is Correct',
-  quizStaffCriteriaTitle: 'Staff Engineering Rubric & Criteria',
+  quizStaffCriteriaTitle: 'Engineering Rubric & Criteria',
   quizYourNotes: 'Your Proposed Architecture & Notes',
   quizYourNotesPlaceholder:
-    'Draft your technical approach, latency budgets, failure modes, data schemas, or algorithms here before viewing the staff criteria...',
-  quizRevealCriteria: 'Reveal Staff Criteria',
+    'Draft your technical approach, latency budgets, failure modes, data schemas, or algorithms here before viewing the rubric criteria...',
+  quizRevealCriteria: 'Reveal Evaluation Criteria',
   quizHideCriteria: 'Hide Criteria',
   quizCriteriaInstruction:
     'Self-evaluate your answer against the official rubric. Check each criterion covered:',
@@ -180,9 +197,16 @@ export const en = {
   quizJumpTo: 'Jump to #',
   quizBookmark: 'Save for Review',
   quizBookmarked: 'Saved',
+  quizResetAnswer: 'Reset Answer',
   quizKeyboardShortcuts:
     'Keyboard shortcuts: [1-4] or [A-D] Select option | [Space] Reveal/Flip | [←/→] Navigate',
-  flashcardFlipPrompt: 'Click to flip • Swipe or drag to navigate',
+  quizMcqKeyboardShortcuts:
+    'Keyboard shortcuts: [1-4] or [A-D] Select option | [←/→] Navigate',
+  quizOpenEndedKeyboardShortcuts:
+    'Keyboard shortcuts: [Space] Reveal/Hide Criteria | [←/→] Navigate',
+  flashcardFlipPrompt: 'Click or [Space] to flip • Swipe or drag to navigate',
+  flashcardKeyboardShortcuts:
+    'Keyboard shortcuts: [Space] Flip | [←/→] Navigate | [R] Save for Review',
   flashcardFront: 'Front (Question)',
   flashcardBack: 'Back (Solution & Rationale)',
   flashcardMarkKnow: 'I Know This',
@@ -203,6 +227,33 @@ export const en = {
     '[Space] Flip | [1] Needs Review | [2] Knew It | [←/→] Navigate',
   flashcardEmptyDeck: 'Great job! No cards in this deck filter.',
   flashcardResetDeck: 'Switch to All Cards',
+
+  // Cheatsheet Section
+  cheatsheetHeroBadge: 'Technical Interview Cheatsheet',
+  cheatsheetHeroTitle: 'High-Yield Python & ML Engineering Knowledge Base',
+  cheatsheetHeroDesc: 'Essential Python interview gotchas, Transformer architectural invariants, Big-O complexities, and vectorization idioms.',
+  cheatsheetSearchPlaceholder: 'Search catches & tips (e.g., mutable default, RoPE, KV cache, softmax, GIL)...',
+  cheatsheetTabAll: 'All References',
+  cheatsheetTabPython: 'Python Catches & Gotchas',
+  cheatsheetTabML: 'ML & Transformers Invariants',
+  cheatsheetTabComplexity: 'Time Complexities',
+  cheatsheetTabNumpy: 'NumPy Vectorization',
+  cheatsheetTheTrap: 'The Interview Trap',
+  cheatsheetWhyItHappens: 'Why It Happens (CPython Internals)',
+  cheatsheetProFix: 'Pro Tip / Standard Fix',
+  cheatsheetFlawedCode: 'Flawed / Naive Pattern',
+  cheatsheetCleanCode: 'Idiomatic Production Solution',
+  cheatsheetConcept: 'Core Concept & Architecture',
+  cheatsheetMathematicalFormula: 'Formula / Invariant',
+  cheatsheetInterviewGotcha: 'Where Candidates Get Tripped Up',
+  cheatsheetCodeImplementation: 'Production PyTorch / NumPy Idiom',
+  cheatsheetKeyTakeaway: 'Key Interview Takeaway',
+  cheatsheetCopyCode: 'Copy code snippet',
+  cheatsheetCopied: 'Copied to clipboard!',
+  cheatsheetNoResults: 'No tips or catches match your search.',
+  cheatsheetResetFilter: 'Clear Search Filter',
+  cheatsheetPythonCatchesCount: '22 Python Traps',
+  cheatsheetMLTipsCount: '22 ML & Transformer Tips',
 };
 
 export type TranslationKey = keyof typeof en;

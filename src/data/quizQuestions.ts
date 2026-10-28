@@ -1060,7 +1060,7 @@ export const quizQuestions: QuizQuestion[] = [
     "id": 78,
     "type": "open-ended",
     "section": "Open-Ended System Design & Scenario",
-    "question": "A Staff Frontend Engineer looks at your real-time investigation console and asks: \"How do you prevent React from re-rendering the entire dashboard 20 times a second when SSE events stream in?\"",
+    "question": "A Frontend Engineer looks at your real-time investigation console and asks: \"How do you prevent React from re-rendering the entire dashboard 20 times a second when SSE events stream in?\"",
     "acceptableCriteria": [
       "Identifies the anti-pattern of a single monolithic useState at the root component passing new object references to un-memoized children.",
       "Explains state isolation: splitting components by domain (EvidencePanel, RiskPanel, InvestigationTimeline, TelecomLiveFeed), wrapping static/slow-changing panels in React.memo, or using fine-grained store selectors (useSyncExternalStore) so an incoming timeline event only triggers DOM reconciliation in the timeline component."
@@ -1277,7 +1277,7 @@ export const quizQuestions: QuizQuestion[] = [
     "id": 99,
     "type": "open-ended",
     "section": "Open-Ended System Design & Scenario",
-    "question": "If an interviewer asks you: \"What was the single hardest production bug you uncovered and fixed while building SentinelFlow & SentinelPulse?\", how do you structure the answer for maximum Staff-level impact?",
+    "question": "If an interviewer asks you: \"What was the single hardest production bug you uncovered and fixed while building SentinelFlow & SentinelPulse?\", how do you structure the answer for maximum architectural impact?",
     "acceptableCriteria": [
       "Uses a crisp Symptom → Root Cause → Systemic Fix → Verification arc:",
       "Example 1 (Backend/Distributed): The cross-container SHA-256 audit hash-chain fork caused by relying on an in-memory asyncio.Lock across separate api and worker containers, fixed via Postgres SELECT ... FOR UPDATE on the parent record + composite UniqueConstraint + 10-worker concurrency test.",

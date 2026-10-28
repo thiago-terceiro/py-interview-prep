@@ -12,10 +12,6 @@ let currentSection = 'Classical ML, Feature Engineering & Fraud/Anomaly Detectio
 
 let i = 0;
 
-function cleanText(t) {
-  return t ? t.trim() : '';
-}
-
 while (i < lines.length) {
   const line = lines[i];
 

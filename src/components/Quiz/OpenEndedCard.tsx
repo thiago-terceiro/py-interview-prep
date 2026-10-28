@@ -272,7 +272,7 @@ export const OpenEndedCard: React.FC<OpenEndedCardProps> = ({
       <footer className="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
         <div className="text-xs text-slate-500 font-mono hidden md:flex items-center gap-1">
           <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-          <span>{t('quizKeyboardShortcuts')}</span>
+          <span>{t('quizOpenEndedKeyboardShortcuts')}</span>
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end ml-auto">

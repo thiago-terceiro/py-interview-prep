@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { Link } from '@tanstack/react-router';
 import { TwoPointersVisualizer } from './TwoPointersVisualizer';
 import { SlidingWindowVisualizer } from './SlidingWindowVisualizer';
 import { BinarySearchVisualizer } from './BinarySearchVisualizer';
 import { BfsGridVisualizer } from './BfsGridVisualizer';
 import { GradientDescentVisualizer } from './GradientDescentVisualizer';
+import { PageHeaderCard } from '../PageHeaderCard';
+import { SlidingTabs, type TabItem } from '../SlidingTabs';
 import { Sparkles, ArrowRight, Code2 } from 'lucide-react';
 
 interface VisualizerHubProps {
@@ -16,12 +19,12 @@ export const VisualizerHub: React.FC<VisualizerHubProps> = ({ onOpenQuestion, on
   const [activeTab, setActiveTab] = useState<
     'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent'
   >(initialTab);
+  const [prevInitialTab, setPrevInitialTab] = useState(initialTab);
 
-  React.useEffect(() => {
-    if (initialTab && initialTab !== activeTab) {
-      setActiveTab(initialTab);
-    }
-  }, [initialTab]);
+  if (initialTab !== prevInitialTab) {
+    setPrevInitialTab(initialTab);
+    setActiveTab(initialTab);
+  }
 
   const handleTabChange = (tabId: 'two-pointers' | 'sliding-window' | 'binary-search' | 'bfs-grid' | 'gradient-descent') => {
     setActiveTab(tabId);
@@ -83,53 +86,45 @@ export const VisualizerHub: React.FC<VisualizerHubProps> = ({ onOpenQuestion, on
 
   const currentVis = visualizers.find(v => v.id === activeTab)!;
 
+  const tabItems: TabItem<typeof activeTab>[] = visualizers.map(v => ({
+    id: v.id,
+    label: v.name,
+    badge: v.category,
+    badgeColor: v.badgeColor,
+  }));
+
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/30 to-slate-900 border border-slate-800 p-6 rounded-2xl">
-        <div>
-          <div className="flex items-center gap-2 text-indigo-400 text-xs font-semibold tracking-wider uppercase mb-1">
-            <Sparkles className="w-4 h-4" /> Interactive Algorithm Visualizers
-          </div>
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            See the Core Interview Patterns in Action
-          </h2>
-          <p className="text-slate-400 text-sm mt-1 max-w-2xl">
-            Stepping through algorithms visually transforms abstract pointer movements and loss surfaces into intuitive mental models you can recall during coding interviews.
-          </p>
-        </div>
+    <div className="max-w-[1700px] w-full mx-auto space-y-6 pb-16">
+      {/* Reusable Fixed-Height Header Card */}
+      <PageHeaderCard
+        badgeIcon={Sparkles}
+        badgeText="Interactive Algorithm Visualizers"
+        badgeColor="text-indigo-400"
+        title="See the Core Interview Patterns in Action"
+        description="Stepping through algorithms visually transforms abstract pointer movements and loss surfaces into intuitive mental models you can recall during coding interviews."
+        action={
+          onOpenQuestion ? (
+            <Link
+              to="/arena/$questionId"
+              params={{ questionId: currentVis.questionId }}
+              onClick={() => onOpenQuestion(currentVis.questionId)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/25 shrink-0 no-underline cursor-pointer"
+            >
+              <Code2 className="w-4 h-4" />
+              Practice {currentVis.questionTitle.split(' ')[0]}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : undefined
+        }
+      />
 
-        {onOpenQuestion && (
-          <button
-            onClick={() => onOpenQuestion(currentVis.questionId)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs transition shadow-lg shadow-indigo-600/25 shrink-0"
-          >
-            <Code2 className="w-4 h-4" />
-            Practice {currentVis.questionTitle.split(' ')[0]}
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        )}
-      </div>
-
-      {/* Visualizer Tabs */}
-      <div className="flex gap-2 p-1.5 bg-[#161b22] border border-slate-800 rounded-xl overflow-x-auto">
-        {visualizers.map(v => (
-          <button
-            key={v.id}
-            onClick={() => handleTabChange(v.id as any)}
-            className={`flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-              activeTab === v.id
-                ? 'bg-slate-800 text-white font-bold border border-slate-700 shadow-md'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-            }`}
-          >
-            <span>{v.name}</span>
-            <span className={`text-[10px] px-1.5 py-0.2 rounded border ${v.badgeColor}`}>
-              {v.category}
-            </span>
-          </button>
-        ))}
-      </div>
+      {/* Visualizer Tabs with Fast-Sliding Active Container Pill */}
+      <SlidingTabs
+        tabs={tabItems}
+        activeTab={activeTab}
+        onChange={(id) => handleTabChange(id)}
+        ariaLabel="Algorithm visualizers selection"
+      />
 
       {/* Active Visualizer Panel */}
       <div>

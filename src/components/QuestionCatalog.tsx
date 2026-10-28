@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from '@tanstack/react-router';
+import { PageHeaderCard } from './PageHeaderCard';
 import type { Track, Difficulty } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 
 import { allQuestions, trackMeta } from '../data/questions';
 import {
@@ -13,6 +16,7 @@ import {
   Table,
   Brain,
   Filter,
+  ArrowUpDown,
 } from 'lucide-react';
 
 interface QuestionCatalogProps {
@@ -30,10 +34,14 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
   onOpenVisualizer,
   initialTrack = 'all',
 }) => {
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedTrack, setSelectedTrack] = useState<Track | 'all'>(initialTrack);
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'solved' | 'unsolved'>('all');
+  const [sortBy, setSortBy] = useState<
+    'difficulty-asc' | 'difficulty-desc' | 'number-asc' | 'number-desc' | 'title-asc'
+  >('difficulty-asc');
 
   const solvedSet = useMemo(() => new Set(solvedQuestionIds), [solvedQuestionIds]);
 
@@ -52,7 +60,7 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
 
   const filteredQuestions = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return allQuestions.filter(q => {
+    const list = allQuestions.filter(q => {
       if (query) {
         const matchTitle = q.title.toLowerCase().includes(query);
         const matchTags = q.tags.some(t => t.toLowerCase().includes(query));
@@ -77,41 +85,69 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
 
       return true;
     });
-  }, [searchQuery, selectedTrack, selectedDifficulty, statusFilter, solvedSet]);
+
+    const difficultyWeight: Record<Difficulty, number> = {
+      Easy: 1,
+      Medium: 2,
+      Hard: 3,
+    };
+
+    return list.sort((a, b) => {
+      if (sortBy === 'difficulty-asc') {
+        const diff = difficultyWeight[a.difficulty] - difficultyWeight[b.difficulty];
+        if (diff !== 0) return diff;
+        return a.number - b.number;
+      }
+      if (sortBy === 'difficulty-desc') {
+        const diff = difficultyWeight[b.difficulty] - difficultyWeight[a.difficulty];
+        if (diff !== 0) return diff;
+        return a.number - b.number;
+      }
+      if (sortBy === 'number-asc') {
+        return a.number - b.number;
+      }
+      if (sortBy === 'number-desc') {
+        return b.number - a.number;
+      }
+      if (sortBy === 'title-asc') {
+        return a.title.localeCompare(b.title);
+      }
+      return 0;
+    });
+  }, [searchQuery, selectedTrack, selectedDifficulty, statusFilter, sortBy, solvedSet]);
 
   const totalQuestions = allQuestions.length;
   const totalSolved = solvedQuestionIds.length;
   const completionPercentage = Math.round((totalSolved / totalQuestions) * 100);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      {/* Overview Stats Bar */}
-      <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-white tracking-tight">
-              Python Technical Interview Curriculum
-            </h2>
-            <p className="text-slate-400 text-sm mt-1">
-              30 curated interview questions spanning core fundamentals to transformer attention mechanics.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4 bg-[#0d1117] px-5 py-3 rounded-xl border border-slate-800">
+    <div className="max-w-[1700px] w-full mx-auto space-y-6 pb-16">
+      {/* Reusable Fixed-Height Header Card - Zero CLS */}
+      <PageHeaderCard
+        badgeIcon={Terminal}
+        badgeText="Curriculum Catalog"
+        badgeColor="text-indigo-400"
+        title="Python Technical Interview Curriculum"
+        description="30 curated interview questions spanning core fundamentals to transformer attention mechanics."
+        action={
+          <div className="flex items-center gap-4 bg-[#0d1117]/80 px-4 py-2.5 rounded-xl border border-slate-800 shrink-0">
             <div>
-              <div className="text-xs text-slate-400">Total Progress</div>
-              <div className="text-2xl font-black text-white font-mono">
-                {totalSolved} <span className="text-sm font-normal text-slate-500">/ {totalQuestions}</span>
+              <div className="text-[11px] text-slate-400">Total Progress</div>
+              <div className="text-xl font-black text-white font-mono">
+                {totalSolved} <span className="text-xs font-normal text-slate-500">/ {totalQuestions}</span>
               </div>
             </div>
-            <div className="w-16 h-16 relative flex items-center justify-center">
-              <span className="text-sm font-bold text-emerald-400 font-mono">
+            <div className="flex items-center justify-center">
+              <span className="text-xs font-bold text-emerald-400 font-mono bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
                 {completionPercentage}%
               </span>
             </div>
           </div>
-        </div>
+        }
+      />
 
+      {/* Progress Bar & Tracks Section - Pushed down outside the header card */}
+      <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-5 space-y-4 shadow-md">
         {/* Progress Bar */}
         <div className="w-full bg-slate-200 dark:bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-300/60 dark:border-slate-800">
           <div
@@ -178,39 +214,71 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
           />
         </div>
 
-        {/* Filter Badges */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        {/* Filter Badges & Sort */}
+        <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1">
+          {/* Sort Selector */}
           <div className="flex items-center gap-1.5 bg-[#161b22] border border-slate-800 p-1 rounded-xl text-xs">
             <span className="text-slate-500 px-2 flex items-center gap-1">
-              <Filter className="w-3 h-3" /> Level:
+              <ArrowUpDown className="w-3 h-3 text-slate-400" />
+              {t('sortBy')}:
             </span>
-            {(['all', 'Easy', 'Medium'] as const).map(diff => (
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as any)}
+              className="bg-[#0d1117] border border-slate-700/80 text-xs text-slate-200 rounded-lg px-2.5 py-1 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+              aria-label={t('sortBy')}
+            >
+              <option value="difficulty-asc">{t('sortDifficultyAsc')}</option>
+              <option value="difficulty-desc">{t('sortDifficultyDesc')}</option>
+              <option value="number-asc">{t('sortNumberAsc')}</option>
+              <option value="number-desc">{t('sortNumberDesc')}</option>
+              <option value="title-asc">{t('sortTitleAsc')}</option>
+            </select>
+          </div>
+
+          {/* Level Filter Badges */}
+          <div className="flex items-center gap-1.5 bg-[#161b22] border border-slate-800 p-1 rounded-xl text-xs">
+            <span className="text-slate-500 px-2 flex items-center gap-1">
+              <Filter className="w-3 h-3" /> {t('levelFilter')}
+            </span>
+            {(['all', 'Easy', 'Medium', 'Hard'] as const).map(diff => (
               <button
                 key={diff}
                 onClick={() => setSelectedDifficulty(diff)}
-                className={`px-2.5 py-1 rounded-lg capitalize transition ${
+                className={`px-2.5 py-1 rounded-lg capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                   selectedDifficulty === diff
                     ? 'bg-slate-800 text-white font-semibold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                {diff}
+                {diff === 'all'
+                  ? t('levelAll')
+                  : diff === 'Easy'
+                  ? t('levelEasy')
+                  : diff === 'Medium'
+                  ? t('levelMedium')
+                  : t('levelHard')}
               </button>
             ))}
           </div>
 
+          {/* Status Filter Badges */}
           <div className="flex items-center gap-1.5 bg-[#161b22] border border-slate-800 p-1 rounded-xl text-xs">
             {(['all', 'unsolved', 'solved'] as const).map(status => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
-                className={`px-2.5 py-1 rounded-lg capitalize transition ${
+                className={`px-2.5 py-1 rounded-lg capitalize transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 ${
                   statusFilter === status
                     ? 'bg-slate-800 text-white font-semibold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                {status}
+                {status === 'all'
+                  ? t('statusAll')
+                  : status === 'unsolved'
+                  ? t('statusUnsolved')
+                  : t('statusSolved')}
               </button>
             ))}
           </div>
@@ -259,12 +327,14 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
                         <span className="text-xs font-mono font-bold text-slate-400">
                           #{q.number}
                         </span>
-                        <button
+                        <Link
+                          to="/arena/$questionId"
+                          params={{ questionId: q.id }}
                           onClick={() => onSelectQuestion(q.id)}
-                          className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left cursor-pointer"
+                          className="text-base font-semibold text-slate-900 dark:text-slate-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition text-left cursor-pointer no-underline"
                         >
                           {q.title}
-                        </button>
+                        </Link>
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded-full border ${meta.badgeBg}`}
                         >
@@ -274,7 +344,9 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
                           className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
                             q.difficulty === 'Easy'
                               ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                              : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                              : q.difficulty === 'Medium'
+                              ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                              : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
                           }`}
                         >
                           {q.difficulty}
@@ -301,23 +373,27 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
                   {/* Actions */}
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
                     {q.visualizerId && (
-                      <button
+                      <Link
+                        to="/visualizers/$tab"
+                        params={{ tab: q.visualizerId }}
                         onClick={() => onOpenVisualizer(q.visualizerId!)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/60 text-indigo-300 border border-indigo-700/50 hover:bg-indigo-900/80 text-xs font-medium transition"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-950/60 text-indigo-300 border border-indigo-700/50 hover:bg-indigo-900/80 text-xs font-medium transition no-underline cursor-pointer"
                         title="View Interactive Visualizer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span className="hidden sm:inline">Visualizer</span>
-                      </button>
+                      </Link>
                     )}
 
-                    <button
+                    <Link
+                      to="/arena/$questionId"
+                      params={{ questionId: q.id }}
                       onClick={() => onSelectQuestion(q.id)}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-md shadow-emerald-500/20"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-md shadow-emerald-500/20 no-underline cursor-pointer"
                     >
                       <Code2 className="w-3.5 h-3.5" />
                       Solve
-                    </button>
+                    </Link>
                   </div>
                 </div>
               );

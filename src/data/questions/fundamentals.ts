@@ -102,6 +102,250 @@ _run_tests()
       'Finally, wrap the generator result with `list(...)` to return a list.'
     ]
   },
+
+  {
+    id: 'py-04-group-anagrams',
+    number: 4,
+    title: 'Group Anagrams with Frequency Hash',
+    slug: 'group-anagrams',
+    track: 'fundamentals',
+    difficulty: 'Easy',
+    tags: ['Strings', 'Hash Map', 'defaultdict', 'Tuples as Keys'],
+    summary: 'Group an array of strings into anagrams using optimal hash key representations.',
+    description: `Given an array of strings \`strs\`, group the anagrams together. You can return the answer in any order.
+
+An **Anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
+
+In Python interviews, interviewers check whether you know how to use immutable tuples or sorted character keys in a dictionary.`,
+    examples: [
+      {
+        input: 'strs = ["eat", "tea", "tan", "ate", "nat", "bat"]',
+        output: '[["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]',
+        explanation: 'Words with identical character sets and counts are grouped together.'
+      },
+      {
+        input: 'strs = [""]',
+        output: '[[""]]',
+        explanation: 'Empty strings form a group.'
+      }
+    ],
+    constraints: [
+      '1 <= strs.length <= 10^4',
+      '0 <= strs[i].length <= 100',
+      'strs[i] consists of lowercase English letters.'
+    ],
+    starterCode: `from typing import List
+
+def group_anagrams(strs: List[str]) -> List[List[str]]:
+    """
+    Groups anagrams together.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `from typing import List
+from collections import defaultdict
+
+def group_anagrams(strs: List[str]) -> List[List[str]]:
+    groups = defaultdict(list)
+    for word in strs:
+        # Sorted string as the canonical key
+        key = "".join(sorted(word))
+        groups[key].append(word)
+    return list(groups.values())
+`,
+    testHarness: `
+def _run_tests():
+    import copy
+    def normalize(groups):
+        return sorted([sorted(g) for g in groups])
+
+    cases = [
+        (["eat", "tea", "tan", "ate", "nat", "bat"], [["bat"], ["nat", "tan"], ["ate", "eat", "tea"]]),
+        ([""], [[""]]),
+        (["a"], [["a"]])
+    ]
+    for inp, expected in cases:
+        inp_str = f"strs = {str(inp)}"
+        try:
+            actual = group_anagrams(copy.deepcopy(inp))
+            passed = normalize(actual) == normalize(expected)
+            _test_items.append({
+                "input": inp_str,
+                "expected": str(expected),
+                "actual": str(actual),
+                "passed": passed
+            })
+        except Exception as e:
+            _test_items.append({
+                "input": inp_str,
+                "expected": str(expected),
+                "actual": f"Error: {e}",
+                "passed": False,
+                "error": str(e)
+            })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Use a `collections.defaultdict(list)`. For each string, either sort the characters `"".join(sorted(word))` or compute a 26-element character count tuple `tuple(count)` to serve as the dictionary key.',
+      timeComplexity: 'O(N * K log K) with sorting or O(N * K) with a 26-element count tuple, where N is number of strings and K is max length of string.',
+      spaceComplexity: 'O(N * K) to store the grouped strings.',
+      keyTakeaway: 'Dictionary keys in Python must be hashable and immutable. Strings and tuples are hashable, whereas lists and dicts are not.'
+    },
+    hints: [
+      'Two words are anagrams if and only if their sorted letter representations are identical.',
+      'Use `collections.defaultdict(list)` so you don\'t have to check `if key not in d` manually.',
+      'Alternative for O(N * K) time: use a 26-tuple of character counts as the dictionary key.'
+    ]
+  },
+
+  {
+    id: 'py-06-chunked-stream-iterator',
+    number: 6,
+    title: 'Memory-Efficient Chunked Iterator',
+    slug: 'chunked-stream-iterator',
+    track: 'fundamentals',
+    difficulty: 'Easy',
+    tags: ['Iterators', 'itertools', 'Generators', 'Memory'],
+    summary: 'Implement a generator that yields chunks of size N from any arbitrary iterable.',
+    description: `When handling large files, database queries, or streaming records in Python, you cannot load the entire dataset into memory at once.
+
+Write a generator function \`chunked(iterable, size: int)\` that yields lists (or tuples) of at most \`size\` elements from \`iterable\`.
+- The final chunk may contain fewer than \`size\` elements if the stream does not divide evenly.
+- The function should work seamlessly on infinite generators or finite iterables without calling \`len()\` or converting the whole stream into a list.`,
+    examples: [
+      {
+        input: 'chunked([1, 2, 3, 4, 5, 6, 7], 3)',
+        output: '[[1, 2, 3], [4, 5, 6], [7]]',
+        explanation: 'Chunks of size 3, with the remainder 7 in the last chunk.'
+      }
+    ],
+    constraints: [
+      'size >= 1',
+      'Must work on pure generators (no len() or index access).'
+    ],
+    starterCode: `import itertools
+from itertools import islice
+from typing import Iterable, List, Any
+
+def chunked(iterable: Iterable[Any], size: int):
+    """
+    Yields successive chunks of up to 'size' elements from iterable.
+    """
+    # Write your generator here
+    pass
+`,
+    solutionCode: `from itertools import islice
+from typing import Iterable, Any
+
+def chunked(iterable: Iterable[Any], size: int):
+    it = iter(iterable)
+    while True:
+        chunk = list(islice(it, size))
+        if not chunk:
+            break
+        yield chunk
+`,
+    testHarness: `
+import itertools
+from itertools import islice
+
+def _run_tests():
+    def _safe_materialize(gen, max_chunks=20):
+        if gen is None:
+            return None
+        # Safeguard against runaway or infinite generators
+        chunks = list(itertools.islice(gen, max_chunks + 1))
+        if len(chunks) > max_chunks:
+            raise ValueError(f"Stream yielded >{max_chunks} chunks (possible infinite loop)")
+        # Normalize each chunk to a list (handles iterators, tuples, islice objects, or lists)
+        res = []
+        for c in chunks:
+            if hasattr(c, '__iter__') and not isinstance(c, (str, bytes)):
+                res.append(list(c))
+            else:
+                res.append(c)
+        return res
+
+    # Test 1: list
+    try:
+        out1 = chunked([1, 2, 3, 4, 5, 6, 7], 3)
+        res1 = _safe_materialize(out1)
+        exp1 = [[1, 2, 3], [4, 5, 6], [7]]
+        _test_items.append({
+            "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
+            "expected": str(exp1),
+            "actual": str(res1),
+            "passed": res1 == exp1
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
+            "expected": "[[1, 2, 3], [4, 5, 6], [7]]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
+
+    # Test 2: Generator stream (infinite range with break)
+    def num_gen():
+        for i in range(10):
+            yield i
+    try:
+        out2 = chunked(num_gen(), 4)
+        res2 = _safe_materialize(out2)
+        exp2 = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
+        _test_items.append({
+            "input": "chunked(generator_0_to_9, 4)",
+            "expected": str(exp2),
+            "actual": str(res2),
+            "passed": res2 == exp2
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "chunked(generator_0_to_9, 4)",
+            "expected": "[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
+
+    # Test 3: Empty input
+    try:
+        out3 = chunked([], 2)
+        res3 = _safe_materialize(out3)
+        exp3 = []
+        _test_items.append({
+            "input": "chunked([], 2)",
+            "expected": str(exp3),
+            "actual": str(res3),
+            "passed": res3 == exp3
+        })
+    except Exception as e:
+        _test_items.append({
+            "input": "chunked([], 2)",
+            "expected": "[]",
+            "actual": f"Error: {e}",
+            "passed": False,
+            "error": str(e)
+        })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Convert `iterable` to an iterator using `iter(iterable)`. In a loop, use `itertools.islice(it, size)` to consume up to `size` items. When `islice` returns an empty slice, break.',
+      timeComplexity: 'O(N) total time across all iterations.',
+      spaceComplexity: 'O(size) auxiliary memory per yielded chunk, never buffering all N elements.',
+      keyTakeaway: '`itertools.islice` on an iterator advances the iterator state directly without pulling unnecessary elements into memory.'
+    },
+    hints: [
+      'First convert the iterable to an iterator using `it = iter(iterable)`.',
+      'Look up `itertools.islice(it, size)`. Wrapping it in `list(...)` grabs up to `size` items.',
+      'Stop when the chunk list is empty.'
+    ]
+  },
+
   {
     id: 'py-02-lru-cache',
     number: 2,
@@ -229,6 +473,7 @@ _run_tests()
       'Remember that updating an existing key also marks it as most recently used.'
     ]
   },
+
   {
     id: 'py-03-retry-decorator',
     number: 3,
@@ -348,102 +593,7 @@ _run_tests()
       'Keep track of the last exception so you can re-raise it when attempt == max_attempts.'
     ]
   },
-  {
-    id: 'py-04-group-anagrams',
-    number: 4,
-    title: 'Group Anagrams with Frequency Hash',
-    slug: 'group-anagrams',
-    track: 'fundamentals',
-    difficulty: 'Easy',
-    tags: ['Strings', 'Hash Map', 'defaultdict', 'Tuples as Keys'],
-    summary: 'Group an array of strings into anagrams using optimal hash key representations.',
-    description: `Given an array of strings \`strs\`, group the anagrams together. You can return the answer in any order.
 
-An **Anagram** is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.
-
-In Python interviews, interviewers check whether you know how to use immutable tuples or sorted character keys in a dictionary.`,
-    examples: [
-      {
-        input: 'strs = ["eat", "tea", "tan", "ate", "nat", "bat"]',
-        output: '[["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]',
-        explanation: 'Words with identical character sets and counts are grouped together.'
-      },
-      {
-        input: 'strs = [""]',
-        output: '[[""]]',
-        explanation: 'Empty strings form a group.'
-      }
-    ],
-    constraints: [
-      '1 <= strs.length <= 10^4',
-      '0 <= strs[i].length <= 100',
-      'strs[i] consists of lowercase English letters.'
-    ],
-    starterCode: `from typing import List
-
-def group_anagrams(strs: List[str]) -> List[List[str]]:
-    """
-    Groups anagrams together.
-    """
-    # Write your solution here
-    pass
-`,
-    solutionCode: `from typing import List
-from collections import defaultdict
-
-def group_anagrams(strs: List[str]) -> List[List[str]]:
-    groups = defaultdict(list)
-    for word in strs:
-        # Sorted string as the canonical key
-        key = "".join(sorted(word))
-        groups[key].append(word)
-    return list(groups.values())
-`,
-    testHarness: `
-def _run_tests():
-    import copy
-    def normalize(groups):
-        return sorted([sorted(g) for g in groups])
-
-    cases = [
-        (["eat", "tea", "tan", "ate", "nat", "bat"], [["bat"], ["nat", "tan"], ["ate", "eat", "tea"]]),
-        ([""], [[""]]),
-        (["a"], [["a"]])
-    ]
-    for inp, expected in cases:
-        inp_str = f"strs = {str(inp)}"
-        try:
-            actual = group_anagrams(copy.deepcopy(inp))
-            passed = normalize(actual) == normalize(expected)
-            _test_items.append({
-                "input": inp_str,
-                "expected": str(expected),
-                "actual": str(actual),
-                "passed": passed
-            })
-        except Exception as e:
-            _test_items.append({
-                "input": inp_str,
-                "expected": str(expected),
-                "actual": f"Error: {e}",
-                "passed": False,
-                "error": str(e)
-            })
-
-_run_tests()
-`,
-    explanation: {
-      approach: 'Use a `collections.defaultdict(list)`. For each string, either sort the characters `"".join(sorted(word))` or compute a 26-element character count tuple `tuple(count)` to serve as the dictionary key.',
-      timeComplexity: 'O(N * K log K) with sorting or O(N * K) with a 26-element count tuple, where N is number of strings and K is max length of string.',
-      spaceComplexity: 'O(N * K) to store the grouped strings.',
-      keyTakeaway: 'Dictionary keys in Python must be hashable and immutable. Strings and tuples are hashable, whereas lists and dicts are not.'
-    },
-    hints: [
-      'Two words are anagrams if and only if their sorted letter representations are identical.',
-      'Use `collections.defaultdict(list)` so you don\'t have to check `if key not in d` manually.',
-      'Alternative for O(N * K) time: use a 26-tuple of character counts as the dictionary key.'
-    ]
-  },
   {
     id: 'py-05-deep-dict-merge',
     number: 5,
@@ -531,130 +681,7 @@ _run_tests()
       'In the recursive case, assign the return value back to `result[key]`.'
     ]
   },
-  {
-    id: 'py-06-chunked-stream-iterator',
-    number: 6,
-    title: 'Memory-Efficient Chunked Iterator',
-    slug: 'chunked-stream-iterator',
-    track: 'fundamentals',
-    difficulty: 'Easy',
-    tags: ['Iterators', 'itertools', 'Generators', 'Memory'],
-    summary: 'Implement a generator that yields chunks of size N from any arbitrary iterable.',
-    description: `When handling large files, database queries, or streaming records in Python, you cannot load the entire dataset into memory at once.
 
-Write a generator function \`chunked(iterable, size: int)\` that yields lists (or tuples) of at most \`size\` elements from \`iterable\`.
-- The final chunk may contain fewer than \`size\` elements if the stream does not divide evenly.
-- The function should work seamlessly on infinite generators or finite iterables without calling \`len()\` or converting the whole stream into a list.`,
-    examples: [
-      {
-        input: 'chunked([1, 2, 3, 4, 5, 6, 7], 3)',
-        output: '[[1, 2, 3], [4, 5, 6], [7]]',
-        explanation: 'Chunks of size 3, with the remainder 7 in the last chunk.'
-      }
-    ],
-    constraints: [
-      'size >= 1',
-      'Must work on pure generators (no len() or index access).'
-    ],
-    starterCode: `from typing import Iterable, List, Any
-
-def chunked(iterable: Iterable[Any], size: int):
-    """
-    Yields successive chunks of up to 'size' elements from iterable.
-    """
-    # Write your generator here
-    pass
-`,
-    solutionCode: `from itertools import islice
-from typing import Iterable, Any
-
-def chunked(iterable: Iterable[Any], size: int):
-    it = iter(iterable)
-    while True:
-        chunk = list(islice(it, size))
-        if not chunk:
-            break
-        yield chunk
-`,
-    testHarness: `
-def _run_tests():
-    # Test 1: list
-    try:
-        out1 = chunked([1, 2, 3, 4, 5, 6, 7], 3)
-        res1 = list(out1) if out1 is not None else None
-        exp1 = [[1, 2, 3], [4, 5, 6], [7]]
-        _test_items.append({
-            "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
-            "expected": str(exp1),
-            "actual": str(res1),
-            "passed": res1 == exp1
-        })
-    except Exception as e:
-        _test_items.append({
-            "input": "chunked([1, 2, 3, 4, 5, 6, 7], 3)",
-            "expected": "[[1, 2, 3], [4, 5, 6], [7]]",
-            "actual": f"Error: {e}",
-            "passed": False,
-            "error": str(e)
-        })
-
-    # Test 2: Generator stream (infinite range with break)
-    def num_gen():
-        for i in range(10):
-            yield i
-    try:
-        out2 = chunked(num_gen(), 4)
-        res2 = list(out2) if out2 is not None else None
-        exp2 = [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]
-        _test_items.append({
-            "input": "chunked(generator_0_to_9, 4)",
-            "expected": str(exp2),
-            "actual": str(res2),
-            "passed": res2 == exp2
-        })
-    except Exception as e:
-        _test_items.append({
-            "input": "chunked(generator_0_to_9, 4)",
-            "expected": "[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]",
-            "actual": f"Error: {e}",
-            "passed": False,
-            "error": str(e)
-        })
-
-    # Test 3: Empty input
-    try:
-        out3 = chunked([], 2)
-        res3 = list(out3) if out3 is not None else None
-        exp3 = []
-        _test_items.append({
-            "input": "chunked([], 2)",
-            "expected": str(exp3),
-            "actual": str(res3),
-            "passed": res3 == exp3
-        })
-    except Exception as e:
-        _test_items.append({
-            "input": "chunked([], 2)",
-            "expected": "[]",
-            "actual": f"Error: {e}",
-            "passed": False,
-            "error": str(e)
-        })
-
-_run_tests()
-`,
-    explanation: {
-      approach: 'Convert `iterable` to an iterator using `iter(iterable)`. In a loop, use `itertools.islice(it, size)` to consume up to `size` items. When `islice` returns an empty slice, break.',
-      timeComplexity: 'O(N) total time across all iterations.',
-      spaceComplexity: 'O(size) auxiliary memory per yielded chunk, never buffering all N elements.',
-      keyTakeaway: '`itertools.islice` on an iterator advances the iterator state directly without pulling unnecessary elements into memory.'
-    },
-    hints: [
-      'First convert the iterable to an iterator using `it = iter(iterable)`.',
-      'Look up `itertools.islice(it, size)`. Wrapping it in `list(...)` grabs up to `size` items.',
-      'Stop when the chunk list is empty.'
-    ]
-  },
   {
     id: 'py-07-custom-context-manager',
     number: 7,
@@ -766,5 +793,5 @@ _run_tests()
       'In `__exit__`, check `if exc_type and issubclass(exc_type, self.suppress_types)`.',
       'Return `True` to suppress, `False` otherwise.'
     ]
-  }
+  },
 ];

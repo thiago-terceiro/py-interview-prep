@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Play, Pause, RotateCcw, ChevronRight, ChevronLeft, Dices, Layers } from 'lucide-react';
 
 interface GridStep {
@@ -19,9 +19,15 @@ const DEFAULT_GRID = [
 
 export const BfsGridVisualizer: React.FC = () => {
   const [grid, setGrid] = useState<string[][]>(DEFAULT_GRID);
-  const [steps, setSteps] = useState<GridStep[]>([]);
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [prevGrid, setPrevGrid] = useState<string[][]>(grid);
+
+  if (grid !== prevGrid) {
+    setPrevGrid(grid);
+    setCurrentStepIndex(0);
+    setIsPlaying(false);
+  }
 
   // Toggle cell on user click
   const toggleCell = (r: number, c: number) => {
@@ -40,7 +46,7 @@ export const BfsGridVisualizer: React.FC = () => {
   };
 
   // Compute BFS steps
-  useEffect(() => {
+  const steps = useMemo<GridStep[]>(() => {
     const rows = grid.length;
     const cols = grid[0].length;
     const workingGrid = grid.map(row => [...row]);
@@ -132,16 +138,14 @@ export const BfsGridVisualizer: React.FC = () => {
       message: `BFS Traversal Finished! Total distinct islands found: ${islandCount}.`,
     });
 
-    setSteps(computedSteps);
-    setCurrentStepIndex(0);
-    setIsPlaying(false);
+    return computedSteps;
   }, [grid]);
 
   useEffect(() => {
     if (!isPlaying) return;
     if (currentStepIndex >= steps.length - 1) {
-      setIsPlaying(false);
-      return;
+      const timer = setTimeout(() => setIsPlaying(false), 0);
+      return () => clearTimeout(timer);
     }
     const timer = setTimeout(() => {
       setCurrentStepIndex(prev => prev + 1);

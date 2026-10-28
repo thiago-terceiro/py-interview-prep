@@ -247,42 +247,47 @@ function RootLayout() {
     <div className="min-h-screen bg-[#0b0f17] text-slate-100 flex flex-col selection:bg-indigo-500/30 selection:text-white">
       {/* Top Main Navigation Bar */}
       <header className="sticky top-0 z-50 bg-[#0d1117]/95 backdrop-blur-md border-b border-slate-800">
-        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between lg:grid lg:grid-cols-[1fr_auto_1fr] gap-4">
           {/* Logo & Brand (Clickable Link to Home) */}
-          <Link
-            to="/"
-            className="flex items-center gap-3 select-none group text-inherit no-underline"
-            title="Go to Home"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-[#0d1117] rounded-[10px] flex items-center justify-center">
-                <Terminal className="w-5 h-5 text-sky-400" />
+          <div className="flex items-center justify-start min-w-0">
+            <Link
+              to="/"
+              className="flex items-center gap-3 select-none group text-inherit no-underline"
+              title="Go to Home"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-sky-500 to-emerald-400 p-0.5 shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform shrink-0">
+                <div className="w-full h-full bg-[#0d1117] rounded-[10px] flex items-center justify-center">
+                  <Terminal className="w-5 h-5 text-sky-400" />
+                </div>
               </div>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-base font-black tracking-tight text-white m-0 group-hover:text-sky-300 transition-colors">
-                  PyInterview <span className="text-sky-400">Pro</span>
-                </h1>
-                <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                  30 Track
-                </span>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base font-black tracking-tight text-white m-0 group-hover:text-sky-300 transition-colors">
+                    PyInterview <span className="text-sky-400">Pro</span>
+                  </h1>
+                  <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    30 Track
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-400 hidden sm:block">
+                  {t('brandSubtitle')}
+                </p>
               </div>
-              <p className="text-[11px] text-slate-400 hidden sm:block">
-                Python Fundamentals → Algorithms → NumPy/Pandas → ML Engineering
-              </p>
-            </div>
-          </Link>
+            </Link>
+          </div>
 
-          {/* Desktop Nav Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-[#161b22] border border-slate-800 p-1 rounded-xl">
+          {/* Desktop Nav Links - Perfectly Centered with the Middle of the Page Container */}
+          <nav
+            aria-label="Main Navigation"
+            className="hidden lg:flex items-center justify-center justify-self-center gap-1 xl:gap-1.5 bg-[#161b22] border border-slate-800 p-1 rounded-xl shadow-inner"
+          >
             {navLinks.map(link => {
               const Icon = link.icon;
               return (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 no-underline ${
+                  className={`flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 rounded-lg text-xs font-semibold border transition-transform duration-75 active:scale-95 no-underline whitespace-nowrap ${
                     link.isActive
                       ? 'bg-slate-800 text-white shadow-sm border-slate-700'
                       : 'text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-800/50'
@@ -296,7 +301,7 @@ function RootLayout() {
           </nav>
 
           {/* Right Header Controls: Engine Pill + Solved Pill + Language + Theme */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-end justify-self-end gap-2.5">
             {/* Pyodide Engine Pill */}
             <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#161b22] border border-slate-800 text-xs font-mono">
               <span

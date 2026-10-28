@@ -281,3 +281,37 @@ html.light ::-webkit-scrollbar-thumb:hover {
   border-radius: 8px;
   overflow: hidden;
 }
+
+/* Snappy hover lift animation for content buttons (strictly excluding navbar in header) */
+main button:not(:disabled):not(.no-lift),
+main a[role="button"]:not(:disabled),
+.btn-lift:not(:disabled) {
+  transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 140ms cubic-bezier(0.16, 1, 0.3, 1), background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+  will-change: transform;
+}
+
+main button:not(:disabled):not(.no-lift):hover,
+main a[role="button"]:not(:disabled):hover,
+.btn-lift:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+main button:not(:disabled):not(.no-lift):active,
+main a[role="button"]:not(:disabled):active,
+.btn-lift:not(:disabled):active {
+  transform: translateY(0px) scale(0.97);
+}
+
+/* Snappy transitions for tabs, pills, and adjacent buttons clicking between one another */
+[role="tab"],
+button[role="tab"],
+.tab-snappy,
+.btn-group button {
+  transition: all 120ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+[role="tab"]:active,
+button[role="tab"]:active {
+  transform: translateY(0px) scale(0.98);
+}
+

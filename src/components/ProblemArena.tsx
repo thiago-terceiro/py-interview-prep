@@ -101,6 +101,17 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showResetModal, question.starterCode, onCodeChange]);
 
+  const [prevQuestionId, setPrevQuestionId] = useState(question.id);
+  if (question.id !== prevQuestionId) {
+    setPrevQuestionId(question.id);
+    setExecutionResult(null);
+    setScriptResult(null);
+    setRevealedHints([]);
+    setActiveTab('description');
+    setActiveTestTab(0);
+    setConsoleEntries([]);
+  }
+
   // Preload needed packages for track (e.g. numpy / pandas)
   useEffect(() => {
     const required = getRequiredPackagesForQuestion(question);
@@ -109,13 +120,6 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
         console.warn('Could not preload packages:', err);
       });
     }
-    // Reset test execution results & console when switching questions
-    setExecutionResult(null);
-    setScriptResult(null);
-    setRevealedHints([]);
-    setActiveTab('description');
-    setActiveTestTab(0);
-    setConsoleEntries([]);
     pyodideRunner.resetReplSession().catch(() => {});
   }, [question]);
 
@@ -128,26 +132,44 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
 
   // Smart sample call for quick testing based on starter code signature & example 1
   const sampleCall = useMemo(() => {
-    // Specific class question handlers
+    // Specific question overrides for multi-step / non-trivial invocations
     if (question.id === 'py-02-lru-cache') {
       return `cache = LRUCache(2); cache.put(1, 10); cache.put(2, 20); print("get(1):", cache.get(1))`;
     }
-    if (question.id === 'py-07-error-suppressor') {
-      return `with ErrorSuppressor(ValueError): print("Suppressed exception successfully"); raise ValueError("oops")`;
+    if (question.id === 'py-03-retry-decorator') {
+      return `@retry(max_attempts=3, delay=0.1)\ndef test_fn():\n    print("Calling function..."); return 42\nprint("Returned:", test_fn())`;
+    }
+    if (question.id === 'py-06-chunked-stream-iterator') {
+      return `list(chunked([1, 2, 3, 4, 5, 6, 7], 3))`;
+    }
+    if (question.id === 'py-07-custom-context-manager') {
+      return `with ErrorSuppressor(ZeroDivisionError) as s:\n    print("Inside context"); 1 / 0\nprint("Suppressed:", s.suppressed)`;
     }
 
-    const fnMatches = [...question.starterCode.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(/g)];
+    const fnMatches = [...question.starterCode.matchAll(/def\s+([a-zA-Z0-9_]+)\s*\(([^)]*)\)/g)];
     const publicFn = fnMatches.find(m => !m[1].startsWith('_'));
-    const fnName = publicFn ? publicFn[1] : (fnMatches[0] ? fnMatches[0][1] : null);
+    const targetMatch = publicFn || fnMatches[0];
+    const fnName = targetMatch ? targetMatch[1] : null;
+    const fnParams = targetMatch ? targetMatch[2].trim() : '';
 
     if (fnName) {
       if (question.examples && question.examples.length > 0) {
-        const exInput = question.examples[0].input;
-        if (exInput && exInput.includes('=')) {
+        const exInput = question.examples[0].input.trim();
+        // If the example input already invokes the function (e.g. "chunked([1, 2, 3], 2)")
+        if (exInput.startsWith(fnName + '(')) {
+          return exInput;
+        }
+        // If the example input has keyword assignments (e.g. "numbers = [2, 7], target = 9")
+        if (exInput.includes('=') && !exInput.includes('\n')) {
           return `${fnName}(${exInput})`;
         }
       }
-      return `${fnName}()`;
+      // Only call fnName() with 0 arguments if the function actually accepts 0 required arguments!
+      const hasRequiredParams = fnParams.length > 0 && !fnParams.startsWith('*') && !fnParams.includes('=');
+      if (!hasRequiredParams) {
+        return `${fnName}()`;
+      }
+      return null;
     }
 
     const classMatch = question.starterCode.match(/class\s+([a-zA-Z0-9_]+)/);

@@ -4,8 +4,21 @@ import type { ExecutionResult, ReplResult, ScriptRunResult } from '../types';
 declare global {
   interface Window {
     loadPyodide?: (config: { indexURL: string }) => Promise<any>;
-    pyodideInstance?: any;
   }
+}
+
+const DEFAULT_TIMEOUT_MS = 15000;
+
+function withTimeout<T = string>(promise: Promise<T>, timeoutMs: number = DEFAULT_TIMEOUT_MS): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(
+        () => reject(new Error(`Execution timed out after ${timeoutMs / 1000}s. Check for infinite loops or deep recursion.`)),
+        timeoutMs
+      )
+    )
+  ]);
 }
 
 export type PyodideStatus = 
@@ -75,7 +88,6 @@ class PyodideRunnerService {
         });
 
         this.pyodide = pyodide;
-        window.pyodideInstance = pyodide;
         this.setStatus('ready', 'Python 3.12 WASM Engine Ready');
         return pyodide;
       } catch (err: any) {
@@ -129,6 +141,13 @@ import io
 import json
 import time
 import traceback
+import itertools
+import collections
+import math
+import functools
+import heapq
+import bisect
+import typing
 
 _captured_stdout = io.StringIO()
 _original_stdout = sys.stdout
@@ -139,10 +158,31 @@ _test_items = []
 _start_t = time.perf_counter()
 
 try:
-    # Prepare execution environment
+    # Host Sandbox Isolation: Disallow untrusted Python code from importing 'js' bridge
+    class _HostIsolationFinder:
+        @staticmethod
+        def find_spec(fullname, path=None, target=None):
+            if fullname == "js" or fullname.startswith("js.") or fullname == "pyodide_js":
+                raise ImportError(f"Security Policy: Host module '{fullname}' is forbidden in the sandbox.")
+            return None
+
+    if not any(getattr(f, '__name__', '') == '_HostIsolationFinder' or isinstance(f, _HostIsolationFinder) for f in sys.meta_path):
+        sys.meta_path.insert(0, _HostIsolationFinder())
+
+    sys.modules.pop("js", None)
+    sys.modules.pop("pyodide_js", None)
+
+    # Prepare execution environment with standard library pre-imports
     user_globals = {
         "__name__": "__main__",
         "__file__": "solution.py",
+        "itertools": itertools,
+        "collections": collections,
+        "math": math,
+        "functools": functools,
+        "heapq": heapq,
+        "bisect": bisect,
+        "typing": typing,
     }
     
     # 1. Execute User Code
@@ -169,7 +209,7 @@ _result_payload = {
 json.dumps(_result_payload)
 `;
 
-      const jsonStrResult = await py.runPythonAsync(runnerScript);
+      const jsonStrResult = await withTimeout<string>(py.runPythonAsync(runnerScript), 15000);
       const parsed = JSON.parse(jsonStrResult);
       const executionTimeMs = parsed.elapsedMs || Math.round(performance.now() - startTime);
 
@@ -250,6 +290,13 @@ import ast
 import json
 import time
 import traceback
+import itertools
+import collections
+import math
+import functools
+import heapq
+import bisect
+import typing
 
 _captured_stdout = io.StringIO()
 _original_stdout = sys.stdout
@@ -261,10 +308,31 @@ _execution_error = None
 _start_t = time.perf_counter()
 
 try:
+    # Host Sandbox Isolation
+    class _HostIsolationFinder:
+        @staticmethod
+        def find_spec(fullname, path=None, target=None):
+            if fullname == "js" or fullname.startswith("js.") or fullname == "pyodide_js":
+                raise ImportError(f"Security Policy: Host module '{fullname}' is forbidden in the sandbox.")
+            return None
+
+    if not any(getattr(f, '__name__', '') == '_HostIsolationFinder' or isinstance(f, _HostIsolationFinder) for f in sys.meta_path):
+        sys.meta_path.insert(0, _HostIsolationFinder())
+
+    sys.modules.pop("js", None)
+    sys.modules.pop("pyodide_js", None)
+
     user_globals = {
         "__name__": "__main__",
         "__file__": "solution.py",
         "__doc__": "PyInterview Pro Standalone Runner",
+        "itertools": itertools,
+        "collections": collections,
+        "math": math,
+        "functools": functools,
+        "heapq": heapq,
+        "bisect": bisect,
+        "typing": typing,
     }
     
     # 1. Execute User Code at module level
@@ -313,7 +381,7 @@ json.dumps({
 })
 `;
 
-      const jsonStrResult = await py.runPythonAsync(runnerScript);
+      const jsonStrResult = await withTimeout<string>(py.runPythonAsync(runnerScript), 15000);
       const parsed = JSON.parse(jsonStrResult);
       const executionTimeMs = parsed.elapsedMs || Math.round(performance.now() - startTime);
 
@@ -358,11 +426,25 @@ import ast
 import json
 import time
 import traceback
+import itertools
+import collections
+import math
+import functools
+import heapq
+import bisect
+import typing
 
 if "_repl_session_env" not in globals():
     globals()["_repl_session_env"] = {
         "__name__": "__main__",
         "__doc__": "PyInterview Pro Interactive REPL",
+        "itertools": itertools,
+        "collections": collections,
+        "math": math,
+        "functools": functools,
+        "heapq": heapq,
+        "bisect": bisect,
+        "typing": typing,
     }
 
 _env = globals()["_repl_session_env"]
@@ -412,7 +494,7 @@ json.dumps({
 })
 `;
 
-      const jsonStrResult = await py.runPythonAsync(replScript);
+      const jsonStrResult = await withTimeout<string>(py.runPythonAsync(replScript), 10000);
       const parsed = JSON.parse(jsonStrResult);
       return {
         stdout: parsed.stdout || '',

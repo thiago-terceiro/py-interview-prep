@@ -19,17 +19,20 @@ export const PatternVisualizer: React.FC<PatternVisualizerProps> = ({ pattern })
   const currentStep = steps[currentStepIndex] || steps[0];
 
   // Reset step index when preset or pattern changes
-  useEffect(() => {
+  const [prevKey, setPrevKey] = useState(`${selectedPresetIndex}-${pattern.id}`);
+  const currentKey = `${selectedPresetIndex}-${pattern.id}`;
+  if (currentKey !== prevKey) {
+    setPrevKey(currentKey);
     setCurrentStepIndex(0);
     setIsPlaying(false);
-  }, [selectedPresetIndex, pattern.id]);
+  }
 
   // Autoplay loop
   useEffect(() => {
     if (!isPlaying) return;
     if (currentStepIndex >= steps.length - 1) {
-      setIsPlaying(false);
-      return;
+      const timer = setTimeout(() => setIsPlaying(false), 0);
+      return () => clearTimeout(timer);
     }
 
     const timer = setTimeout(() => {
