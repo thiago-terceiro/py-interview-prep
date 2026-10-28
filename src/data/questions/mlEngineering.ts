@@ -799,4 +799,281 @@ _run_tests()
       'Replace masked values with `-1e9` before computing softmax.'
     ]
   },
+
+  {
+    id: 'py-44-flash-attention-tiling',
+    number: 44,
+    title: 'Tiled Flash-Style Attention with Online Softmax Rescaling (NumPy)',
+    slug: 'flash-attention-tiling-online-softmax',
+    track: 'ml-engineering',
+    difficulty: 'Hard',
+    tags: ['Transformers', 'FlashAttention', 'Online Softmax', 'Vectorization', 'Deep Learning'],
+    summary: 'Compute memory-efficient scaled dot-product attention without materializing the full N x N attention matrix.',
+    description: `Standard Scaled Dot-Product Attention materializes an \`N x N\` attention matrix, which hits an \`O(N^2)\` memory bottleneck on long sequence lengths. **FlashAttention** (Dao et al.) solves this by computing attention in blocks via **Online Softmax rescaling**.
+
+Given 2D float arrays:
+- \`Q\` of shape \`(N, d)\`
+- \`K\` of shape \`(N, d)\`
+- \`V\` of shape \`(N, d)\`
+- An integer tile size \`block_size\`
+
+Implement \`flash_attention_forward(Q, K, V, block_size=4)\`:
+1. Loop over outer column blocks of \`K\` and \`V\` in chunks of \`block_size\`.
+2. Loop over inner row blocks of \`Q\` in chunks of \`block_size\`.
+3. Track running row maximum \`m_i\` and running normalizer sum \`l_i\`.
+4. Rescale existing accumulator \`O\` dynamically as new block scores arrive.
+5. Return the convolved attention output \`O\` matching exact naive scaled dot-product attention up to floating-point tolerance \`1e-5\`.
+
+### Scaling factor:
+\`scale = 1.0 / np.sqrt(d)\`
+
+### Requirements:
+1. Never instantiate the global \`(N, N)\` attention matrix.
+2. Output must have shape \`(N, d)\`.`,
+    examples: [
+      {
+        input: 'Q, K, V with shape (8, 4), block_size = 4',
+        output: 'Attention output with shape (8, 4) identical to softmax(QK^T / sqrt(d)) @ V',
+        explanation: 'Block-wise computation computes exact mathematically equivalent attention values.'
+      }
+    ],
+    constraints: [
+      'N >= 1, d >= 1',
+      'block_size >= 1',
+      'Floating-point accuracy within 1e-5 absolute tolerance.'
+    ],
+    starterCode: `import numpy as np
+
+def flash_attention_forward(Q: np.ndarray, K: np.ndarray, V: np.ndarray, block_size: int = 4) -> np.ndarray:
+    """
+    Computes tiled attention using online softmax rescaling.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `import numpy as np
+
+def flash_attention_forward(Q: np.ndarray, K: np.ndarray, V: np.ndarray, block_size: int = 4) -> np.ndarray:
+    N, d = Q.shape
+    scale = 1.0 / np.sqrt(d)
+    O = np.zeros_like(Q)
+    l = np.zeros(N)
+    m = np.full(N, -np.inf)
+    
+    # Outer loop over key/value blocks
+    for j in range(0, N, block_size):
+        K_j = K[j:j + block_size]
+        V_j = V[j:j + block_size]
+        
+        # Inner loop over query blocks
+        for i in range(0, N, block_size):
+            Q_i = Q[i:i + block_size]
+            S_ij = np.matmul(Q_i, K_j.T) * scale
+            m_ij = np.max(S_ij, axis=-1)
+            m_new = np.maximum(m[i:i + block_size], m_ij)
+            
+            P_ij = np.exp(S_ij - m_new[:, None])
+            l_new = np.exp(m[i:i + block_size] - m_new) * l[i:i + block_size] + np.sum(P_ij, axis=-1)
+            
+            term1 = (np.exp(m[i:i + block_size] - m_new) * l[i:i + block_size])[:, None] * O[i:i + block_size]
+            term2 = np.matmul(P_ij, V_j)
+            O[i:i + block_size] = (term1 + term2) / l_new[:, None]
+            
+            m[i:i + block_size] = m_new
+            l[i:i + block_size] = l_new
+            
+    return O
+`,
+    testHarness: `
+import numpy as np
+
+def _run_tests():
+    np.random.seed(42)
+    N, d = 8, 4
+    Q = np.random.randn(N, d)
+    K = np.random.randn(N, d)
+    V = np.random.randn(N, d)
+
+    # Reference naive scaled dot-product attention
+    scores = np.matmul(Q, K.T) / np.sqrt(d)
+    exp_s = np.exp(scores - np.max(scores, axis=-1, keepdims=True))
+    attn = exp_s / np.sum(exp_s, axis=-1, keepdims=True)
+    naive_ref = np.matmul(attn, V)
+
+    # Test 1: Even block size
+    out1 = flash_attention_forward(Q, K, V, block_size=4)
+    p1 = np.allclose(out1, naive_ref, atol=1e-5)
+    _test_items.append({
+        "input": "Q, K, V (8x4), block_size=4 vs Naive SDPA",
+        "expected": "Max diff < 1e-5",
+        "actual": f"Max diff: {np.max(np.abs(out1 - naive_ref)):.2e}",
+        "passed": bool(p1)
+    })
+
+    # Test 2: Odd block size not dividing N
+    out2 = flash_attention_forward(Q, K, V, block_size=3)
+    p2 = np.allclose(out2, naive_ref, atol=1e-5)
+    _test_items.append({
+        "input": "Q, K, V (8x4), block_size=3 (non-divisible)",
+        "expected": "Max diff < 1e-5",
+        "actual": f"Max diff: {np.max(np.abs(out2 - naive_ref)):.2e}",
+        "passed": bool(p2)
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Online softmax maintains running row maximum $m$ and sum of exponentials $l$. When observing a new tile $S_{ij}$, update $m_{new} = \\max(m, m_{ij})$. Rescale previous accumulator $O$ by $e^{m - m_{new}} \\cdot l$ and add $P_{ij} V_j$, then divide by $l_{new}$. This computes the exact mathematical softmax without allocating the $N \\times N$ matrix.',
+      timeComplexity: 'O(N^2 d) identical FLOP count to naive attention.',
+      spaceComplexity: 'O(N d) strictly bounded auxiliary SRAM memory (eliminates O(N^2) memory).',
+      keyTakeaway: 'The associative property of matrix multiplication combined with online softmax scaling allows computing transformer attention on sequences of arbitrary length within limited GPU SRAM.'
+    },
+    hints: [
+      'Initialize `O` to zeros, `l` to zeros, and `m` to `-inf`.',
+      'Compute `m_new = np.maximum(m_prev, np.max(S_ij, axis=-1))`.',
+      'Scale previous accumulator by `(np.exp(m_prev - m_new) * l_prev)[:, None]`.'
+    ]
+  },
+
+  {
+    id: 'py-45-adamw-optimizer-step',
+    number: 45,
+    title: 'Vectorized AdamW Optimizer Step with Decoupled Weight Decay (NumPy)',
+    slug: 'adamw-optimizer-step-numpy',
+    track: 'ml-engineering',
+    difficulty: 'Hard',
+    tags: ['Optimization', 'AdamW', 'Gradient Descent', 'PyTorch Internals', 'Vectorization'],
+    summary: 'Implement a complete vectorized AdamW optimizer update step with decoupled weight decay.',
+    description: `Standard Adam applies $L_2$ regularization by adding weight decay to the gradient, which inadvertently causes weights with large gradient variances to receive less regularization. **AdamW** (Loshchilov & Hutter) fixes this by **decoupling weight decay** directly from the gradient update.
+
+Implement \`adamw_step(param, grad, m, v, t, lr=1e-3, beta1=0.9, beta2=0.999, eps=1e-8, weight_decay=0.01)\`:
+1. **Decoupled weight decay update**: \`param = param * (1.0 - lr * weight_decay)\`
+2. **First moment update**: \`m = beta1 * m + (1.0 - beta1) * grad\`
+3. **Second moment update**: \`v = beta2 * v + (1.0 - beta2) * (grad ** 2)\`
+4. **Bias correction**:
+   - \`m_hat = m / (1.0 - beta1 ** t)\`
+   - \`v_hat = v / (1.0 - beta2 ** t)\`
+5. **Parameter update**: \`param_new = param - lr * m_hat / (np.sqrt(v_hat) + eps)\`
+6. Return \`(param_new, m, v)\`.
+
+### Requirements:
+1. Fully vectorized using NumPy (no loops across parameter tensor elements).
+2. Compute accurate bias correction using the time step \`t\` (1-indexed).`,
+    examples: [
+      {
+        input: 'param=[2.0, -1.0], grad=[0.1, -0.2], t=1',
+        output: 'Updated param, m, v arrays following AdamW equations',
+        explanation: 'Weights updated with decoupled decay and momentum.'
+      }
+    ],
+    constraints: [
+      'param, grad, m, v have identical NumPy shapes.',
+      't >= 1 (1-indexed timestep)',
+      '0 <= beta1, beta2 < 1',
+      'lr > 0, eps > 0, weight_decay >= 0'
+    ],
+    starterCode: `import numpy as np
+from typing import Tuple
+
+def adamw_step(
+    param: np.ndarray,
+    grad: np.ndarray,
+    m: np.ndarray,
+    v: np.ndarray,
+    t: int,
+    lr: float = 1e-3,
+    beta1: float = 0.9,
+    beta2: float = 0.999,
+    eps: float = 1e-8,
+    weight_decay: float = 0.01
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Computes single AdamW optimization step.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `import numpy as np
+from typing import Tuple
+
+def adamw_step(
+    param: np.ndarray,
+    grad: np.ndarray,
+    m: np.ndarray,
+    v: np.ndarray,
+    t: int,
+    lr: float = 1e-3,
+    beta1: float = 0.9,
+    beta2: float = 0.999,
+    eps: float = 1e-8,
+    weight_decay: float = 0.01
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    # 1. Decoupled weight decay
+    param_decayed = param * (1.0 - lr * weight_decay)
+    
+    # 2. Update biased first and second moments
+    m_new = beta1 * m + (1.0 - beta1) * grad
+    v_new = beta2 * v + (1.0 - beta2) * (grad ** 2)
+    
+    # 3. Bias corrections
+    m_hat = m_new / (1.0 - beta1 ** t)
+    v_hat = v_new / (1.0 - beta2 ** t)
+    
+    # 4. Parameter update
+    param_new = param_decayed - lr * m_hat / (np.sqrt(v_hat) + eps)
+    
+    return param_new, m_new, v_new
+`,
+    testHarness: `
+import numpy as np
+
+def _run_tests():
+    p = np.array([2.0, -1.0])
+    g = np.array([0.1, -0.2])
+    m = np.zeros(2)
+    v = np.zeros(2)
+    
+    # Step 1: t=1
+    p1, m1, v1 = adamw_step(p, g, m, v, t=1, lr=0.1, weight_decay=0.01)
+    
+    # Decoupled decay: p * (1 - 0.1 * 0.01) = p * 0.999 = [1.998, -0.999]
+    # m_new = 0.1 * g = [0.01, -0.02] -> m_hat = [0.1, -0.2]
+    # v_new = 0.001 * g^2 = [0.00001, 0.00004] -> v_hat = [0.01, 0.04]
+    # update = 0.1 * m_hat / sqrt(v_hat) = 0.1 * [1.0, -1.0] = [0.1, -0.1]
+    # expected p1 = [1.998 - 0.1, -0.999 - (-0.1)] = [1.898, -0.899]
+    exp_p1 = np.array([1.898, -0.899])
+    
+    passed1 = np.allclose(p1, exp_p1, atol=1e-3)
+    _test_items.append({
+        "input": "adamw_step(t=1, lr=0.1, weight_decay=0.01)",
+        "expected": f"param ~ {exp_p1}",
+        "actual": f"param = {np.round(p1, 4)}",
+        "passed": bool(passed1)
+    })
+
+    # Step 2: Zero gradient pure decay check
+    p_zero_g, _, _ = adamw_step(np.array([10.0]), np.array([0.0]), np.array([0.0]), np.array([0.0]), t=1, lr=0.1, weight_decay=0.05)
+    # expected = 10.0 * (1.0 - 0.005) = 9.95
+    passed2 = np.isclose(p_zero_g[0], 9.95)
+    _test_items.append({
+        "input": "Zero gradient pure weight decay check",
+        "expected": "param = 9.95",
+        "actual": f"param = {p_zero_g[0]:.4f}",
+        "passed": bool(passed2)
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'In AdamW, weight decay is applied directly to the parameters prior to or alongside the gradient step: $w \\leftarrow w(1 - \\eta \\lambda) - \\eta \\frac{\\hat{m}}{\\sqrt{\\hat{v}} + \\epsilon}$. Compute the moving average of gradients $m$ and squared gradients $v$, correct for initialization bias at step $t$ using $(1 - \\beta^t)$, and apply the adaptive update.',
+      timeComplexity: 'O(P) linear in parameter count P.',
+      spaceComplexity: 'O(P) for moment vectors.',
+      keyTakeaway: 'AdamW prevents weights from being over-regularized or under-regularized based on gradient scale, making it the default optimizer for training LLMs and Vision Transformers.'
+    },
+    hints: [
+      'Multiply param by `(1.0 - lr * weight_decay)`.',
+      'Compute bias correction: `m_hat = m_new / (1.0 - beta1 ** t)`.',
+      'The step update is `- lr * m_hat / (np.sqrt(v_hat) + eps)`.'
+    ]
+  }
 ];

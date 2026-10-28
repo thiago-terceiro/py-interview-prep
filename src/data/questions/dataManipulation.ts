@@ -653,5 +653,253 @@ _run_tests()
       'Extract `.mean()` and `.std()` from that rolling object.',
       'Multiply standard deviation by `k` and add/subtract from the mean.'
     ]
+  },
+
+  {
+    id: 'py-42-numpy-2d-convolution-strides',
+    number: 42,
+    title: 'Vectorized 2D Convolution via NumPy Stride Tricks (as_strided)',
+    slug: 'numpy-2d-convolution-stride-tricks',
+    track: 'data-manipulation',
+    difficulty: 'Hard',
+    tags: ['NumPy', 'Stride Tricks', 'Vectorization', 'Image Processing', 'CNN'],
+    summary: 'Implement sliding-window 2D spatial convolution without Python loops using NumPy stride tricks.',
+    description: `Writing spatial convolutions with nested Python loops is notoriously slow. In computer vision and deep learning frameworks, 2D convolution and pooling operations create virtual sliding-window views using memory strides.
+
+Given a 2D float image \`image\` of shape \`(H, W)\` and a 2D filter kernel \`kernel\` of shape \`(kH, kW)\`:
+Implement \`conv2d_strided(image, kernel, stride=1)\` to compute the 2D valid convolution without allocating duplicate memory buffers for each sliding window.
+
+### Requirements:
+1. Use \`np.lib.stride_tricks.as_strided\` to create a 4D view of shape \`(out_H, out_W, kH, kW)\`.
+2. Compute the element-wise sum of products using \`np.einsum('ijkl,kl->ij', ...)\` or tensor contractions.
+3. Support arbitrary positive \`stride\`.
+4. Output must be a 2D NumPy array of shape \`((H - kH) // stride + 1, (W - kW) // stride + 1)\`.`,
+    examples: [
+      {
+        input: 'image = 4x4 matrix, kernel = 2x2 matrix, stride = 1',
+        output: '3x3 convolved output matrix',
+        explanation: 'Each 2x2 spatial patch is multiplied element-wise by kernel and summed.'
+      }
+    ],
+    constraints: [
+      'image.ndim == 2, kernel.ndim == 2',
+      'H >= kH >= 1, W >= kW >= 1',
+      'stride >= 1',
+      'No Python for-loops over pixels allowed.'
+    ],
+    starterCode: `import numpy as np
+
+def conv2d_strided(image: np.ndarray, kernel: np.ndarray, stride: int = 1) -> np.ndarray:
+    """
+    Computes 2D spatial convolution using NumPy stride tricks and einsum.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `import numpy as np
+
+def conv2d_strided(image: np.ndarray, kernel: np.ndarray, stride: int = 1) -> np.ndarray:
+    H, W = image.shape
+    kH, kW = kernel.shape
+    out_H = (H - kH) // stride + 1
+    out_W = (W - kW) // stride + 1
+    
+    # 4D view: (out_H, out_W, kH, kW)
+    shape = (out_H, out_W, kH, kW)
+    strides = (
+        image.strides[0] * stride,
+        image.strides[1] * stride,
+        image.strides[0],
+        image.strides[1]
+    )
+    
+    windows = np.lib.stride_tricks.as_strided(image, shape=shape, strides=strides)
+    return np.einsum('ijkl,kl->ij', windows, kernel)
+`,
+    testHarness: `
+import numpy as np
+
+def _run_tests():
+    # Test 1: 4x4 image with 2x2 kernel
+    img = np.array([
+        [1.0, 2.0, 3.0, 0.0],
+        [0.0, 1.0, 2.0, 3.0],
+        [3.0, 0.0, 1.0, 2.0],
+        [2.0, 3.0, 0.0, 1.0]
+    ], dtype=float)
+    ker = np.array([
+        [2.0, 0.0],
+        [0.0, 2.0]
+    ], dtype=float)
+    
+    out1 = conv2d_strided(img, ker, stride=1)
+    exp1 = np.array([
+        [4.0, 8.0, 12.0],
+        [0.0, 4.0, 8.0],
+        [12.0, 0.0, 4.0]
+    ], dtype=float)
+    p1 = np.allclose(out1, exp1)
+    _test_items.append({
+        "input": "4x4 image * 2x2 diagonal kernel (stride=1)",
+        "expected": str(exp1.tolist()),
+        "actual": str(out1.tolist()),
+        "passed": bool(p1)
+    })
+
+    # Test 2: Stride 2 downsampling
+    out2 = conv2d_strided(img, ker, stride=2)
+    exp2 = np.array([
+        [4.0, 12.0],
+        [12.0, 4.0]
+    ], dtype=float)
+    p2 = np.allclose(out2, exp2)
+    _test_items.append({
+        "input": "4x4 image * 2x2 diagonal kernel (stride=2)",
+        "expected": str(exp2.tolist()),
+        "actual": str(out2.tolist()),
+        "passed": bool(p2)
+    })
+
+    # Test 3: Kernel equal to image size (output 1x1)
+    out3 = conv2d_strided(ker, ker, stride=1)
+    exp3 = np.array([[8.0]])
+    p3 = np.allclose(out3, exp3)
+    _test_items.append({
+        "input": "2x2 image * 2x2 kernel (1x1 output)",
+        "expected": "[[8.0]]",
+        "actual": str(out3.tolist()),
+        "passed": bool(p3)
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Create a 4D view of shape `(out_H, out_W, kH, kW)` using `as_strided`. The first two dimensions index which patch is selected (stepping by `image.strides * stride`), while the last two dimensions index pixels within that patch (stepping by standard `image.strides`). `np.einsum("ijkl,kl->ij", windows, kernel)` multiplies and sums along patch dimensions without allocating memory.',
+      timeComplexity: 'O(out_H * out_W * kH * kW) in heavily optimized C/BLAS without Python loop interpreter overhead.',
+      spaceComplexity: 'O(1) memory allocation for the window view (virtual memory strides).',
+      keyTakeaway: '`as_strided` allows viewing overlapping sub-arrays in O(1) memory, serving as the mathematical backbone of NumPy and PyTorch im2col operations.'
+    },
+    hints: [
+      'Calculate `out_H = (H - kH) // stride + 1` and `out_W = (W - kW) // stride + 1`.',
+      'The 4D strides tuple is `(image.strides[0]*stride, image.strides[1]*stride, image.strides[0], image.strides[1])`.',
+      'Use `np.einsum("ijkl,kl->ij", windows, kernel)` to contract the patch.'
+    ]
+  },
+
+  {
+    id: 'py-43-pandas-asof-trade-matcher',
+    number: 43,
+    title: 'High-Throughput As-Of Execution Matching with Slippage (Pandas)',
+    slug: 'pandas-asof-trade-matcher',
+    track: 'data-manipulation',
+    difficulty: 'Hard',
+    tags: ['Pandas', 'merge_asof', 'Time Series', 'Financial Engineering', 'Quantitative Analytics'],
+    summary: 'Perform high-throughput asynchronous execution matching between trade prints and order book quotes.',
+    description: `In quantitative trading and execution analytics, trades executed on an exchange must be matched against the prevailing National Best Bid and Offer (NBBO) quote that was active immediately prior to the trade execution timestamp.
+
+Given two DataFrames:
+1. \`trades_df\`: Columns \`['timestamp', 'symbol', 'price_trade']\`
+2. \`quotes_df\`: Columns \`['timestamp', 'symbol', 'bid', 'ask']\`
+
+Implement \`match_trades_to_quotes(trades_df, quotes_df, tolerance_ms=50)\`:
+1. Both dataframes must be sorted by \`timestamp\`.
+2. Perform a backward as-of join (\`pd.merge_asof\`) matching each trade to the most recent quote for the same \`symbol\`.
+3. If the quote timestamp is older than \`tolerance_ms\` milliseconds relative to the trade timestamp, the quote is rejected (leaving quote columns as \`NaN\`).
+4. Compute a new column \`slippage = (price_trade - bid).abs()\`.
+
+### Requirements:
+1. Use Pandas \`pd.merge_asof\` with \`direction='backward'\`, \`by='symbol'\`, and \`tolerance=pd.Timedelta(milliseconds=tolerance_ms)\`.
+2. Return the enriched trade dataframe.`,
+    examples: [
+      {
+        input: 'trades at 10:00:00.010 and 10:00:00.100; quotes at 10:00:00.000 (bid=150.00)',
+        output: 'Trade 1 matched with slippage 0.05; Trade 2 unmatched (diff 100ms > tolerance 50ms)',
+        explanation: 'As-of merge respects temporal ordering and tolerance limits.'
+      }
+    ],
+    constraints: [
+      'trades_df and quotes_df have valid datetime timestamps.',
+      'tolerance_ms > 0',
+      'Must handle multiple symbols without cross-symbol pollution.'
+    ],
+    starterCode: `import pandas as pd
+
+def match_trades_to_quotes(trades_df: pd.DataFrame, quotes_df: pd.DataFrame, tolerance_ms: int = 50) -> pd.DataFrame:
+    """
+    Matches trades to the prevailing quote via backward as-of merge with tolerance.
+    """
+    # Write your solution here
+    pass
+`,
+    solutionCode: `import pandas as pd
+
+def match_trades_to_quotes(trades_df: pd.DataFrame, quotes_df: pd.DataFrame, tolerance_ms: int = 50) -> pd.DataFrame:
+    t_sorted = trades_df.sort_values('timestamp')
+    q_sorted = quotes_df.sort_values('timestamp')
+    
+    merged = pd.merge_asof(
+        t_sorted,
+        q_sorted,
+        on='timestamp',
+        by='symbol',
+        direction='backward',
+        tolerance=pd.Timedelta(milliseconds=tolerance_ms)
+    )
+    
+    # Calculate execution slippage
+    merged['slippage'] = (merged['price_trade'] - merged['bid']).abs()
+    return merged
+`,
+    testHarness: `
+import pandas as pd
+import numpy as np
+
+def _run_tests():
+    t_data = pd.DataFrame({
+        'timestamp': pd.to_datetime(['2026-01-01 10:00:00.010', '2026-01-01 10:00:00.100']),
+        'symbol': ['AAPL', 'AAPL'],
+        'price_trade': [150.05, 150.50]
+    })
+    q_data = pd.DataFrame({
+        'timestamp': pd.to_datetime(['2026-01-01 10:00:00.000', '2026-01-01 10:00:00.020']),
+        'symbol': ['AAPL', 'AAPL'],
+        'bid': [150.00, 150.10],
+        'ask': [150.02, 150.12]
+    })
+
+    res = match_trades_to_quotes(t_data, q_data, tolerance_ms=50)
+
+    # Test 1: First trade matched to quote at 10:00:00.000 (10ms diff <= 50ms)
+    slip1 = res.iloc[0]['slippage']
+    p1 = np.isclose(slip1, 0.05)
+    _test_items.append({
+        "input": "Trade 1 at 10ms matched to quote at 0ms (diff 10ms)",
+        "expected": "slippage = 0.05",
+        "actual": f"slippage = {slip1:.2f}",
+        "passed": bool(p1)
+    })
+
+    # Test 2: Second trade at 100ms exceeds 50ms tolerance from 20ms quote -> bid is NaN
+    p2 = pd.isna(res.iloc[1]['bid']) and pd.isna(res.iloc[1]['slippage'])
+    _test_items.append({
+        "input": "Trade 2 at 100ms vs latest quote at 20ms (diff 80ms > 50ms)",
+        "expected": "bid is NaN, slippage is NaN",
+        "actual": f"bid={res.iloc[1]['bid']}, slippage={res.iloc[1]['slippage']}",
+        "passed": bool(p2)
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Sort both frames by `timestamp`. Use `pd.merge_asof` matching on `timestamp` partitioned `by="symbol"`. Specifying `direction="backward"` guarantees taking the latest quote prior to trade execution. Supplying `tolerance=pd.Timedelta(milliseconds=tolerance_ms)` automatically invalidates outdated quotes without manual looping.',
+      timeComplexity: 'O(T log T + Q log Q + T + Q) using binary search / merge pointer traversal.',
+      spaceComplexity: 'O(T + Q) merged dataframe.',
+      keyTakeaway: '`pd.merge_asof` executes temporal fuzzy joins without generating Cartesian products, making it thousands of times faster than standard SQL outer joins for tick data.'
+    },
+    hints: [
+      'Both DataFrames must be sorted by `timestamp` before calling `merge_asof`.',
+      'Pass `direction="backward"` and `tolerance=pd.Timedelta(milliseconds=tolerance_ms)`.',
+      'Set `by="symbol"` to match within the same ticker.'
+    ]
   }
 ];

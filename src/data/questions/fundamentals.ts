@@ -794,4 +794,416 @@ _run_tests()
       'Return `True` to suppress, `False` otherwise.'
     ]
   },
+
+  {
+    id: 'py-39-lfu-cache',
+    number: 39,
+    title: 'Design an LFU (Least Frequently Used) Cache with O(1) Operations',
+    slug: 'lfu-cache-design',
+    track: 'fundamentals',
+    difficulty: 'Hard',
+    tags: ['Design', 'Hash Map', 'Doubly Linked List', 'Data Structures', 'Caching'],
+    summary: 'Implement an LFU cache with strictly O(1) time complexity for get and put operations.',
+    description: `Design and implement a data structure for a **Least Frequently Used (LFU)** cache.
+
+Implement the \`LFUCache\` class:
+- \`LFUCache(int capacity)\`: Initializes the object with the capacity of the data structure.
+- \`int get(int key)\`: Gets the value of the key if the key exists in the cache. Otherwise, returns \`-1\`.
+- \`void put(int key, int value)\`: Update the value of the key if present, or inserts the key if not already present. When the cache reaches its capacity, it should invalidate and remove the **least frequently used** key before inserting a new item. For this problem, when there is a **tie** (i.e., two or more keys with the same frequency), the **least recently used** key should be invalidated.
+
+The functions \`get\` and \`put\` must each run in **O(1)** average time complexity.
+
+### Requirements:
+1. Both \`get(key)\` and \`put(key, value)\` must be **O(1)**.
+2. Invalidate ties using the LRU criterion among identical frequency buckets.
+3. Handle \`capacity = 0\` correctly.`,
+    examples: [
+      {
+        input: '["LFUCache", "put", "put", "get", "put", "get", "get", "put", "get", "get", "get"]\\n[[2], [1, 1], [2, 2], [1], [3, 3], [2], [3], [4, 4], [1], [3], [4]]',
+        output: '[null, null, null, 1, null, -1, 3, null, -1, 3, 4]',
+        explanation: 'At capacity 2: 1 is fetched (freq 2), then putting 3 evicts key 2 (freq 1).'
+      }
+    ],
+    constraints: [
+      '0 <= capacity <= 10^4',
+      '0 <= key <= 10^5',
+      '0 <= value <= 10^9',
+      'At most 2 * 10^5 calls will be made to get and put.'
+    ],
+    starterCode: `class LFUCache:
+    """
+    Initializes LFU cache with capacity.
+    """
+    def __init__(self, capacity: int):
+        # Write your initialization here
+        pass
+
+    def get(self, key: int) -> int:
+        """
+        Retrieves value for key in O(1) and increments usage frequency.
+        """
+        # Write your solution here
+        pass
+
+    def put(self, key: int, value: int) -> None:
+        """
+        Inserts or updates key in O(1), evicting LFU key on overflow.
+        """
+        # Write your solution here
+        pass
+`,
+    solutionCode: `import collections
+
+class LFUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        # Maps key -> (value, frequency)
+        self.key_to_val_freq = {}
+        # Maps frequency -> OrderedDict(key -> None) maintaining LRU order among same frequency
+        self.freq_to_keys = collections.defaultdict(collections.OrderedDict)
+        self.min_freq = 0
+
+    def get(self, key: int) -> int:
+        if key not in self.key_to_val_freq:
+            return -1
+        val, freq = self.key_to_val_freq[key]
+        del self.freq_to_keys[freq][key]
+        if not self.freq_to_keys[freq] and self.min_freq == freq:
+            self.min_freq += 1
+        self.key_to_val_freq[key] = (val, freq + 1)
+        self.freq_to_keys[freq + 1][key] = None
+        return val
+
+    def put(self, key: int, value: int) -> None:
+        if self.capacity <= 0:
+            return
+        if key in self.key_to_val_freq:
+            self.key_to_val_freq[key] = (value, self.key_to_val_freq[key][1])
+            self.get(key)
+            return
+        if len(self.key_to_val_freq) >= self.capacity:
+            evict_k, _ = self.freq_to_keys[self.min_freq].popitem(last=False)
+            del self.key_to_val_freq[evict_k]
+        self.key_to_val_freq[key] = (value, 1)
+        self.freq_to_keys[1][key] = None
+        self.min_freq = 1
+`,
+    testHarness: `
+def _run_tests():
+    # Test 1: Capacity 2 standard flow
+    c = LFUCache(2)
+    c.put(1, 1)
+    c.put(2, 2)
+    v1 = c.get(1)  # 1 freq=2
+    c.put(3, 3)    # evicts 2 (freq 1)
+    v2 = c.get(2)  # -1
+    v3 = c.get(3)  # 3
+    c.put(4, 4)    # evicts 1 (freq 2 vs 3 freq 2: 1 accessed earlier)
+    v4 = c.get(1)  # -1
+    v5 = c.get(3)  # 3
+    v6 = c.get(4)  # 4
+
+    p1 = (v1 == 1 and v2 == -1 and v3 == 3 and v4 == -1 and v5 == 3 and v6 == 4)
+    _test_items.append({
+        "input": "LFUCache(2) standard sequence",
+        "expected": "v1=1, v2=-1, v3=3, v4=-1, v5=3, v6=4",
+        "actual": f"v1={v1}, v2={v2}, v3={v3}, v4={v4}, v5={v5}, v6={v6}",
+        "passed": p1
+    })
+
+    # Test 2: Capacity 0
+    c0 = LFUCache(0)
+    c0.put(1, 100)
+    v0 = c0.get(1)
+    _test_items.append({
+        "input": "LFUCache(0).put(1, 100); get(1)",
+        "expected": "-1",
+        "actual": str(v0),
+        "passed": v0 == -1
+    })
+
+    # Test 3: Key update preserves / advances frequency
+    c1 = LFUCache(2)
+    c1.put(1, 10)
+    c1.put(1, 20)
+    g1 = c1.get(1)
+    _test_items.append({
+        "input": "LFUCache(2) updating key 1",
+        "expected": "20",
+        "actual": str(g1),
+        "passed": g1 == 20
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Maintain two hash maps: `key_to_val_freq` stores (value, freq). `freq_to_keys` maps frequency count to a doubly linked list (or Python `collections.OrderedDict`). Track `min_freq`. When an element is accessed, promote it to `freq + 1`. On eviction, pop the first element from `freq_to_keys[min_freq]` in O(1).',
+      timeComplexity: 'O(1) average time for both get and put.',
+      spaceComplexity: 'O(capacity) space across hash structures.',
+      keyTakeaway: 'Grouping keys into frequency buckets where each bucket is an OrderedDict enables simultaneous O(1) frequency lookup and O(1) LRU tie-breaking.'
+    },
+    hints: [
+      'Two hash maps are essential: `key -> (val, freq)` and `freq -> OrderedDict(key -> None)`.',
+      'Track `min_freq` integer at all times.',
+      'When an element frequency increases and leaves the current `min_freq` bucket empty, increment `min_freq`.'
+    ],
+    visualizerId: 'two-pointers'
+  },
+
+  {
+    id: 'py-40-token-bucket-rate-limiter',
+    number: 40,
+    title: 'Thread-Safe Token Bucket Rate Limiter with Burst Capacity',
+    slug: 'token-bucket-rate-limiter',
+    track: 'fundamentals',
+    difficulty: 'Hard',
+    tags: ['Concurrency', 'Rate Limiting', 'Threading', 'Time', 'System Design'],
+    summary: 'Implement a thread-safe token bucket rate limiter with lazy fractional replenishment.',
+    description: `Implement a production-grade, thread-safe **Token Bucket Rate Limiter** commonly deployed in API gateways, microservices, and high-frequency trading gateways.
+
+The Token Bucket algorithm allows bursts of requests up to a configurable maximum capacity while strictly enforcing a sustained refill rate.
+
+### Requirements:
+1. Implement \`TokenBucketRateLimiter(rate_per_sec: float, capacity: int)\`.
+2. Implement \`allow_request(tokens: int = 1) -> bool\`.
+3. Do **not** use a background thread or ticker to add tokens; replenish tokens **lazily** based on elapsed fractional seconds using \`time.monotonic()\`.
+4. Ensure thread-safety using Python's \`threading.Lock\`.`,
+    examples: [
+      {
+        input: 'limiter = TokenBucketRateLimiter(rate_per_sec=10, capacity=2)\\nlimiter.allow_request(1)\\nlimiter.allow_request(1)\\nlimiter.allow_request(1)',
+        output: 'True, True, False',
+        explanation: 'Capacity allows 2 immediate bursts; third request is blocked until replenished.'
+      }
+    ],
+    constraints: [
+      'rate_per_sec > 0',
+      'capacity >= 1',
+      'tokens requested >= 1'
+    ],
+    starterCode: `import time
+import threading
+
+class TokenBucketRateLimiter:
+    """
+    Thread-safe lazy-refill Token Bucket Rate Limiter.
+    """
+    def __init__(self, rate_per_sec: float, capacity: int):
+        # Write your initialization here
+        pass
+
+    def allow_request(self, tokens: int = 1) -> bool:
+        """
+        Returns True if tokens are available, False otherwise.
+        """
+        # Write your solution here
+        pass
+`,
+    solutionCode: `import time
+import threading
+
+class TokenBucketRateLimiter:
+    def __init__(self, rate_per_sec: float, capacity: int):
+        self.rate = float(rate_per_sec)
+        self.capacity = float(capacity)
+        self.tokens = float(capacity)
+        self.last_timestamp = time.monotonic()
+        self.lock = threading.Lock()
+
+    def allow_request(self, tokens: int = 1) -> bool:
+        with self.lock:
+            now = time.monotonic()
+            elapsed = now - self.last_timestamp
+            self.last_timestamp = now
+            # Replenish fractional tokens accumulated during elapsed time
+            self.tokens = min(self.capacity, self.tokens + elapsed * self.rate)
+            
+            if self.tokens >= tokens:
+                self.tokens -= tokens
+                return True
+            return False
+`,
+    testHarness: `
+def _run_tests():
+    import time
+    
+    # Test 1: Immediate bursts
+    limiter = TokenBucketRateLimiter(rate_per_sec=10.0, capacity=2)
+    r1 = limiter.allow_request(1)
+    r2 = limiter.allow_request(1)
+    r3 = limiter.allow_request(1)
+    
+    p1 = (r1 is True and r2 is True and r3 is False)
+    _test_items.append({
+        "input": "TokenBucket(10/s, cap=2): 3 immediate requests",
+        "expected": "True, True, False",
+        "actual": f"{r1}, {r2}, {r3}",
+        "passed": p1
+    })
+
+    # Test 2: Replenishment over time
+    limiter2 = TokenBucketRateLimiter(rate_per_sec=50.0, capacity=1)
+    limiter2.allow_request(1)  # Consume capacity
+    time.sleep(0.03)           # Sleep 30ms -> 0.03 * 50 = 1.5 tokens
+    r_replenished = limiter2.allow_request(1)
+    _test_items.append({
+        "input": "TokenBucket(50/s): request after 30ms sleep",
+        "expected": "True",
+        "actual": str(r_replenished),
+        "passed": r_replenished is True
+    })
+
+    # Test 3: Multi-token request exceeds capacity
+    limiter3 = TokenBucketRateLimiter(rate_per_sec=10.0, capacity=5)
+    r_big = limiter3.allow_request(6)
+    _test_items.append({
+        "input": "allow_request(6) on capacity 5",
+        "expected": "False",
+        "actual": str(r_big),
+        "passed": r_big is False
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'Avoid spinning background threads. Calculate elapsed time on every call using `time.monotonic()`. Multiply elapsed time by `rate_per_sec` and add to current tokens (capped at `capacity`). If tokens >= requested, deduct and return True. Guard the block with `threading.Lock`.',
+      timeComplexity: 'O(1) strictly per request check.',
+      spaceComplexity: 'O(1) state storage.',
+      keyTakeaway: 'Lazy replenishment replaces timer threads with simple elapsed-time arithmetic, minimizing CPU consumption and context switching.'
+    },
+    hints: [
+      'Use `time.monotonic()` instead of `time.time()` to prevent clock drift issues.',
+      'Formula: `tokens = min(capacity, tokens + elapsed * rate)`.',
+      'Wrap state changes inside `with self.lock:`.'
+    ]
+  },
+
+  {
+    id: 'py-41-immutable-schema-metaclass',
+    number: 41,
+    title: 'Strict Schema Metaclass with Slot Allocation and Type Coercion',
+    slug: 'strict-schema-metaclass',
+    track: 'fundamentals',
+    difficulty: 'Hard',
+    tags: ['Metaclasses', 'Slots', 'Dunder Methods', 'Type System', 'OOP'],
+    summary: 'Create a custom Python metaclass that enforces type hints, generates __slots__, and validates records.',
+    description: `Modern high-performance Python libraries (like Pydantic and attrs) use metaprogramming to eliminate boilerplate while enforcing runtime validation and memory efficiency.
+
+Write a custom Python metaclass \`SchemaMeta\` such that any class inheriting from \`SchemaModel\` (or using \`metaclass=SchemaMeta\`):
+1. Reads class annotations (\`__annotations__\`).
+2. Automatically defines \`__slots__\` from the annotation keys, preventing arbitrary attribute injection.
+3. Automatically generates an \`__init__\` method that:
+   - Requires all annotated fields as keyword arguments (raises \`TypeError\` if missing).
+   - Validates that provided values match the annotated types (raises \`TypeError\` on mismatch).
+   - Assigns validated attributes onto the instance.
+
+### Requirements:
+1. Define \`SchemaMeta(type)\`.
+2. Define base class \`SchemaModel(metaclass=SchemaMeta)\`.
+3. Disallow undefined attributes via generated \`__slots__\`.`,
+    examples: [
+      {
+        input: 'class User(SchemaModel):\\n    name: str\\n    age: int\\n\\nu = User(name="Alice", age=30)',
+        output: 'u.name == "Alice", u.age == 30',
+        explanation: 'Instance initialized cleanly.'
+      },
+      {
+        input: 'User(name="Bob", age="30")',
+        output: 'Raises TypeError',
+        explanation: 'age is not an int.'
+      }
+    ],
+    constraints: [
+      'Must work dynamically for arbitrary field annotations.',
+      'Instances must have __slots__ configured.'
+    ],
+    starterCode: `class SchemaMeta(type):
+    """
+    Custom metaclass inspecting annotations to enforce types and __slots__.
+    """
+    # Write your metaclass implementation here
+    pass
+
+class SchemaModel(metaclass=SchemaMeta):
+    pass
+`,
+    solutionCode: `class SchemaMeta(type):
+    def __new__(cls, name, bases, namespace):
+        annotations = namespace.get('__annotations__', {})
+        # Generate __slots__ to optimize memory and disallow arbitrary attributes
+        namespace['__slots__'] = tuple(annotations.keys())
+        
+        def __init__(self, **kwargs):
+            for k, expected_type in annotations.items():
+                if k not in kwargs:
+                    raise TypeError(f"Missing required field: '{k}'")
+                val = kwargs[k]
+                if not isinstance(val, expected_type):
+                    raise TypeError(f"Field '{k}' must be {expected_type.__name__}, got {type(val).__name__}")
+                setattr(self, k, val)
+                
+        namespace['__init__'] = __init__
+        return super().__new__(cls, name, bases, namespace)
+
+class SchemaModel(metaclass=SchemaMeta):
+    pass
+`,
+    testHarness: `
+def _run_tests():
+    class Person(SchemaModel):
+        name: str
+        age: int
+        active: bool
+
+    # Test 1: Valid initialization
+    p = Person(name="Alice", age=28, active=True)
+    p1 = (p.name == "Alice" and p.age == 28 and p.active is True)
+    _test_items.append({
+        "input": "Person(name='Alice', age=28, active=True)",
+        "expected": "Valid Person instance",
+        "actual": f"name={p.name}, age={p.age}, active={p.active}",
+        "passed": p1
+    })
+
+    # Test 2: Type mismatch raises TypeError
+    type_err = False
+    try:
+        Person(name="Bob", age="invalid", active=True)
+    except TypeError:
+        type_err = True
+
+    _test_items.append({
+        "input": "Person(name='Bob', age='invalid', active=True)",
+        "expected": "Raises TypeError",
+        "actual": f"Raised: {type_err}",
+        "passed": type_err
+    })
+
+    # Test 3: Slots prevent dynamic attribute addition
+    slots_err = False
+    try:
+        p.unregistered_attr = 42
+    except AttributeError:
+        slots_err = True
+
+    _test_items.append({
+        "input": "p.unregistered_attr = 42 (verifying __slots__)",
+        "expected": "Raises AttributeError",
+        "actual": f"Raised: {slots_err}",
+        "passed": slots_err
+    })
+
+_run_tests()
+`,
+    explanation: {
+      approach: 'In `SchemaMeta.__new__`, inspect `namespace.get("__annotations__", {})`. Inject `__slots__ = tuple(annotations.keys())` into the class dictionary before passing it to `super().__new__`. Construct a custom `__init__` checking keyword argument presence and `isinstance(val, expected_type)`.',
+      timeComplexity: 'O(1) class definition time, O(F) per-instance construction where F is field count.',
+      spaceComplexity: 'Substantially lower memory per instance due to __slots__ replacing dynamic __dict__.',
+      keyTakeaway: 'Metaclasses execute at class creation time, enabling automatic code generation and memory optimization before any instance is instantiated.'
+    },
+    hints: [
+      'Override `__new__` on `SchemaMeta(type)` taking `(cls, name, bases, namespace)`.',
+      'Assign `namespace["__slots__"] = tuple(annotations.keys())`.',
+      'Create an `__init__` function inside `__new__` and attach it to `namespace["__init__"]`.'
+    ]
+  }
 ];
