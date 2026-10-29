@@ -233,21 +233,6 @@ export const QuizHub: React.FC = () => {
         badgeColor="text-indigo-400"
         title={t('quizHeroTitle')}
         description={t('quizHeroDesc')}
-        action={
-          <div className="flex items-center gap-3 bg-[#0d1117]/80 border border-slate-800 px-4 py-2.5 rounded-xl shrink-0">
-            <div>
-              <div className="text-[11px] text-slate-400">Completed</div>
-              <div className="text-xl font-black text-white font-mono">
-                {completedTotal} <span className="text-xs font-normal text-slate-500">/ {totalQuestions}</span>
-              </div>
-            </div>
-            <div className="flex items-center justify-center">
-              <span className="text-xs font-bold text-indigo-400 font-mono bg-indigo-500/10 border border-indigo-500/30 px-2 py-0.5 rounded-full">
-                {overallPercent}%
-              </span>
-            </div>
-          </div>
-        }
       />
 
       {/* Stats Bar */}

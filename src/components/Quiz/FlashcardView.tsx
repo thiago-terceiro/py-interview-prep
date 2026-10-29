@@ -9,7 +9,6 @@ import {
   Eye,
   EyeOff,
   Shuffle,
-  Brain,
   Award,
   Sparkles,
   Check,
@@ -48,6 +47,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   const dragStartTimeRef = useRef<number>(0);
   const isPointerDownRef = useRef<boolean>(false);
   const hasDraggedRef = useRef<boolean>(false);
+  const isIntentLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const cardRef = useRef<HTMLElement>(null);
 
   // Filter deck based on selection: All vs Marked for Review
@@ -97,6 +97,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
   const handlePrev = useCallback(() => {
     if (hasPrev && !animatingCard) {
+      if (
+        document.activeElement instanceof HTMLElement &&
+        (document.activeElement === cardRef.current || cardRef.current?.contains(document.activeElement))
+      ) {
+        document.activeElement.blur();
+      }
+
+      const initialScrollY = window.scrollY;
       setDragOffset(0);
       setAnimatingCard({ dir: 'right', phase: 'exit' });
       setTimeout(() => {
@@ -104,9 +112,20 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         setShowOptionsHint(false);
         setActiveDeckIndex(prev => prev - 1);
         setAnimatingCard({ dir: 'right', phase: 'enter-prep' });
+
+        if (window.scrollY !== initialScrollY && initialScrollY > 0) {
+          window.scrollTo({ top: initialScrollY, behavior: 'instant' as ScrollBehavior });
+        }
+
         requestAnimationFrame(() => {
+          if (window.scrollY !== initialScrollY && initialScrollY > 0) {
+            window.scrollTo({ top: initialScrollY, behavior: 'instant' as ScrollBehavior });
+          }
           requestAnimationFrame(() => {
             setAnimatingCard({ dir: 'right', phase: 'enter-active' });
+            if (window.scrollY !== initialScrollY && initialScrollY > 0) {
+              window.scrollTo({ top: initialScrollY, behavior: 'instant' as ScrollBehavior });
+            }
             setTimeout(() => {
               setAnimatingCard(null);
             }, 300);
@@ -118,6 +137,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
   const handleNext = useCallback(() => {
     if (hasNext && !animatingCard) {
+      if (
+        document.activeElement instanceof HTMLElement &&
+        (document.activeElement === cardRef.current || cardRef.current?.contains(document.activeElement))
+      ) {
+        document.activeElement.blur();
+      }
+
+      const initialScrollY = window.scrollY;
       setDragOffset(0);
       setAnimatingCard({ dir: 'left', phase: 'exit' });
       setTimeout(() => {
@@ -125,9 +152,20 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         setShowOptionsHint(false);
         setActiveDeckIndex(prev => prev + 1);
         setAnimatingCard({ dir: 'left', phase: 'enter-prep' });
+
+        if (window.scrollY !== initialScrollY && initialScrollY > 0) {
+          window.scrollTo({ top: initialScrollY, behavior: 'instant' as ScrollBehavior });
+        }
+
         requestAnimationFrame(() => {
+          if (window.scrollY !== initialScrollY && initialScrollY > 0) {
+            window.scrollTo({ top: initialScrollY, behavior: 'instant' as ScrollBehavior });
+          }
           requestAnimationFrame(() => {
             setAnimatingCard({ dir: 'left', phase: 'enter-active' });
+            if (window.scrollY !== initialScrollY && initialScrollY > 0) {
+              window.scrollTo({ top: initialScrollY, behavior: 'instant' as ScrollBehavior });
+            }
             setTimeout(() => {
               setAnimatingCard(null);
             }, 300);
@@ -198,23 +236,29 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     dragStartTimeRef.current = Date.now();
     isPointerDownRef.current = true;
     hasDraggedRef.current = false;
+    isIntentLockedRef.current = null;
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLElement>) => {
     if (!isPointerDownRef.current) return;
     const deltaX = e.clientX - dragStartXRef.current;
     const deltaY = e.clientY - dragStartYRef.current;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-    if (!hasDraggedRef.current) {
-      // Determine if horizontal intent is clear
-      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
-        if (Math.abs(deltaY) > Math.abs(deltaX) * 1.3) {
-          // Primarily vertical scroll: abort horizontal drag
-          isPointerDownRef.current = false;
-          setIsDragging(false);
-          setDragOffset(0);
-          return;
-        }
+    if (isIntentLockedRef.current === null) {
+      // 1. If vertical movement begins or matches horizontal: strictly lock to vertical scrolling
+      if (absY >= 12 && absY >= absX) {
+        isIntentLockedRef.current = 'vertical';
+        isPointerDownRef.current = false;
+        setIsDragging(false);
+        setDragOffset(0);
+        return;
+      }
+
+      // 2. Only lock into horizontal card swipe if there is clear, substantial horizontal dominance
+      if (absX >= 18 && absX >= absY * 2.0) {
+        isIntentLockedRef.current = 'horizontal';
         hasDraggedRef.current = true;
         setIsDragging(true);
 
@@ -228,10 +272,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       }
     }
 
-    if (hasDraggedRef.current) {
+    if (isIntentLockedRef.current === 'vertical') {
+      return;
+    }
+
+    if (isIntentLockedRef.current === 'horizontal' && hasDraggedRef.current) {
       // Resistance dampening if swiping past bounds
       if ((deltaX > 0 && !hasPrev) || (deltaX < 0 && !hasNext)) {
-        setDragOffset(deltaX * 0.28);
+        setDragOffset(deltaX * 0.25);
       } else {
         setDragOffset(deltaX);
       }
@@ -239,7 +287,11 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   };
 
   const handlePointerUp = (e: React.PointerEvent<HTMLElement>) => {
-    if (!isPointerDownRef.current && !hasDraggedRef.current) return;
+    if (!isPointerDownRef.current && !hasDraggedRef.current) {
+      isIntentLockedRef.current = null;
+      return;
+    }
+
     isPointerDownRef.current = false;
     setIsDragging(false);
 
@@ -252,16 +304,22 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     }
 
     const deltaX = e.clientX - dragStartXRef.current;
+    const deltaY = e.clientY - dragStartYRef.current;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
     const deltaTime = Date.now() - dragStartTimeRef.current;
-    const velocity = Math.abs(deltaX) / Math.max(deltaTime, 1);
+    const velocityX = absX / Math.max(deltaTime, 1);
 
-    const SWIPE_DISTANCE_THRESHOLD = 60; // px
-    const SWIPE_VELOCITY_THRESHOLD = 0.35; // px/ms
-
-    if (
+    // Require unambiguous horizontal swipe intent
+    const isClearHorizontalSwipe =
+      isIntentLockedRef.current === 'horizontal' &&
       hasDraggedRef.current &&
-      (Math.abs(deltaX) > SWIPE_DISTANCE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD)
-    ) {
+      absX > absY * 1.8 &&
+      (absX >= 75 || (absX >= 40 && velocityX >= 0.55));
+
+    isIntentLockedRef.current = null;
+
+    if (isClearHorizontalSwipe) {
       if (deltaX < 0 && hasNext) {
         // Swiped / Dragged Left -> Next Card
         handleNext();
@@ -294,6 +352,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         {/* Deck Filters */}
         <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
           <button
+            type="button"
             onClick={() => setDeckFilter('all')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               deckFilter === 'all'
@@ -305,6 +364,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => setDeckFilter('review')}
             className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               deckFilter === 'review'
@@ -321,6 +381,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
         {/* Shuffle Button */}
         <div className="flex items-center gap-2 self-end sm:self-center">
           <button
+            type="button"
             onClick={handleShuffle}
             disabled={filteredIndices.length <= 1}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#0d1117] text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition disabled:opacity-50"
@@ -338,6 +399,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           <CheckCircle2 className="w-12 h-12 text-sky-400 mx-auto" />
           <p className="text-base font-semibold">{t('flashcardEmptyDeck')}</p>
           <button
+            type="button"
             onClick={() => setDeckFilter('all')}
             className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition shadow-lg shadow-sky-600/20"
           >
@@ -363,7 +425,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           </div>
 
           {/* Swipeable & Draggable Flashcard Article */}
-          <div className="relative overflow-visible">
+          <div className="relative overflow-hidden p-1 -m-1">
             <article
               ref={cardRef}
               onClick={handleCardClick}
@@ -426,21 +488,8 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
               {/* Card Body */}
               <div className="my-auto py-5">
                 {!isFlipped ? (
-                  /* ================= FRONT: ACTIVE RECALL PROMPT ================= */
+                  /* ================= FRONT: QUESTION PROMPT ================= */
                   <div className="space-y-5">
-                    {/* Active Recall Coaching Pill */}
-                    <div className="p-3.5 rounded-xl bg-indigo-950/20 border border-indigo-500/30 flex items-start gap-3">
-                      <Brain className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-                      <div>
-                        <div className="text-xs font-bold text-indigo-300 uppercase tracking-wider font-mono">
-                          Active Recall
-                        </div>
-                        <p className="text-xs text-slate-300 leading-snug mt-0.5">
-                          {t('flashcardActiveRecallPrompt')}
-                        </p>
-                      </div>
-                    </div>
-
                     {/* Question Prompt */}
                     <h2 className="text-lg sm:text-2xl font-bold text-white leading-relaxed">
                       {currentQ.question}
@@ -453,6 +502,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                         className="pt-2 border-t border-slate-800/60"
                       >
                         <button
+                          type="button"
                           onClick={() => setShowOptionsHint(prev => !prev)}
                           className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-sky-300 font-medium transition"
                         >
@@ -565,6 +615,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
               >
                 {/* Single Blue Button to mark for review */}
                 <button
+                  type="button"
                   onClick={() => onToggleBookmark(currentQ.id)}
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 ${
                     isMarkedForReview
@@ -597,6 +648,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           {/* Navigation Controls */}
           <div className="flex items-center justify-between px-2 pt-2">
             <button
+              type="button"
               onClick={handlePrev}
               disabled={!hasPrev}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -614,6 +666,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
             </span>
 
             <button
+              type="button"
               onClick={handleNext}
               disabled={!hasNext}
               className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold transition-all ${
