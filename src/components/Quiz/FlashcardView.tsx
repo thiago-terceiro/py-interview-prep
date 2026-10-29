@@ -59,6 +59,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   // Section friendly short names for dropdown options
   const sectionShortLabels: Record<string, string> = useMemo(
     () => ({
+      'Machine Learning Fundamentals & Beginner Concepts': 'ML Fundamentals (Beginner)',
       'Classical ML, Feature Engineering & Fraud/Anomaly Detection': 'Classical ML & Fraud',
       'Ultra-Low-Latency Inference, ONNX & Real-Time Data Stores': 'Low-Latency & ONNX',
       'MLOps, Drift Detection, CI/CD & Observability': 'MLOps & CI/CD',

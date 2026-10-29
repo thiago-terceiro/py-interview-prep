@@ -1293,5 +1293,705 @@ export const quizQuestions: QuizQuestion[] = [
       "Explains without jargon that legitimate erratic user behavior (e.g., traveling abroad and making a large purchase) and sophisticated fraud overlap in signal space—so moving the threshold to catch 100% of fraud inevitably blocks legitimate customers.",
       "Shows how the 3-Zone Policy (ALLOW | FLAG | BLOCK) + Two-Tier Architecture solves this operationally: auto-allowing clear good traffic, auto-blocking clear attacks, and routing only the overlapping gray zone (FLAG) to the asynchronous investigation agent + human review console so false positives are resolved without hurting customer conversion."
     ]
+  },
+  {
+    "id": 101,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the primary difference between Supervised Learning and Unsupervised Learning?",
+    "options": {
+      "A": "Supervised learning trains on labeled input-output pairs, while unsupervised learning discovers patterns from unlabeled data.",
+      "B": "Supervised learning uses neural networks, while unsupervised learning only uses decision trees.",
+      "C": "Supervised learning cannot be evaluated with metrics, while unsupervised learning uses accuracy.",
+      "D": "Supervised learning requires continuous target values, while unsupervised learning requires discrete categories."
+    },
+    "answer": "A",
+    "explanation": "Supervised learning algorithms are provided with ground-truth target labels for each sample to learn a mapping function f(x) -> y, whereas unsupervised learning algorithms uncover underlying structures, groupings, or representations without explicit labels."
+  },
+  {
+    "id": 102,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Which of the following scenarios is an example of a Regression problem rather than a Classification problem?",
+    "options": {
+      "A": "Predicting whether an incoming email is spam or not spam.",
+      "B": "Predicting the sale price of a house in dollars based on square footage and location.",
+      "C": "Categorizing medical images into benign, malignant, or normal tissue.",
+      "D": "Identifying whether a bank transaction is fraudulent or legitimate."
+    },
+    "answer": "B",
+    "explanation": "Regression predicts continuous numerical quantities (such as dollars, temperature, or stock price), whereas classification assigns samples to discrete categorical classes."
+  },
+  {
+    "id": 103,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the classic symptom of an overfitted machine learning model?",
+    "options": {
+      "A": "High training error and high validation error.",
+      "B": "Low training error, but substantially higher validation or test error.",
+      "C": "Equal performance on both training and test sets with high bias.",
+      "D": "Inability to learn simple linear relationships in the training dataset."
+    },
+    "answer": "B",
+    "explanation": "Overfitting occurs when a model memorizes noise and idiosyncrasies of the training data rather than generalizable rules, leading to near-zero training error but poor generalization to unseen validation data."
+  },
+  {
+    "id": 104,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Which statement best describes an underfitted machine learning model?",
+    "options": {
+      "A": "The model performs exceptionally well on the test set but fails on the training set.",
+      "B": "The model has too many parameters relative to the number of data points.",
+      "C": "The model is too simplistic to capture the underlying patterns, resulting in poor performance on both training and test data.",
+      "D": "The model has high variance and near-zero bias."
+    },
+    "answer": "C",
+    "explanation": "Underfitting (high bias) happens when the hypothesis space is too constrained or the model lacks complexity (e.g. fitting a straight line to sinusoidal data), performing poorly across both training and validation sets."
+  },
+  {
+    "id": 105,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In the Bias-Variance tradeoff, what do High Bias and High Variance represent respectively?",
+    "options": {
+      "A": "High Bias represents overfitting; High Variance represents underfitting.",
+      "B": "High Bias represents underfitting (oversimplified assumptions); High Variance represents overfitting (extreme sensitivity to training fluctuations).",
+      "C": "High Bias occurs when k is small in KNN; High Variance occurs when k is large in KNN.",
+      "D": "High Bias means the model is slow to train; High Variance means the model consumes too much RAM."
+    },
+    "answer": "B",
+    "explanation": "Bias is error introduced by approximating a complex real-world problem with an overly simple model (underfitting). Variance is the model's sensitivity to small fluctuations in the training set (overfitting)."
+  },
+  {
+    "id": 106,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Why is a dataset commonly split into Train, Validation, and Test sets rather than just Train and Test?",
+    "options": {
+      "A": "The validation set is used to fit model parameters, while the train set tunes hyperparameters.",
+      "B": "The validation set is used to tune hyperparameters and select models without corrupting the final unbiased evaluation on the unseen test set.",
+      "C": "Scikit-Learn requires three sets for all estimators by default.",
+      "D": "The test set is used to compute gradients during backpropagation."
+    },
+    "answer": "B",
+    "explanation": "If hyperparameters are tuned against the test set, the model indirectly overfits to that test set. The validation set provides intermediate feedback for model selection and tuning, keeping the test set purely for an unbiased final score."
+  },
+  {
+    "id": 107,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Which of the following practices constitutes Data Leakage?",
+    "options": {
+      "A": "Fitting a StandardScaler exclusively on the training split, and using it to transform the test split.",
+      "B": "Imputing missing values and scaling features across the entire dataset before performing the train/test split.",
+      "C": "Evaluating model predictions on the held-out test set only once at the end.",
+      "D": "Removing duplicate rows from the raw dataset prior to modeling."
+    },
+    "answer": "B",
+    "explanation": "Calculating global statistics (such as mean and standard deviation) across the combined dataset before splitting leaks validation distribution information into the training pipeline."
+  },
+  {
+    "id": 108,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "When imputing missing values in a numerical column that contains extreme outliers, why is Median imputation preferred over Mean imputation?",
+    "options": {
+      "A": "Median imputation requires more floating-point operations.",
+      "B": "The median is robust to outliers, whereas the mean is heavily skewed by extreme values.",
+      "C": "The mean can only be computed on categorical variables.",
+      "D": "Median imputation guarantees that all imputed values will be integers."
+    },
+    "answer": "B",
+    "explanation": "The mean is sensitive to extreme values (e.g. one $10,000,000 salary drastically inflates the average of $50,000 salaries), while the median represents the 50th percentile and remains unaffected by extreme tails."
+  },
+  {
+    "id": 109,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What does One-Hot Encoding do to a categorical feature with values ['Red', 'Green', 'Blue']?",
+    "options": {
+      "A": "Converts them into a single column with random integer IDs.",
+      "B": "Creates 3 binary indicator columns (one for each category), where exactly one column has value 1 and the others have 0.",
+      "C": "Replaces the colors with their RGB wavelength measurements.",
+      "D": "Normalizes the strings into lowercase ASCII floats."
+    },
+    "answer": "B",
+    "explanation": "One-Hot Encoding converts each unique categorical value into an independent binary column (0 or 1), preventing linear models from assuming an artificial mathematical ordering among categories."
+  },
+  {
+    "id": 110,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the primary risk of using Label Encoding (0, 1, 2) on nominal categories like ['France', 'Germany', 'Spain'] in a linear regression model?",
+    "options": {
+      "A": "It doubles the RAM consumption of the DataFrame.",
+      "B": "The linear model incorrectly assumes an arbitrary mathematical order and magnitude (e.g. Spain = 2 is twice Germany = 1).",
+      "C": "It converts all missing values into NaNs.",
+      "D": "Label Encoding is only valid for text classification with Naive Bayes."
+    },
+    "answer": "B",
+    "explanation": "Nominal categories have no intrinsic mathematical order. Assigning arbitrary integers causes distance-based and linear models to assume numeric relationships (e.g. Spain > Germany > France) that do not exist in reality."
+  },
+  {
+    "id": 111,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the mathematical transformation applied by Min-Max Normalization (MinMaxScaler)?",
+    "options": {
+      "A": "x_scaled = (x - mean) / std",
+      "B": "x_scaled = (x - min) / (max - min), scaling values into a fixed range typically [0, 1].",
+      "C": "x_scaled = log(x + 1)",
+      "D": "x_scaled = x / sum(x)"
+    },
+    "answer": "B",
+    "explanation": "MinMaxScaler linearly shifts and rescales the feature so that the minimum value maps to 0 and the maximum value maps to 1: (x - min) / (max - min)."
+  },
+  {
+    "id": 112,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What are the mean and standard deviation of a feature after applying Standardization (StandardScaler)?",
+    "options": {
+      "A": "Mean = 1, Standard Deviation = 0",
+      "B": "Mean = 0, Standard Deviation = 1",
+      "C": "Mean = 0.5, Standard Deviation = 0.5",
+      "D": "Mean and Standard Deviation remain unchanged."
+    },
+    "answer": "B",
+    "explanation": "StandardScaler computes z = (x - mean) / std, transforming the feature to have zero mean (mean = 0) and unit variance (std = 1)."
+  },
+  {
+    "id": 113,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Why is feature scaling critical for distance-based algorithms such as K-Nearest Neighbors (KNN) and K-Means?",
+    "options": {
+      "A": "Without scaling, the algorithm cannot compute categorical modes.",
+      "B": "Features with larger numerical ranges (e.g. Annual Income in thousands) will dominate the Euclidean distance calculation over features with small ranges (e.g. Age in years).",
+      "C": "Scaling prevents decision trees from splitting on continuous columns.",
+      "D": "Feature scaling reduces the number of samples in the dataset."
+    },
+    "answer": "B",
+    "explanation": "Euclidean distance is the square root of the sum of squared differences. A difference of $10,000 in income will dwarf a difference of 10 years in age unless both features are scaled to a comparable scale."
+  },
+  {
+    "id": 114,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In simple Linear Regression, what mathematical objective does Ordinary Least Squares (OLS) minimize?",
+    "options": {
+      "A": "The sum of absolute differences between predictions and actual values.",
+      "B": "The sum of squared residuals (vertical differences between actual data points and the regression line).",
+      "C": "The classification accuracy on the training set.",
+      "D": "The number of features used in the model."
+    },
+    "answer": "B",
+    "explanation": "Ordinary Least Squares minimizes the residual sum of squares: RSS = sum((y_i - y_hat_i)^2)."
+  },
+  {
+    "id": 115,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In the linear regression formula y = w * x + b, what do 'w' and 'b' represent?",
+    "options": {
+      "A": "w is the learning rate, and b is the regularization penalty.",
+      "B": "w is the slope (weight / coefficient), and b is the y-intercept (bias).",
+      "C": "w is the variance, and b is the standard deviation.",
+      "D": "w is the independent variable, and b is the dependent variable."
+    },
+    "answer": "B",
+    "explanation": "The weight w represents the rate of change in y for every one-unit change in x, while the bias b represents the expected value of y when x = 0 (the y-intercept)."
+  },
+  {
+    "id": 116,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "How does Mean Squared Error (MSE) differ from Mean Absolute Error (MAE) when evaluating regression models?",
+    "options": {
+      "A": "MSE is always smaller than MAE.",
+      "B": "MSE squares the error terms, making it much more sensitive and punitive toward large outliers than MAE.",
+      "C": "MAE can only be used when target values are negative.",
+      "D": "MSE has the exact same physical units as the original target variable."
+    },
+    "answer": "B",
+    "explanation": "Because MSE squares errors (y - y_hat)^2, an error of 10 adds 100 to the penalty, whereas MAE treats errors linearly |y - y_hat|. Thus, MSE heavily penalizes large mistakes."
+  },
+  {
+    "id": 117,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What does an R-squared (R^2) score of 0.85 indicate about a regression model?",
+    "options": {
+      "A": "85% of predictions made by the model were classified correctly.",
+      "B": "85% of the variance in the dependent target variable is explained by the independent features in the model.",
+      "C": "The model has an 85% probability of overfitting.",
+      "D": "The mean squared error of the model is 0.15."
+    },
+    "answer": "B",
+    "explanation": "R-squared (coefficient of determination) quantifies the proportion of total variance in the dependent variable explained by the regression model: 1 - (SS_res / SS_tot)."
+  },
+  {
+    "id": 118,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the mathematical output range of the Sigmoid activation function used in Logistic Regression?",
+    "options": {
+      "A": "[-1, 1]",
+      "B": "[0, 1]",
+      "C": "[-infinity, +infinity]",
+      "D": "[0, +infinity]"
+    },
+    "answer": "B",
+    "explanation": "The sigmoid function sigma(z) = 1 / (1 + e^(-z)) smoothly maps any real-valued number into the open interval (0, 1), allowing the output to be interpreted as a probability."
+  },
+  {
+    "id": 119,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In binary Logistic Regression, what is the default decision threshold for classifying an instance as positive (class 1)?",
+    "options": {
+      "A": "0.0",
+      "B": "0.5",
+      "C": "1.0",
+      "D": "Depends on the number of features."
+    },
+    "answer": "B",
+    "explanation": "By default, if the predicted probability P(y=1|x) >= 0.5, the instance is classified as class 1; otherwise, it is classified as class 0. This threshold can be adjusted to balance precision and recall."
+  },
+  {
+    "id": 120,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What loss function is minimized when training a Logistic Regression model?",
+    "options": {
+      "A": "Mean Squared Error (MSE)",
+      "B": "Log Loss (Binary Cross-Entropy)",
+      "C": "Hinge Loss",
+      "D": "Mean Absolute Percentage Error (MAPE)"
+    },
+    "answer": "B",
+    "explanation": "Binary Cross-Entropy (Log Loss) penalizes confident wrong predictions asymptotically toward infinity: -[y * log(p) + (1 - y) * log(1 - p)]."
+  },
+  {
+    "id": 121,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In a binary classification Confusion Matrix, what is a False Positive (Type I Error)?",
+    "options": {
+      "A": "A positive sample correctly predicted as positive.",
+      "B": "A negative sample incorrectly predicted as positive (false alarm).",
+      "C": "A positive sample incorrectly predicted as negative (missed detection).",
+      "D": "A negative sample correctly predicted as negative."
+    },
+    "answer": "B",
+    "explanation": "A False Positive occurs when the model predicts positive (class 1), but the actual ground truth is negative (class 0) \u2014 for example, flagging a legitimate email as spam."
+  },
+  {
+    "id": 122,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In medical disease screening, why is a False Negative (Type II Error) usually considered far more dangerous than a False Positive?",
+    "options": {
+      "A": "A False Negative means a sick patient is incorrectly diagnosed as healthy and misses critical early treatment.",
+      "B": "A False Negative causes the hospital database to crash.",
+      "C": "A False Negative automatically reduces the model's specificity to 0.",
+      "D": "False Negatives can only occur when testing healthy individuals."
+    },
+    "answer": "A",
+    "explanation": "A False Negative tells a patient with a deadly illness that they are healthy, delaying life-saving intervention. A False Positive prompts a confirmatory follow-up test."
+  },
+  {
+    "id": 123,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Why is Accuracy a misleading evaluation metric for an imbalanced dataset where 99% of samples are legitimate and 1% are fraud?",
+    "options": {
+      "A": "Accuracy cannot be computed if the number of samples exceeds 1,000.",
+      "B": "A naive model that simply predicts 'legitimate' for every single transaction achieves 99% accuracy while detecting zero fraud.",
+      "C": "Accuracy always yields negative values on imbalanced datasets.",
+      "D": "Accuracy requires balanced multi-class outputs."
+    },
+    "answer": "B",
+    "explanation": "On severely skewed datasets, the majority class completely masks the performance on the minority class. A dummy classifier predicting only the majority class scores 99% accuracy despite being entirely useless."
+  },
+  {
+    "id": 124,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the formula and definition of Precision?",
+    "options": {
+      "A": "TP / (TP + FN) \u2014 the proportion of actual positives correctly identified.",
+      "B": "TP / (TP + FP) \u2014 the proportion of predicted positive identifications that were actually correct.",
+      "C": "(TP + TN) / Total \u2014 the proportion of all predictions that were correct.",
+      "D": "TN / (TN + FP) \u2014 the proportion of actual negatives correctly identified."
+    },
+    "answer": "B",
+    "explanation": "Precision answers: 'Out of all instances the model predicted as positive, how many were truly positive?' Formula: TP / (TP + FP)."
+  },
+  {
+    "id": 125,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the formula and definition of Recall (Sensitivity)?",
+    "options": {
+      "A": "TP / (TP + FN) \u2014 the proportion of actual positive cases that were correctly detected.",
+      "B": "TP / (TP + FP) \u2014 the proportion of predicted positive cases that were correct.",
+      "C": "TN / (TN + FP) \u2014 the true negative rate.",
+      "D": "FP / (FP + TN) \u2014 the false positive rate."
+    },
+    "answer": "A",
+    "explanation": "Recall (Sensitivity) answers: 'Out of all actual positive cases in reality, how many did the model successfully capture?' Formula: TP / (TP + FN)."
+  },
+  {
+    "id": 126,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What typically happens to Precision and Recall when you lower the classification probability threshold from 0.50 to 0.20?",
+    "options": {
+      "A": "Precision increases, and Recall decreases.",
+      "B": "Recall increases (catches more positives), but Precision decreases (more false alarms).",
+      "C": "Both Precision and Recall stay exactly the same.",
+      "D": "Both Precision and Recall drop to zero."
+    },
+    "answer": "B",
+    "explanation": "Lowering the decision threshold makes the model more aggressive in predicting the positive class. This captures more true positives (increasing Recall) at the cost of flagging more false positives (lowering Precision)."
+  },
+  {
+    "id": 127,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Why is the F1-Score calculated as the Harmonic Mean of Precision and Recall instead of the simple Arithmetic Mean?",
+    "options": {
+      "A": "The arithmetic mean cannot be calculated for fractions.",
+      "B": "The harmonic mean heavily penalizes extreme imbalances where one metric is high and the other is near zero.",
+      "C": "The harmonic mean makes the F1-score insensitive to false positives.",
+      "D": "The arithmetic mean would always exceed 1.0."
+    },
+    "answer": "B",
+    "explanation": "F1 = 2 * (Precision * Recall) / (Precision + Recall). If a model has Precision = 1.0 but Recall = 0.02, the arithmetic average is ~0.51 (misleadingly good), whereas the harmonic mean drops to ~0.04 (accurately reflecting failure)."
+  },
+  {
+    "id": 128,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What two metrics are plotted against each other on an ROC (Receiver Operating Characteristic) curve?",
+    "options": {
+      "A": "Precision on the y-axis vs Recall on the x-axis.",
+      "B": "True Positive Rate (Recall) on the y-axis vs False Positive Rate (1 - Specificity) on the x-axis across various thresholds.",
+      "C": "Training Loss on the y-axis vs Validation Loss on the x-axis.",
+      "D": "Accuracy on the y-axis vs Number of Estimators on the x-axis."
+    },
+    "answer": "B",
+    "explanation": "The ROC curve plots the True Positive Rate (TPR = TP / (TP + FN)) against the False Positive Rate (FPR = FP / (FP + TN)) as the discrimination threshold varies from 0 to 1."
+  },
+  {
+    "id": 129,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In a Decision Tree, what is a Leaf Node (Terminal Node)?",
+    "options": {
+      "A": "The top-most node where the very first split occurs.",
+      "B": "An internal node where a feature condition is evaluated.",
+      "C": "An endpoint node that contains no child nodes and provides the final class prediction or continuous value.",
+      "D": "A node that has been pruned due to high entropy."
+    },
+    "answer": "C",
+    "explanation": "The root node is at the top, internal nodes test conditions on features, and leaf (terminal) nodes represent final decision outcomes where no further splits occur."
+  },
+  {
+    "id": 130,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What does a Gini Impurity of 0.0 indicate for a node in a Decision Tree?",
+    "options": {
+      "A": "The node is split equally between all classes (maximum chaos).",
+      "B": "The node is completely pure; all samples in the node belong to the exact same class.",
+      "C": "The node contains zero data points.",
+      "D": "The decision tree has encountered an infinite loop."
+    },
+    "answer": "B",
+    "explanation": "Gini Impurity = 1 - sum(p_i^2). When all samples belong to one class (p = 1.0), Gini = 1 - 1^2 = 0.0, representing complete purity."
+  },
+  {
+    "id": 131,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In Decision Trees, what is Information Gain?",
+    "options": {
+      "A": "The reduction in entropy (uncertainty) achieved by splitting a dataset on a specific feature.",
+      "B": "The increase in model training time per tree depth.",
+      "C": "The amount of memory added to RAM when expanding a branch.",
+      "D": "The number of leaf nodes created per epoch."
+    },
+    "answer": "A",
+    "explanation": "Information Gain measures how much a split reduces disorder: IG(T, a) = Entropy(T) - Entropy(T|a). The decision tree chooses the split that maximizes this reduction in entropy."
+  },
+  {
+    "id": 132,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the primary danger of training a Decision Tree without setting depth constraints (e.g. max_depth=None)?",
+    "options": {
+      "A": "The tree will underfit the data.",
+      "B": "The tree will continue splitting until every single training sample has its own leaf, severely overfitting to training noise.",
+      "C": "The tree will invert the classification labels.",
+      "D": "The tree will convert into a logistic regression model."
+    },
+    "answer": "B",
+    "explanation": "Unconstrained decision trees will create splits for individual training outliers, achieving 100% training accuracy but memorizing noise and failing on new test samples."
+  },
+  {
+    "id": 133,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the purpose of Pruning in Decision Trees?",
+    "options": {
+      "A": "Increasing the number of features in the dataset.",
+      "B": "Removing branches that provide little predictive power to reduce complexity and prevent overfitting.",
+      "C": "Converting the tree into an artificial neural network.",
+      "D": "Re-scaling continuous inputs into [0, 1]."
+    },
+    "answer": "B",
+    "explanation": "Pruning trims off superfluous branches (via cost-complexity pruning or setting max_depth, min_samples_leaf) to produce a simpler, more interpretable tree that generalizes better."
+  },
+  {
+    "id": 134,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What does Bagging (Bootstrap Aggregation) in a Random Forest involve?",
+    "options": {
+      "A": "Training each tree sequentially on the mistakes of the previous tree.",
+      "B": "Training multiple individual trees in parallel on different random subsets of data sampled with replacement.",
+      "C": "Compressing tree weights using gzip.",
+      "D": "Dropping 50% of the nodes during inference."
+    },
+    "answer": "B",
+    "explanation": "Bagging creates multiple bootstrap datasets by randomly sampling N instances from the training set with replacement, training an independent tree on each subset, and averaging their predictions."
+  },
+  {
+    "id": 135,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "How does Random Forest achieve lower variance than a single decision tree?",
+    "options": {
+      "A": "By training a single very deep tree with no regularization.",
+      "B": "By aggregating predictions across many decorrelated trees trained on bootstrap samples with random feature subsets.",
+      "C": "By converting all features into principal components.",
+      "D": "By setting the learning rate to zero."
+    },
+    "answer": "B",
+    "explanation": "Individual trees have high variance. By combining many diverse, decorrelated trees through bootstrap sampling and random feature selection per split, their errors cancel out when averaged."
+  },
+  {
+    "id": 136,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "How does the K-Nearest Neighbors (KNN) algorithm classify a new unseen query point?",
+    "options": {
+      "A": "By calculating an optimal linear decision boundary during training.",
+      "B": "By finding the k closest training points using a distance metric (e.g. Euclidean) and taking a majority vote among their classes.",
+      "C": "By building a decision tree based on information gain.",
+      "D": "By clustering centroids using gradient descent."
+    },
+    "answer": "B",
+    "explanation": "KNN is an instance-based (lazy) learner. It stores all training instances and classifies a new point by identifying its k nearest neighbors in feature space and assigning the most common class."
+  },
+  {
+    "id": 137,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In K-Nearest Neighbors (KNN), what is the effect of setting k = 1?",
+    "options": {
+      "A": "The model becomes very smooth and underfits the data.",
+      "B": "The model becomes highly sensitive to local noise and outliers, leading to high variance (overfitting).",
+      "C": "The decision boundary becomes a perfect straight line.",
+      "D": "The algorithm runs in constant O(1) time during prediction."
+    },
+    "answer": "B",
+    "explanation": "When k = 1, the model assigns the class of the single closest point, meaning any outlier or mislabeled training point creates its own isolated decision island (high variance)."
+  },
+  {
+    "id": 138,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What are the two alternating steps repeated in the K-Means clustering algorithm until convergence?",
+    "options": {
+      "A": "Gradient step and backpropagation step.",
+      "B": "Assignment step (assigning each point to the nearest centroid) and Update step (recalculating centroids as the mean of assigned points).",
+      "C": "Tree splitting step and pruning step.",
+      "D": "Convolution step and pooling step."
+    },
+    "answer": "B",
+    "explanation": "K-Means alternates between: (1) assigning every data point to its closest centroid, and (2) updating each centroid to be the arithmetic mean of all points assigned to it."
+  },
+  {
+    "id": 139,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What does the 'Elbow Method' look for when selecting the optimal number of clusters (k) in K-Means?",
+    "options": {
+      "A": "The point where training time becomes exponential.",
+      "B": "The 'elbow' point where the rate of decrease in within-cluster sum of squares (Inertia) sharply flattens out.",
+      "C": "The value of k where accuracy reaches 100%.",
+      "D": "The point where the silhouette score becomes negative."
+    },
+    "answer": "B",
+    "explanation": "As k increases, inertia (sum of squared distances to closest centroid) naturally decreases. The elbow point marks the optimal tradeoff where adding more clusters yields diminishing returns."
+  },
+  {
+    "id": 140,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the primary geometric objective of a Support Vector Machine (SVM)?",
+    "options": {
+      "A": "To find a hyperplane that maximizes the margin (distance) between the closest data points of opposing classes (support vectors).",
+      "B": "To minimize the mean absolute error of leaf nodes.",
+      "C": "To cluster data around k centroids.",
+      "D": "To compute conditional probabilities using Bayes Theorem."
+    },
+    "answer": "A",
+    "explanation": "An SVM finds the optimal separating hyperplane that maximizes the geometric margin between classes. The data points that lie closest to the decision boundary are the support vectors."
+  },
+  {
+    "id": 141,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "How does 5-Fold Cross-Validation operate on a dataset?",
+    "options": {
+      "A": "The dataset is duplicated 5 times to create a larger training set.",
+      "B": "The dataset is divided into 5 equal folds; the model is trained on 4 folds and tested on the 1 remaining fold, repeating 5 times so every fold serves as a test set.",
+      "C": "Five different algorithms are trained simultaneously on the same data.",
+      "D": "The dataset is filtered 5 times to remove outliers."
+    },
+    "answer": "B",
+    "explanation": "K-Fold splits the dataset into K parts. It trains on K-1 folds and evaluates on the hold-out fold, cycling K times so that every sample is tested once. The K scores are averaged for a robust metric."
+  },
+  {
+    "id": 142,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "Why should you use Stratified K-Fold instead of standard K-Fold for classification tasks?",
+    "options": {
+      "A": "Stratified K-Fold trains 10x faster.",
+      "B": "Stratified K-Fold ensures that each fold contains roughly the same percentage of each target class as the complete dataset.",
+      "C": "Stratified K-Fold works without target labels.",
+      "D": "Stratified K-Fold automatically normalizes continuous features."
+    },
+    "answer": "B",
+    "explanation": "Standard random K-Fold can inadvertently produce a fold with zero positive samples when classes are imbalanced. Stratified K-Fold preserves the exact class ratio across all folds."
+  },
+  {
+    "id": 143,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What unique property distinguishes L1 Regularization (Lasso) from L2 Regularization (Ridge)?",
+    "options": {
+      "A": "L1 regularization penalizes squared weights; L2 penalizes absolute weights.",
+      "B": "L1 regularization drives irrelevant feature coefficients completely to zero, performing automated feature selection.",
+      "C": "L1 regularization can only be used with decision trees.",
+      "D": "L1 regularization increases model variance."
+    },
+    "answer": "B",
+    "explanation": "Lasso adds a penalty proportional to the absolute values of weights (lambda * sum(|w_i|)). Geometrically, its diamond-shaped constraint boundary produces sparse weights, driving unimportant weights to zero."
+  },
+  {
+    "id": 144,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "How does L2 Regularization (Ridge Regression) prevent overfitting?",
+    "options": {
+      "A": "By setting unimportant weights strictly to 0.0.",
+      "B": "By adding a penalty proportional to the square of the coefficients (lambda * sum(w_i^2)), shrinking weights toward zero without eliminating them completely.",
+      "C": "By removing outliers from the training set.",
+      "D": "By increasing the degree of polynomial features."
+    },
+    "answer": "B",
+    "explanation": "Ridge penalizes the squared magnitude of coefficients. This discourages large weights and distributes impact across features, making the model less sensitive to individual feature noise."
+  },
+  {
+    "id": 145,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In Gradient Descent optimization, what happens if the learning rate is set too high?",
+    "options": {
+      "A": "The model will take tiny steps and take days to converge.",
+      "B": "The parameters can overshoot the minimum, causing the loss to oscillate or diverge completely.",
+      "C": "The model automatically switches to L1 regularization.",
+      "D": "The gradients will shrink to zero."
+    },
+    "answer": "B",
+    "explanation": "A learning rate that is too large takes excessively big steps, repeatedly stepping over the valley of the cost function and causing the loss to oscillate or blow up to infinity."
+  },
+  {
+    "id": 146,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "In model training terminology, what is an 'Epoch'?",
+    "options": {
+      "A": "A single step updating weights on a single batch of samples.",
+      "B": "One complete pass of the entire training dataset through the learning algorithm.",
+      "C": "The number of hidden layers in a neural network.",
+      "D": "The time it takes to evaluate the test dataset."
+    },
+    "answer": "B",
+    "explanation": "One Epoch means that every sample in the training set has had a chance to be processed by the model forward and backward once."
+  },
+  {
+    "id": 147,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What are the core components of an artificial neuron (Perceptron)?",
+    "options": {
+      "A": "Input values, weights, a bias term, a summation function, and an activation function.",
+      "B": "Gini impurity, information gain, and leaf nodes.",
+      "C": "Centroids, Euclidean distances, and inertia.",
+      "D": "Precision, recall, and F1-score."
+    },
+    "answer": "A",
+    "explanation": "An artificial neuron multiplies inputs by learned weights, sums them together with a bias (z = sum(w_i * x_i) + b), and passes the result through an activation function f(z) to produce the output."
+  },
+  {
+    "id": 148,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the formula and main advantage of the ReLU (Rectified Linear Unit) activation function in deep learning?",
+    "options": {
+      "A": "f(x) = 1 / (1 + e^-x); produces bounded outputs between 0 and 1.",
+      "B": "f(x) = max(0, x); it is computationally fast and does not saturate for positive values, mitigating the vanishing gradient problem.",
+      "C": "f(x) = tanh(x); zero-centered outputs.",
+      "D": "f(x) = x^2; creates quadratic decision boundaries."
+    },
+    "answer": "B",
+    "explanation": "ReLU is defined as max(0, x). For any positive input, its derivative is 1.0, which allows gradients to flow backwards without diminishing exponentially, unlike sigmoid or tanh."
+  },
+  {
+    "id": 149,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "How does Dropout regularize deep neural networks during training?",
+    "options": {
+      "A": "By permanently deleting weights that are less than 0.01.",
+      "B": "By randomly setting a fraction of neuron outputs to zero on each forward pass during training, preventing co-adaptation of features.",
+      "C": "By dropping bad training samples from the dataset.",
+      "D": "By stopping training after 5 epochs."
+    },
+    "answer": "B",
+    "explanation": "Dropout randomly deactivates a percentage of neurons during each training step. This forces the network to learn redundant, robust representations rather than relying on specific co-adapted pathways."
+  },
+  {
+    "id": 150,
+    "type": "multiple-choice",
+    "section": "Machine Learning Fundamentals & Beginner Concepts",
+    "question": "What is the primary goal of Principal Component Analysis (PCA)?",
+    "options": {
+      "A": "To classify tabular data into discrete classes using hyperplanes.",
+      "B": "To reduce the dimensionality of a dataset by projecting it onto orthogonal axes (principal components) that capture the maximum variance.",
+      "C": "To impute missing values using k-nearest neighbors.",
+      "D": "To compute feature importance in random forests."
+    },
+    "answer": "B",
+    "explanation": "PCA is an unsupervised linear dimensionality reduction technique. It finds orthogonal directions (eigenvectors of the covariance matrix) along which the data varies the most, preserving maximum information in fewer dimensions."
   }
 ];

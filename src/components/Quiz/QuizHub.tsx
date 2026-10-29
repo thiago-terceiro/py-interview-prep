@@ -229,7 +229,7 @@ export const QuizHub: React.FC = () => {
       {/* Reusable Fixed-Height Header Card - Zero CLS */}
       <PageHeaderCard
         badgeIcon={GraduationCap}
-        badgeText="100 Technical Qs Knowledge Bank"
+        badgeText="150 Technical Qs Knowledge Bank"
         badgeColor="text-indigo-400"
         title={t('quizHeroTitle')}
         description={t('quizHeroDesc')}
@@ -333,14 +333,14 @@ export const QuizHub: React.FC = () => {
         )}
       </div>
 
-      {/* Interactive 100-Question Mini Map (Expandable) */}
+      {/* Interactive 150-Question Mini Map (Expandable) */}
       {showQuestionMap && viewMode !== 'list' && (
         <section
           className="bg-[#161b22] border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl animate-fadeIn"
-          aria-label="100 Questions Fast Jump Navigator"
+          aria-label="150 Questions Fast Jump Navigator"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono text-slate-400 mb-3 pb-2 border-b border-slate-800">
-            <span className="font-bold text-slate-200 shrink-0">100 Questions Navigator</span>
+            <span className="font-bold text-slate-200 shrink-0">150 Questions Navigator</span>
             <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[11px]">
               <span className="flex items-center gap-1.5 shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" /> Correct
@@ -357,7 +357,7 @@ export const QuizHub: React.FC = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-10 sm:grid-cols-20 gap-1.5 max-h-60 overflow-y-auto p-1">
+          <div className="grid grid-cols-10 sm:grid-cols-20 md:grid-cols-25 gap-1.5 max-h-64 overflow-y-auto p-1">
             {quizQuestions.map((q, idx) => {
               const isSelected = idx === currentIndex;
               const isMCQ = q.type === 'multiple-choice';

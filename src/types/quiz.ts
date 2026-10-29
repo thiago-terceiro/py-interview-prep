@@ -1,6 +1,7 @@
 export type QuizQuestionType = 'multiple-choice' | 'open-ended';
 
 export type QuizSection =
+  | 'Machine Learning Fundamentals & Beginner Concepts'
   | 'Classical ML, Feature Engineering & Fraud/Anomaly Detection'
   | 'Ultra-Low-Latency Inference, ONNX & Real-Time Data Stores'
   | 'MLOps, Drift Detection, CI/CD & Observability'

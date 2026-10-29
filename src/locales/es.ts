@@ -10,7 +10,7 @@ export const es: Record<TranslationKey, string> = {
   navPatterns: 'Patrones de Algoritmos',
   navVisualizers: 'Visualizadores',
   navCheatsheet: 'Guía Rápida',
-  navQuiz: 'Banco de 100 Preguntas',
+  navQuiz: 'Banco de 150 Preguntas',
   resetProgress: 'Limpiar Datos Locales',
 
   // Selector de Idioma & A11y
@@ -139,15 +139,16 @@ export const es: Record<TranslationKey, string> = {
   patternIntermediate: 'Intermedio',
   patternAdvanced: 'Avanzado',
 
-  // Banco de 100 Preguntas (AI & ML)
+  // Banco de 150 Preguntas (AI & ML)
   quizHeroBadge: 'Banco de Preguntas: ML en Producción e IA Full-Stack',
-  quizHeroTitle: '100 Preguntas de ML en Producción e IA Full-Stack',
+  quizHeroTitle: '150 Preguntas de ML en Producción e IA Full-Stack',
   quizHeroDesc:
-    '70 preguntas técnicas de opción múltiple con retroalimentación inmediata y explicaciones exhaustivas, más 30 escenarios reales de diseño de sistemas con rúbricas de evaluación.',
+    '120 preguntas técnicas de opción múltiple con retroalimentación inmediata y explicaciones exhaustivas (incluyendo 50 conceptos fundamentales para principiantes en ML), más 30 escenarios reales de diseño de sistemas con rúbricas de evaluación.',
   quizModeQuiz: 'Quiz Interactivo',
   quizModeFlashcard: 'Flashcards',
   quizModeList: 'Ver Todas',
-  quizFilterAll: 'Las 100 Preguntas',
+  quizFilterAll: 'Las 150 Preguntas',
+  quizFilterMLFundamentals: 'Fundamentos de ML (Principiante)',
   quizFilterClassicalML: 'ML Clásico y Fraude',
   quizFilterLowLatency: 'Latencia Ultrabaja y ONNX',
   quizFilterMLOps: 'MLOps y Observabilidad',
@@ -162,9 +163,9 @@ export const es: Record<TranslationKey, string> = {
   quizStatsMastery: 'Progreso de Dominio',
   quizProgressResetBtn: 'Restablecer Datos del Quiz',
   quizProgressResetTitle: '¿Restablecer Progreso del Quiz?',
-  quizProgressResetSubtitle: 'Revertir las 100 preguntas al estado no respondido',
+  quizProgressResetSubtitle: 'Revertir las 150 preguntas al estado no respondido',
   quizProgressResetConfirm:
-    '¿Estás seguro de que deseas restablecer todas tus respuestas, notas y progreso del Banco de 100 Preguntas? Esta acción no se puede deshacer.',
+    '¿Estás seguro de que deseas restablecer todas tus respuestas, notas y progreso del Banco de 150 Preguntas? Esta acción no se puede deshacer.',
   quizSearchPlaceholder: 'Buscar preguntas, opciones, explicaciones, criterios...',
   quizFilterStatus: 'Filtrar por Estado',
   quizFilterAllStatus: 'Todos los Estados',
@@ -214,7 +215,7 @@ export const es: Record<TranslationKey, string> = {
   flashcardMarkKnow: 'Ya lo Sé',
   flashcardMarkReview: 'Marcar para Repasar',
   flashcardMarkedReview: 'Marcado para Repasar',
-  flashcardDeckAll: 'Las 100 Tarjetas',
+  flashcardDeckAll: 'Las 150 Tarjetas',
   flashcardDeckReview: 'Por Repasar',
   flashcardDeckUnmastered: 'Aún No Dominadas',
   flashcardShuffle: 'Barajar Mazo',

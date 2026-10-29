@@ -8,7 +8,7 @@ export const en = {
   navPatterns: 'Algo Patterns',
   navVisualizers: 'Algorithm Visualizers',
   navCheatsheet: 'Cheatsheet',
-  navQuiz: '100 Qs Bank',
+  navQuiz: '150 Qs Bank',
   resetProgress: 'Clear Local Data',
 
   // Language & A11y switcher
@@ -137,15 +137,16 @@ export const en = {
   patternIntermediate: 'Intermediate',
   patternAdvanced: 'Advanced',
 
-  // 100 Qs Question Bank (AI & ML)
+  // 150 Qs Question Bank (AI & ML)
   quizHeroBadge: 'Production ML & Full-Stack AI Question Bank',
-  quizHeroTitle: '100 Production ML & Full-Stack AI Questions',
+  quizHeroTitle: '150 Production ML & Full-Stack AI Questions',
   quizHeroDesc:
-    '70 deep technical multiple-choice questions with instant feedback and comprehensive explanations, plus 30 real-world system design scenarios with grading rubrics.',
+    '120 technical multiple-choice questions with instant feedback and comprehensive explanations (including 50 ML beginner fundamentals), plus 30 real-world system design scenarios with grading rubrics.',
   quizModeQuiz: 'Interactive Quiz',
   quizModeFlashcard: 'Flashcards',
   quizModeList: 'Browse All',
-  quizFilterAll: 'All 100 Questions',
+  quizFilterAll: 'All 150 Questions',
+  quizFilterMLFundamentals: 'ML Fundamentals (Beginner)',
   quizFilterClassicalML: 'Classical ML & Fraud',
   quizFilterLowLatency: 'Ultra-Low-Latency & ONNX',
   quizFilterMLOps: 'MLOps & Observability',
@@ -160,9 +161,9 @@ export const en = {
   quizStatsMastery: 'Mastery Progress',
   quizProgressResetBtn: 'Reset Quiz Data',
   quizProgressResetTitle: 'Reset Quiz Progress?',
-  quizProgressResetSubtitle: 'Revert all 100 questions to unanswered state',
+  quizProgressResetSubtitle: 'Revert all 150 questions to unanswered state',
   quizProgressResetConfirm:
-    'Are you sure you want to reset all answers, notes, and progress in the 100 Questions Bank? This action cannot be undone.',
+    'Are you sure you want to reset all answers, notes, and progress in the 150 Questions Bank? This action cannot be undone.',
   quizSearchPlaceholder: 'Search questions, options, explanations, criteria...',
   quizFilterStatus: 'Filter by Status',
   quizFilterAllStatus: 'All Statuses',
@@ -212,7 +213,7 @@ export const en = {
   flashcardMarkKnow: 'I Know This',
   flashcardMarkReview: 'Mark for Review',
   flashcardMarkedReview: 'Marked for Review',
-  flashcardDeckAll: 'All 100 Cards',
+  flashcardDeckAll: 'All 150 Cards',
   flashcardDeckReview: 'Needs Review',
   flashcardDeckUnmastered: 'Unmastered Only',
   flashcardShuffle: 'Shuffle Deck',
