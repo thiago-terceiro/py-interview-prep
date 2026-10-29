@@ -56,7 +56,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </h1>
 
         <p className="text-sm text-slate-400 max-w-2xl mx-auto leading-relaxed">
-          30 hand-crafted interview questions spanning language nuances, algorithmic patterns,
+          45 hand-crafted interview questions spanning language nuances, algorithmic patterns,
           NumPy/Pandas vectorization, and ML engineering. Zero setup required, running entirely
           in your browser.
         </p>
@@ -69,7 +69,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm shadow-lg shadow-amber-500/20 transition-transform active:scale-95 no-underline cursor-pointer"
           >
             <Trophy className="w-4 h-4" />
-            <span>Explore All 30 Questions</span>
+            <span>Explore All 45 Questions</span>
           </Link>
 
           <Link
@@ -112,7 +112,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         {/* Progress Counter Banner */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#161b22] border border-slate-800 text-xs text-slate-400 font-mono">
           <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-          <span>Progress: <strong className="text-white">{solvedCount}</strong> of 30 problems solved</span>
+          <span>Progress: <strong className="text-white">{solvedCount}</strong> of 45 problems solved</span>
         </div>
       </section>
 

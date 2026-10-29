@@ -5,7 +5,7 @@ export const es: Record<TranslationKey, string> = {
   brandName: 'PyInterview Pro',
   brandSubtitle: 'Fundamentos de Python → Algoritmos → Ingeniería de ML',
   navHome: 'Inicio',
-  navCatalog: 'Las 30 Preguntas',
+  navCatalog: 'Las 45 Preguntas',
   navArena: 'Arena de Práctica',
   navPatterns: 'Patrones de Algoritmos',
   navVisualizers: 'Visualizadores',
@@ -113,7 +113,7 @@ export const es: Record<TranslationKey, string> = {
 
   // Integración con Inicio
   homePatternBannerTitle: 'Aprende Algoritmos por Patrones, No por Memoria',
-  homePatternBannerDesc: 'Deja de memorizar ciegamente en LeetCode. Descubre los 10 planos estructurales detrás de nuestras 30 preguntas con 4 niveles de explicación y visualizadores interactivos.',
+  homePatternBannerDesc: 'Deja de memorizar ciegamente en LeetCode. Descubre los 10 planos estructurales detrás de nuestras 45 preguntas con 4 niveles de explicación y visualizadores interactivos.',
   homeExplorePatternsBtn: 'Explorar Centro de Patrones',
 
   // UI General
@@ -124,8 +124,8 @@ export const es: Record<TranslationKey, string> = {
   sortBy: 'Ordenar por',
   sortDifficultyAsc: 'Dificultad (Fácil → Difícil)',
   sortDifficultyDesc: 'Dificultad (Difícil → Fácil)',
-  sortNumberAsc: 'Número de Pregunta (#1 → #30)',
-  sortNumberDesc: 'Número de Pregunta (#30 → #1)',
+  sortNumberAsc: 'Número de Pregunta (#1 → #45)',
+  sortNumberDesc: 'Número de Pregunta (#45 → #1)',
   sortTitleAsc: 'Título (A → Z)',
   levelFilter: 'Nivel:',
   levelAll: 'Todos',

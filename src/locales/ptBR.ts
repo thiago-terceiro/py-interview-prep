@@ -5,7 +5,7 @@ export const ptBR: Record<TranslationKey, string> = {
   brandName: 'PyInterview Pro',
   brandSubtitle: 'Fundamentos Python → Algoritmos → Engenharia de ML',
   navHome: 'Início',
-  navCatalog: 'Todas as 30 Questões',
+  navCatalog: 'Todas as 45 Questões',
   navArena: 'Arena de Prática',
   navPatterns: 'Padrões de Algoritmos',
   navVisualizers: 'Visualizadores de Algoritmos',
@@ -113,7 +113,7 @@ export const ptBR: Record<TranslationKey, string> = {
 
   // Integração com a Home
   homePatternBannerTitle: 'Aprenda Algoritmos por Padrões, Não por Decoreba',
-  homePatternBannerDesc: 'Pare de tentar decorar centenas de problemas no LeetCode. Conheça as estruturas mentais por trás de nossas 30 questões com 4 camadas de explicação e visualizadores interativos.',
+  homePatternBannerDesc: 'Pare de tentar decorar centenas de problemas no LeetCode. Conheça as estruturas mentais por trás de nossas 45 questões com 4 camadas de explicação e visualizadores interativos.',
   homeExplorePatternsBtn: 'Acessar Central de Padrões',
 
   // UI Geral
@@ -124,8 +124,8 @@ export const ptBR: Record<TranslationKey, string> = {
   sortBy: 'Ordenar por',
   sortDifficultyAsc: 'Dificuldade (Fácil → Difícil)',
   sortDifficultyDesc: 'Dificuldade (Difícil → Fácil)',
-  sortNumberAsc: 'Número da Questão (#1 → #30)',
-  sortNumberDesc: 'Número da Questão (#30 → #1)',
+  sortNumberAsc: 'Número da Questão (#1 → #45)',
+  sortNumberDesc: 'Número da Questão (#45 → #1)',
   sortTitleAsc: 'Título (A → Z)',
   levelFilter: 'Nível:',
   levelAll: 'Todos',

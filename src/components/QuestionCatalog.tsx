@@ -128,7 +128,7 @@ export const QuestionCatalog: React.FC<QuestionCatalogProps> = ({
         badgeText="Curriculum Catalog"
         badgeColor="text-indigo-400"
         title="Python Technical Interview Curriculum"
-        description="30 curated interview questions spanning core fundamentals to transformer attention mechanics."
+        description="45 curated interview questions spanning core fundamentals to transformer attention mechanics."
         action={
           <div className="flex items-center gap-4 bg-[#0d1117]/80 px-4 py-2.5 rounded-xl border border-slate-800 shrink-0">
             <div>

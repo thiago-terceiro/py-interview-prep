@@ -3,7 +3,7 @@ export const en = {
   brandName: 'PyInterview Pro',
   brandSubtitle: 'Python Fundamentals → Algorithms → ML Engineering',
   navHome: 'Home',
-  navCatalog: 'All 30 Questions',
+  navCatalog: 'All 45 Questions',
   navArena: 'Practice Arena',
   navPatterns: 'Algo Patterns',
   navVisualizers: 'Algorithm Visualizers',
@@ -111,7 +111,7 @@ export const en = {
 
   // Home Page linking
   homePatternBannerTitle: 'Learn Algorithms via Patterns, Not Rote Memorization',
-  homePatternBannerDesc: 'Stop grinding LeetCode blindly. Discover the 10 structural blueprints behind our 30 interview questions with 4 distinct explanation layers and interactive step visualizers.',
+  homePatternBannerDesc: 'Stop grinding LeetCode blindly. Discover the 10 structural blueprints behind our 45 interview questions with 4 distinct explanation layers and interactive step visualizers.',
   homeExplorePatternsBtn: 'Explore Algo Patterns Hub',
 
   // General UI
@@ -122,8 +122,8 @@ export const en = {
   sortBy: 'Sort by',
   sortDifficultyAsc: 'Difficulty (Easy → Hard)',
   sortDifficultyDesc: 'Difficulty (Hard → Easy)',
-  sortNumberAsc: 'Question Number (#1 → #30)',
-  sortNumberDesc: 'Question Number (#30 → #1)',
+  sortNumberAsc: 'Question Number (#1 → #45)',
+  sortNumberDesc: 'Question Number (#45 → #1)',
   sortTitleAsc: 'Title (A → Z)',
   levelFilter: 'Level:',
   levelAll: 'All',

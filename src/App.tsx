@@ -266,7 +266,7 @@ function RootLayout() {
                     PyInterview <span className="text-sky-400">Pro</span>
                   </h1>
                   <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    30 Track
+                    {allQuestions.length} Track
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 hidden sm:block">
@@ -327,11 +327,11 @@ function RootLayout() {
             {/* Solved Progress Pill - Non-wrapping and compact */}
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#161b22] border border-slate-800 text-xs select-none whitespace-nowrap shrink-0"
-              title="Questions solved out of 30 total"
+              title={`Questions solved out of ${allQuestions.length} total`}
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span className="font-mono font-bold text-white whitespace-nowrap">
-                {solvedQuestionIds.length} <span className="text-slate-500 font-normal">/ 30</span>
+                {solvedQuestionIds.length} <span className="text-slate-500 font-normal">/ {allQuestions.length}</span>
               </span>
             </div>
 
