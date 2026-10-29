@@ -12,24 +12,30 @@ import {
   Award,
   Sparkles,
   Check,
+  Search,
 } from 'lucide-react';
+
+export type FlashcardStatusFilter = 'all' | 'review' | 'mastered' | 'unstudied';
 
 interface FlashcardViewProps {
   questions: QuizQuestion[];
   progress: UserQuizProgress;
+  initialQuestionIndex?: number;
   onRateCard?: (questionId: number, rating: 'mastered' | 'review') => void;
   onToggleBookmark: (questionId: number) => void;
 }
 
-type DeckFilter = 'all' | 'review';
-
 export const FlashcardView: React.FC<FlashcardViewProps> = ({
   questions,
   progress,
+  initialQuestionIndex,
+  onRateCard,
   onToggleBookmark,
 }) => {
   const { t } = useLanguage();
-  const [deckFilter, setDeckFilter] = useState<DeckFilter>('all');
+  const [selectedSection, setSelectedSection] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<FlashcardStatusFilter>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [isFlipped, setIsFlipped] = useState<boolean>(false);
   const [showOptionsHint, setShowOptionsHint] = useState<boolean>(false);
   const [activeDeckIndex, setActiveDeckIndex] = useState<number>(0);
@@ -50,19 +56,97 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   const isIntentLockedRef = useRef<'horizontal' | 'vertical' | null>(null);
   const cardRef = useRef<HTMLElement>(null);
 
-  // Filter deck based on selection: All vs Marked for Review
+  // Section friendly short names for dropdown options
+  const sectionShortLabels: Record<string, string> = useMemo(
+    () => ({
+      'Classical ML, Feature Engineering & Fraud/Anomaly Detection': 'Classical ML & Fraud',
+      'Ultra-Low-Latency Inference, ONNX & Real-Time Data Stores': 'Low-Latency & ONNX',
+      'MLOps, Drift Detection, CI/CD & Observability': 'MLOps & CI/CD',
+      'Agentic Workflows, LangGraph, State Machines & LLMs': 'Agentic Workflows & LLMs',
+      'Distributed Systems, Security, RBAC & Cryptographic Auditing': 'Distributed & Security',
+      'High-Performance React/Next.js Streaming UI & Accessibility': 'Streaming UI & A11y',
+      'Open-Ended System Design & Scenario': 'System Design Scenarios',
+    }),
+    []
+  );
+
+  const sections = useMemo(() => {
+    const list = [
+      { id: 'all', label: 'All Topics', shortLabel: 'All Topics', count: questions.length },
+    ];
+    const unique = Array.from(new Set(questions.map(q => q.section)));
+    for (const sec of unique) {
+      list.push({
+        id: sec,
+        label: sec,
+        shortLabel: sectionShortLabels[sec] || sec,
+        count: questions.filter(q => q.section === sec).length,
+      });
+    }
+    return list;
+  }, [questions, sectionShortLabels]);
+
+  // Live status counts given current topic
+  const filteredCounts = useMemo(() => {
+    let baseList = questions;
+    if (selectedSection !== 'all') {
+      baseList = baseList.filter(q => q.section === selectedSection);
+    }
+    const all = baseList.length;
+    const review = baseList.filter(q => progress.bookmarkedIds.includes(q.id)).length;
+    const mastered = baseList.filter(q => progress.completedIds.includes(q.id)).length;
+    const unstudied = baseList.filter(q => !progress.completedIds.includes(q.id)).length;
+    return { all, review, mastered, unstudied };
+  }, [questions, selectedSection, progress.bookmarkedIds, progress.completedIds]);
+
+  // Filter deck based on topic, status, and search query
   const filteredIndices = useMemo(() => {
     const list: number[] = [];
+    const query = searchQuery.trim().toLowerCase();
+
     questions.forEach((q, idx) => {
-      const isMarked = progress.bookmarkedIds.includes(q.id);
-      if (deckFilter === 'review') {
-        if (isMarked) list.push(idx);
-      } else {
-        list.push(idx);
+      // 1. Section filter
+      if (selectedSection !== 'all' && q.section !== selectedSection) {
+        return;
       }
+
+      // 2. Status filter
+      const isMarked = progress.bookmarkedIds.includes(q.id);
+      const isCompleted = progress.completedIds.includes(q.id);
+
+      if (statusFilter === 'review' && !isMarked) return;
+      if (statusFilter === 'mastered' && !isCompleted) return;
+      if (statusFilter === 'unstudied' && isCompleted) return;
+
+      // 3. Search query
+      if (query) {
+        const matchesQ = q.question.toLowerCase().includes(query);
+        const matchesSec = q.section.toLowerCase().includes(query);
+        let matchesContent = false;
+        if (q.type === 'multiple-choice') {
+          matchesContent =
+            q.explanation.toLowerCase().includes(query) ||
+            Object.values(q.options).some(opt => opt.toLowerCase().includes(query));
+        } else {
+          matchesContent = q.acceptableCriteria.some(crit => crit.toLowerCase().includes(query));
+        }
+        if (!matchesQ && !matchesSec && !matchesContent) {
+          return;
+        }
+      }
+
+      list.push(idx);
     });
+
     return list;
-  }, [questions, progress.bookmarkedIds, deckFilter]);
+  }, [
+    questions,
+    selectedSection,
+    statusFilter,
+    searchQuery,
+    progress.bookmarkedIds,
+    progress.completedIds,
+  ]);
 
   // Actual sequence of question indices being studied
   const activeDeck = useMemo(() => {
@@ -72,21 +156,65 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     return filteredIndices;
   }, [filteredIndices, shuffledIndices]);
 
-  // Reset to first card when deck changes
-  const [prevDeckFilter, setPrevDeckFilter] = useState(deckFilter);
-  if (deckFilter !== prevDeckFilter) {
-    setPrevDeckFilter(deckFilter);
+  // Sync with jump map selection if navigated externally (React 19 render-time state adjustment)
+  const [prevInitialIndex, setPrevInitialIndex] = useState<number | undefined>(initialQuestionIndex);
+  if (initialQuestionIndex !== prevInitialIndex) {
+    setPrevInitialIndex(initialQuestionIndex);
+    if (initialQuestionIndex !== undefined) {
+      const targetPos = activeDeck.indexOf(initialQuestionIndex);
+      if (targetPos !== -1) {
+        setActiveDeckIndex(targetPos);
+        setIsFlipped(false);
+        setShowOptionsHint(false);
+        setDragOffset(0);
+      }
+    }
+  }
+
+  const handleSectionChange = (section: string) => {
+    setSelectedSection(section);
     setActiveDeckIndex(0);
+    setShuffledIndices(null);
     setIsFlipped(false);
     setShowOptionsHint(false);
     setDragOffset(0);
-  }
+  };
+
+  const handleStatusFilterChange = (status: FlashcardStatusFilter) => {
+    setStatusFilter(status);
+    setActiveDeckIndex(0);
+    setShuffledIndices(null);
+    setIsFlipped(false);
+    setShowOptionsHint(false);
+    setDragOffset(0);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setActiveDeckIndex(0);
+    setShuffledIndices(null);
+    setIsFlipped(false);
+    setShowOptionsHint(false);
+    setDragOffset(0);
+  };
+
+  const handleResetFilters = () => {
+    setSelectedSection('all');
+    setStatusFilter('all');
+    setSearchQuery('');
+    setActiveDeckIndex(0);
+    setShuffledIndices(null);
+    setIsFlipped(false);
+    setShowOptionsHint(false);
+    setDragOffset(0);
+  };
 
   const currentQIndex = activeDeck[activeDeckIndex];
   const currentQ: QuizQuestion | undefined =
     currentQIndex !== undefined ? questions[currentQIndex] : undefined;
 
   const isMarkedForReview = currentQ ? progress.bookmarkedIds.includes(currentQ.id) : false;
+  const isMastered = currentQ ? progress.completedIds.includes(currentQ.id) : false;
 
   const hasPrev = activeDeckIndex > 0;
   const hasNext = activeDeckIndex < activeDeck.length - 1;
@@ -212,9 +340,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
           e.preventDefault();
           onToggleBookmark(currentQ.id);
         }
+      } else if (e.key === 'm' || e.key === 'M') {
+        if (currentQ && onRateCard) {
+          e.preventDefault();
+          onRateCard(currentQ.id, isMastered ? 'review' : 'mastered');
+        }
       }
     },
-    [handleFlip, handlePrev, handleNext, currentQ, onToggleBookmark]
+    [handleFlip, handlePrev, handleNext, currentQ, onToggleBookmark, onRateCard, isMastered]
   );
 
   useEffect(() => {
@@ -347,63 +480,140 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto space-y-4">
-      {/* Top Deck Toolbar: Filter Pills + Shuffle */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#161b22] border border-slate-800 p-3 rounded-2xl shadow-lg">
-        {/* Deck Filters */}
-        <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
-          <button
-            type="button"
-            onClick={() => setDeckFilter('all')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              deckFilter === 'all'
-                ? 'bg-sky-600 text-white shadow-sm'
-                : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
-            }`}
-          >
-            {t('flashcardDeckAll')} ({questions.length})
-          </button>
+      {/* Top Deck Toolbar: Filters & Shuffle */}
+      <div className="bg-[#161b22] border border-slate-800 p-3 sm:p-4 rounded-2xl shadow-lg space-y-3">
+        {/* Row 1: Search + Topic Selector + Shuffle Button */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => handleSearchChange(e.target.value)}
+              placeholder="Filter flashcards by keyword..."
+              className="w-full bg-[#0d1117] border border-slate-800 rounded-xl pl-9 pr-8 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs px-1"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
 
-          <button
-            type="button"
-            onClick={() => setDeckFilter('review')}
-            className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              deckFilter === 'review'
-                ? 'bg-sky-600 text-white shadow-sm'
-                : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
-            }`}
-          >
-            <Bookmark className="w-3.5 h-3.5" />
-            <span>{t('flashcardDeckReview')}</span>
-            <span className="text-[11px] opacity-80">({progress.bookmarkedIds.length})</span>
-          </button>
-        </div>
+          {/* Section / Category Selector */}
+          <div className="w-full sm:w-auto">
+            <select
+              value={selectedSection}
+              onChange={e => handleSectionChange(e.target.value)}
+              aria-label="Filter flashcards by topic"
+              className="w-full sm:w-auto bg-[#0d1117] border border-slate-800 text-slate-200 text-xs rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 font-medium"
+            >
+              <option value="all">All Topics ({questions.length})</option>
+              {sections.filter(s => s.id !== 'all').map(sec => (
+                <option key={sec.id} value={sec.id}>
+                  {sec.shortLabel} ({sec.count})
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Shuffle Button */}
-        <div className="flex items-center gap-2 self-end sm:self-center">
+          {/* Shuffle Button */}
           <button
             type="button"
             onClick={handleShuffle}
             disabled={filteredIndices.length <= 1}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#0d1117] text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-[#0d1117] text-slate-300 hover:text-white border border-slate-800 hover:border-slate-700 transition disabled:opacity-50 shrink-0"
             title={t('flashcardShuffle')}
           >
             <Shuffle className="w-3.5 h-3.5 text-sky-400" />
-            <span className="hidden sm:inline">{t('flashcardShuffle')}</span>
+            <span>{t('flashcardShuffle')}</span>
           </button>
+        </div>
+
+        {/* Row 2: Status Filter Pills + Active Deck Count */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/60">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => handleStatusFilterChange('all')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                statusFilter === 'all'
+                  ? 'bg-sky-600 text-white shadow-sm'
+                  : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              All Cards ({filteredCounts.all})
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleStatusFilterChange('review')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                statusFilter === 'review'
+                  ? 'bg-amber-600 text-white shadow-sm'
+                  : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              <span>{t('flashcardDeckReview')}</span>
+              <span className="text-[11px] opacity-80">({filteredCounts.review})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleStatusFilterChange('mastered')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                statusFilter === 'mastered'
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>Mastered</span>
+              <span className="text-[11px] opacity-80">({filteredCounts.mastered})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleStatusFilterChange('unstudied')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                statusFilter === 'unstudied'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-[#0d1117] text-slate-400 hover:text-slate-200 border border-slate-800'
+              }`}
+            >
+              Unstudied ({filteredCounts.unstudied})
+            </button>
+          </div>
+
+          <div className="text-xs font-mono text-slate-400">
+            <span className="text-sky-400 font-bold">{filteredIndices.length}</span> in deck
+          </div>
         </div>
       </div>
 
       {/* Empty Deck State */}
       {activeDeck.length === 0 ? (
-        <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-12 text-center text-slate-300 space-y-3">
+        <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-12 text-center text-slate-300 space-y-4">
           <CheckCircle2 className="w-12 h-12 text-sky-400 mx-auto" />
-          <p className="text-base font-semibold">{t('flashcardEmptyDeck')}</p>
+          <div className="space-y-1">
+            <p className="text-base font-semibold">{t('flashcardEmptyDeck')}</p>
+            <p className="text-xs text-slate-500">
+              No flashcards match your current filter combination.
+            </p>
+          </div>
           <button
             type="button"
-            onClick={() => setDeckFilter('all')}
+            onClick={handleResetFilters}
             className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition shadow-lg shadow-sky-600/20"
           >
-            {t('flashcardResetDeck')}
+            Reset Filters
           </button>
         </div>
       ) : !currentQ ? null : (
@@ -608,38 +818,58 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                 )}
               </div>
 
-              {/* Bottom Card Footer: Only the ONE BLUE "Mark for Review" button */}
+              {/* Bottom Card Footer */}
               <div
                 onClick={e => e.stopPropagation()}
-                className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-3"
+                className="pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-3"
               >
-                {/* Single Blue Button to mark for review */}
-                <button
-                  type="button"
-                  onClick={() => onToggleBookmark(currentQ.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 ${
-                    isMarkedForReview
-                      ? 'bg-sky-600 text-white shadow-sky-600/30 ring-2 ring-sky-400/50'
-                      : 'bg-sky-950/40 hover:bg-sky-900/60 text-sky-300 border border-sky-500/40 hover:border-sky-400'
-                  }`}
-                  title={isMarkedForReview ? t('flashcardMarkedReview') : t('flashcardMarkReview')}
-                  aria-label={isMarkedForReview ? t('flashcardMarkedReview') : t('flashcardMarkReview')}
-                >
-                  {isMarkedForReview ? (
-                    <>
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>{t('flashcardMarkedReview')}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark className="w-4 h-4" />
-                      <span>{t('flashcardMarkReview')}</span>
-                    </>
+                <div className="flex items-center gap-2">
+                  {/* Mark for Review Button */}
+                  <button
+                    type="button"
+                    onClick={() => onToggleBookmark(currentQ.id)}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 ${
+                      isMarkedForReview
+                        ? 'bg-amber-600 text-white shadow-amber-600/30 ring-2 ring-amber-400/50'
+                        : 'bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-500/40 hover:border-amber-400'
+                    }`}
+                    title={isMarkedForReview ? t('flashcardMarkedReview') : t('flashcardMarkReview')}
+                    aria-label={isMarkedForReview ? t('flashcardMarkedReview') : t('flashcardMarkReview')}
+                  >
+                    {isMarkedForReview ? (
+                      <>
+                        <Check className="w-4 h-4 stroke-[3]" />
+                        <span>{t('flashcardMarkedReview')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bookmark className="w-4 h-4" />
+                        <span>{t('flashcardMarkReview')}</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Mark as Mastered Button */}
+                  {onRateCard && (
+                    <button
+                      type="button"
+                      onClick={() => onRateCard(currentQ.id, isMastered ? 'review' : 'mastered')}
+                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-md active:scale-95 ${
+                        isMastered
+                          ? 'bg-emerald-600 text-white shadow-emerald-600/30 ring-2 ring-emerald-400/50'
+                          : 'bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/40 hover:border-emerald-400'
+                      }`}
+                      title={isMastered ? 'Mastered' : 'Mark as Mastered'}
+                      aria-label={isMastered ? 'Mastered' : 'Mark as Mastered'}
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{isMastered ? 'Mastered' : 'Mark Mastered'}</span>
+                    </button>
                   )}
-                </button>
+                </div>
 
                 <span className="text-[11px] font-mono text-slate-500 hidden sm:inline">
-                  [Space] Flip • Swipe or drag to navigate • [R] Review
+                  [Space] Flip • Swipe or drag • [R] Review • [M] Mastered
                 </span>
               </div>
             </article>

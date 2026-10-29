@@ -318,6 +318,7 @@ export const QuizHub: React.FC = () => {
         {viewMode !== 'list' && (
           <div className="w-full sm:w-auto flex items-center justify-between sm:justify-end gap-2">
             <button
+              type="button"
               onClick={() => setShowQuestionMap(prev => !prev)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0d1117] border border-slate-800 text-xs font-mono text-slate-300 hover:text-white hover:border-slate-700 transition"
             >
@@ -338,20 +339,20 @@ export const QuizHub: React.FC = () => {
           className="bg-[#161b22] border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl animate-fadeIn"
           aria-label="100 Questions Fast Jump Navigator"
         >
-          <div className="flex items-center justify-between text-xs font-mono text-slate-400 mb-3 pb-2 border-b border-slate-800">
-            <span className="font-bold text-slate-200">100 Questions Navigator</span>
-            <div className="flex items-center gap-3 text-[11px]">
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Correct
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono text-slate-400 mb-3 pb-2 border-b border-slate-800">
+            <span className="font-bold text-slate-200 shrink-0">100 Questions Navigator</span>
+            <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[11px]">
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" /> Correct
               </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Incorrect
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" /> Incorrect
               </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> System Design
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" /> System Design
               </span>
-              <span className="flex items-center gap-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-700" /> Unanswered
+              <span className="flex items-center gap-1.5 shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-700 shrink-0" /> Unanswered MCQ
               </span>
             </div>
           </div>
@@ -375,13 +376,16 @@ export const QuizHub: React.FC = () => {
                   }
                 }
               } else {
+                // System Design questions (IDs 71-100)
                 if (progress.completedIds.includes(q.id)) {
-                  bgClass = 'bg-purple-950/60 text-purple-300 border-purple-500/50';
+                  bgClass = 'bg-purple-600/40 text-purple-200 border-purple-400 font-bold shadow-sm shadow-purple-500/20';
                 } else if (
                   progress.openEndedNotes[q.id] &&
                   progress.openEndedNotes[q.id].trim().length > 0
                 ) {
                   bgClass = 'bg-amber-950/40 text-amber-300 border-amber-500/40';
+                } else {
+                  bgClass = 'bg-purple-950/30 text-purple-300 border-purple-700/50 hover:border-purple-400 hover:bg-purple-900/40';
                 }
               }
 
@@ -391,6 +395,7 @@ export const QuizHub: React.FC = () => {
 
               return (
                 <button
+                  type="button"
                   key={q.id}
                   onClick={() => {
                     setCurrentIndex(idx);
@@ -455,6 +460,7 @@ export const QuizHub: React.FC = () => {
         <FlashcardView
           questions={quizQuestions}
           progress={progress}
+          initialQuestionIndex={currentIndex}
           onRateCard={handleRateFlashcard}
           onToggleBookmark={handleToggleBookmark}
         />
