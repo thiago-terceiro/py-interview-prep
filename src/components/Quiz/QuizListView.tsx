@@ -30,18 +30,36 @@ export const QuizListView: React.FC<QuizListViewProps> = ({
   const [selectedSection, setSelectedSection] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
 
-  // Available sections
+  // Precomputed lookup sets & index map for O(1) operations
+  const bookmarkedSet = useMemo(() => new Set(progress.bookmarkedIds), [progress.bookmarkedIds]);
+  const completedSet = useMemo(() => new Set(progress.completedIds), [progress.completedIds]);
+  const questionIndexMap = useMemo(() => new Map(questions.map((q, idx) => [q.id, idx])), [questions]);
+
+  // Available sections calculated in a single O(N) pass
   const sections: { id: string; label: string; count: number }[] = useMemo(() => {
     const list: { id: string; label: string; count: number }[] = [
       { id: 'all', label: t('quizFilterAll'), count: questions.length },
     ];
 
-    const uniqueSections = Array.from(new Set(questions.map(q => q.section)));
-    for (const sec of uniqueSections) {
+    const getSectionLabel = (sec: string) => {
+      if (sec === 'Level 1: Introductory') return t('quizFilterLevelIntro');
+      if (sec === 'Level 2: Beginner') return t('quizFilterLevelBeginner');
+      if (sec === 'Level 3: Intermediate') return t('quizFilterLevelInterm');
+      if (sec === 'Level 4: Advanced') return t('quizFilterLevelAdv');
+      if (sec === 'Level 5: Master') return t('quizFilterLevelMaster');
+      return sec;
+    };
+
+    const sectionCounts = new Map<string, number>();
+    for (const q of questions) {
+      sectionCounts.set(q.section, (sectionCounts.get(q.section) || 0) + 1);
+    }
+
+    for (const [sec, count] of sectionCounts.entries()) {
       list.push({
         id: sec,
-        label: sec,
-        count: questions.filter(q => q.section === sec).length,
+        label: getSectionLabel(sec),
+        count,
       });
     }
 
@@ -57,8 +75,8 @@ export const QuizListView: React.FC<QuizListViewProps> = ({
       }
 
       // 2. Status filter
-      const isBookmarked = progress.bookmarkedIds.includes(q.id);
-      const isCompleted = progress.completedIds.includes(q.id);
+      const isBookmarked = bookmarkedSet.has(q.id);
+      const isCompleted = completedSet.has(q.id);
       const isAnswered =
         q.type === 'multiple-choice'
           ? progress.selectedAnswers[q.id] !== undefined
@@ -97,7 +115,7 @@ export const QuizListView: React.FC<QuizListViewProps> = ({
 
       return true;
     });
-  }, [questions, selectedSection, statusFilter, searchQuery, progress]);
+  }, [questions, selectedSection, statusFilter, searchQuery, bookmarkedSet, completedSet, progress.selectedAnswers, progress.openEndedNotes]);
 
   return (
     <div className="space-y-6">
@@ -207,9 +225,9 @@ export const QuizListView: React.FC<QuizListViewProps> = ({
       ) : (
         <div className="grid grid-cols-1 gap-3.5">
           {filteredQuestions.map(q => {
-            const index = questions.findIndex(item => item.id === q.id);
-            const isBookmarked = progress.bookmarkedIds.includes(q.id);
-            const isCompleted = progress.completedIds.includes(q.id);
+            const index = questionIndexMap.get(q.id) ?? 0;
+            const isBookmarked = bookmarkedSet.has(q.id);
+            const isCompleted = completedSet.has(q.id);
             const isMCQ = q.type === 'multiple-choice';
 
             const userSelected = isMCQ ? progress.selectedAnswers[q.id] : undefined;

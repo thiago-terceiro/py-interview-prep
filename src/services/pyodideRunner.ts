@@ -148,6 +148,8 @@ import functools
 import heapq
 import bisect
 import typing
+import gc
+import gc
 
 _captured_stdout = io.StringIO()
 _original_stdout = sys.stdout
@@ -195,8 +197,12 @@ try:
 
 except Exception as ex:
     _execution_error = traceback.format_exc()
-
-sys.stdout = _original_stdout
+finally:
+    sys.stdout = _original_stdout
+    try:
+        gc.collect()
+    except Exception:
+        pass
 _elapsed_ms = round((time.perf_counter() - _start_t) * 1000, 2)
 
 _result_payload = {
@@ -297,6 +303,8 @@ import functools
 import heapq
 import bisect
 import typing
+import gc
+import gc
 
 _captured_stdout = io.StringIO()
 _original_stdout = sys.stdout
@@ -372,6 +380,10 @@ except Exception:
 finally:
     sys.stdout = _original_stdout
     sys.stderr = _original_stderr
+    try:
+        gc.collect()
+    except Exception:
+        pass
 
 _elapsed_ms = round((time.perf_counter() - _start_t) * 1000, 2)
 json.dumps({
@@ -433,6 +445,7 @@ import functools
 import heapq
 import bisect
 import typing
+import gc
 
 if "_repl_session_env" not in globals():
     globals()["_repl_session_env"] = {
@@ -484,6 +497,10 @@ except Exception:
 finally:
     sys.stdout = _orig_out
     sys.stderr = _orig_err
+    try:
+        gc.collect()
+    except Exception:
+        pass
 
 _elapsed_ms = round((time.perf_counter() - _t_start) * 1000, 2)
 json.dumps({

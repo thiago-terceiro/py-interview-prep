@@ -59,46 +59,65 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
   // Section friendly short names for dropdown options
   const sectionShortLabels: Record<string, string> = useMemo(
     () => ({
-      'Machine Learning Fundamentals & Beginner Concepts': 'ML Fundamentals (Beginner)',
-      'Classical ML, Feature Engineering & Fraud/Anomaly Detection': 'Classical ML & Fraud',
-      'Ultra-Low-Latency Inference, ONNX & Real-Time Data Stores': 'Low-Latency & ONNX',
-      'MLOps, Drift Detection, CI/CD & Observability': 'MLOps & CI/CD',
-      'Agentic Workflows, LangGraph, State Machines & LLMs': 'Agentic Workflows & LLMs',
-      'Distributed Systems, Security, RBAC & Cryptographic Auditing': 'Distributed & Security',
-      'High-Performance React/Next.js Streaming UI & Accessibility': 'Streaming UI & A11y',
-      'Open-Ended System Design & Scenario': 'System Design Scenarios',
+      'Level 1: Introductory': t('quizFilterLevelIntro'),
+      'Level 2: Beginner': t('quizFilterLevelBeginner'),
+      'Level 3: Intermediate': t('quizFilterLevelInterm'),
+      'Level 4: Advanced': t('quizFilterLevelAdv'),
+      'Level 5: Master': t('quizFilterLevelMaster'),
+      'Machine Learning Fundamentals & Beginner Concepts': t('quizFilterMLFundamentals'),
+      'Classical ML, Feature Engineering & Fraud/Anomaly Detection': t('quizFilterClassicalML'),
+      'Ultra-Low-Latency Inference, ONNX & Real-Time Data Stores': t('quizFilterLowLatency'),
+      'MLOps, Drift Detection, CI/CD & Observability': t('quizFilterMLOps'),
+      'Agentic Workflows, LangGraph, State Machines & LLMs': t('quizFilterAgentic'),
+      'Distributed Systems, Security, RBAC & Cryptographic Auditing': t('quizFilterDistributed'),
+      'High-Performance React/Next.js Streaming UI & Accessibility': t('quizFilterStreamingUI'),
+      'Open-Ended System Design & Scenario': t('quizFilterSystemDesign'),
     }),
-    []
+    [t]
   );
+
+  // Precomputed lookup sets for O(1) operations
+  const bookmarkedSet = useMemo(() => new Set(progress.bookmarkedIds), [progress.bookmarkedIds]);
+  const completedSet = useMemo(() => new Set(progress.completedIds), [progress.completedIds]);
 
   const sections = useMemo(() => {
     const list = [
-      { id: 'all', label: 'All Topics', shortLabel: 'All Topics', count: questions.length },
+      { id: 'all', label: t('quizFilterAll'), shortLabel: t('quizFilterAll'), count: questions.length },
     ];
-    const unique = Array.from(new Set(questions.map(q => q.section)));
-    for (const sec of unique) {
+    const sectionCounts = new Map<string, number>();
+    for (const q of questions) {
+      sectionCounts.set(q.section, (sectionCounts.get(q.section) || 0) + 1);
+    }
+    for (const [sec, count] of sectionCounts.entries()) {
       list.push({
         id: sec,
         label: sec,
         shortLabel: sectionShortLabels[sec] || sec,
-        count: questions.filter(q => q.section === sec).length,
+        count,
       });
     }
     return list;
-  }, [questions, sectionShortLabels]);
+  }, [questions, sectionShortLabels, t]);
 
-  // Live status counts given current topic
+  // Live status counts given current topic computed efficiently
   const filteredCounts = useMemo(() => {
-    let baseList = questions;
-    if (selectedSection !== 'all') {
-      baseList = baseList.filter(q => q.section === selectedSection);
+    let all = 0;
+    let review = 0;
+    let mastered = 0;
+    let unstudied = 0;
+
+    for (const q of questions) {
+      if (selectedSection !== 'all' && q.section !== selectedSection) {
+        continue;
+      }
+      all++;
+      if (bookmarkedSet.has(q.id)) review++;
+      if (completedSet.has(q.id)) mastered++;
+      else unstudied++;
     }
-    const all = baseList.length;
-    const review = baseList.filter(q => progress.bookmarkedIds.includes(q.id)).length;
-    const mastered = baseList.filter(q => progress.completedIds.includes(q.id)).length;
-    const unstudied = baseList.filter(q => !progress.completedIds.includes(q.id)).length;
+
     return { all, review, mastered, unstudied };
-  }, [questions, selectedSection, progress.bookmarkedIds, progress.completedIds]);
+  }, [questions, selectedSection, bookmarkedSet, completedSet]);
 
   // Filter deck based on topic, status, and search query
   const filteredIndices = useMemo(() => {
@@ -112,8 +131,8 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
       }
 
       // 2. Status filter
-      const isMarked = progress.bookmarkedIds.includes(q.id);
-      const isCompleted = progress.completedIds.includes(q.id);
+      const isMarked = bookmarkedSet.has(q.id);
+      const isCompleted = completedSet.has(q.id);
 
       if (statusFilter === 'review' && !isMarked) return;
       if (statusFilter === 'mastered' && !isCompleted) return;
@@ -145,8 +164,8 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
     selectedSection,
     statusFilter,
     searchQuery,
-    progress.bookmarkedIds,
-    progress.completedIds,
+    bookmarkedSet,
+    completedSet,
   ]);
 
   // Actual sequence of question indices being studied
@@ -780,14 +799,14 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                         </div>
 
                         {/* Technical Invariant & Rationale */}
-                        <div className="p-4 rounded-xl bg-[#0d1117] border border-slate-800">
-                          <div className="text-xs font-bold text-sky-400 uppercase tracking-wider font-mono mb-2 flex items-center gap-1.5">
+                        <div className="p-4 sm:p-5 rounded-xl bg-[#0d1117] border border-slate-800 max-h-[380px] sm:max-h-[440px] overflow-y-auto">
+                          <div className="text-xs font-bold text-sky-400 uppercase tracking-wider font-mono mb-2.5 flex items-center gap-1.5 sticky top-0 bg-[#0d1117] pb-1 z-10">
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>{t('quizWhyExplanation')}</span>
                           </div>
-                          <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
+                          <div className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans whitespace-pre-line select-text">
                             {currentQ.explanation}
-                          </p>
+                          </div>
                         </div>
                       </div>
                     ) : (

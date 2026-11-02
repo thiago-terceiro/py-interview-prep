@@ -12,9 +12,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('react') || id.includes('scheduler')) {
-              return 'vendor-react';
-            }
             if (id.includes('@monaco-editor') || id.includes('monaco-editor')) {
               return 'vendor-monaco';
             }
@@ -23,6 +20,12 @@ export default defineConfig({
             }
             if (id.includes('canvas-confetti')) {
               return 'vendor-confetti';
+            }
+            if (id.includes('@tanstack')) {
+              return 'vendor-router';
+            }
+            if (id.includes('react') || id.includes('scheduler')) {
+              return 'vendor-react';
             }
             return 'vendor-misc';
           }

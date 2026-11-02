@@ -58,10 +58,23 @@ export function SlidingTabs<T extends string = string>({
   }, [updateIndicator, tabs]);
 
   useEffect(() => {
-    window.addEventListener('resize', updateIndicator);
+    const container = containerRef.current;
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && container) {
+      observer = new ResizeObserver(() => {
+        updateIndicator();
+      });
+      observer.observe(container);
+    } else {
+      window.addEventListener('resize', updateIndicator, { passive: true });
+    }
     const timer = setTimeout(updateIndicator, 50);
     return () => {
-      window.removeEventListener('resize', updateIndicator);
+      if (observer) {
+        observer.disconnect();
+      } else {
+        window.removeEventListener('resize', updateIndicator);
+      }
       clearTimeout(timer);
     };
   }, [updateIndicator]);

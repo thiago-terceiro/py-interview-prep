@@ -242,9 +242,9 @@ export const QuizCard: React.FC<QuizCardProps> = ({
                 </div>
               )}
             </div>
-            <p className="text-sm sm:text-base text-slate-200 leading-relaxed font-sans">
+            <div className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans whitespace-pre-line select-text">
               {question.explanation}
-            </p>
+            </div>
           </div>
         )}
       </div>

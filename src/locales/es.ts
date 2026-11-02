@@ -10,7 +10,7 @@ export const es: Record<TranslationKey, string> = {
   navPatterns: 'Patrones de Algoritmos',
   navVisualizers: 'Visualizadores',
   navCheatsheet: 'Guía Rápida',
-  navQuiz: 'Banco de 150 Preguntas',
+  navQuiz: 'Banco de 200 Preguntas',
   resetProgress: 'Limpiar Datos Locales',
 
   // Selector de Idioma & A11y
@@ -52,6 +52,7 @@ export const es: Record<TranslationKey, string> = {
   // Estado
   pythonEngineReady: 'Python 3.12 (Pyodide) Listo',
   pythonEngineInitializing: 'Iniciando Python 3.12...',
+  pythonEngineIdle: 'Python 3.12 (Bajo Demanda)',
   pythonEngineError: 'Error del Motor Python',
 
   // Página de Patrones
@@ -115,6 +116,7 @@ export const es: Record<TranslationKey, string> = {
   homePatternBannerTitle: 'Aprende Algoritmos por Patrones, No por Memoria',
   homePatternBannerDesc: 'Deja de memorizar ciegamente en LeetCode. Descubre los 10 planos estructurales detrás de nuestras 45 preguntas con 4 niveles de explicación y visualizadores interactivos.',
   homeExplorePatternsBtn: 'Explorar Centro de Patrones',
+  homeLaunchQuizBtn: 'Abrir Banco de 200 Preguntas',
 
   // UI General
   practiceProblem: 'Problema de Práctica',
@@ -139,15 +141,20 @@ export const es: Record<TranslationKey, string> = {
   patternIntermediate: 'Intermedio',
   patternAdvanced: 'Avanzado',
 
-  // Banco de 150 Preguntas (AI & ML)
-  quizHeroBadge: 'Banco de Preguntas: ML en Producción e IA Full-Stack',
-  quizHeroTitle: '150 Preguntas de ML en Producción e IA Full-Stack',
+  // Banco de 200 Preguntas (Machine Learning)
+  quizHeroBadge: 'Banco de 200 Preguntas Técnicas de ML',
+  quizHeroTitle: '200 Preguntas de Entrevista de Machine Learning',
   quizHeroDesc:
-    '120 preguntas técnicas de opción múltiple con retroalimentación inmediata y explicaciones exhaustivas (incluyendo 50 conceptos fundamentales para principiantes en ML), más 30 escenarios reales de diseño de sistemas con rúbricas de evaluación.',
+    '200 preguntas progresivas de opción múltiple en 5 niveles de dificultad (Introductorio, Principiante, Intermedio, Avanzado y Maestro), con explicaciones detalladas, fórmulas y tarjetas de estudio.',
   quizModeQuiz: 'Quiz Interactivo',
   quizModeFlashcard: 'Flashcards',
   quizModeList: 'Ver Todas',
-  quizFilterAll: 'Las 150 Preguntas',
+  quizFilterAll: 'Las 200 Preguntas',
+  quizFilterLevelIntro: 'Nivel 1: Introductorio (Q1–40)',
+  quizFilterLevelBeginner: 'Nivel 2: Principiante (Q41–80)',
+  quizFilterLevelInterm: 'Nivel 3: Intermedio (Q81–120)',
+  quizFilterLevelAdv: 'Nivel 4: Avanzado (Q121–160)',
+  quizFilterLevelMaster: 'Nivel 5: Maestro (Q161–200)',
   quizFilterMLFundamentals: 'Fundamentos de ML (Principiante)',
   quizFilterClassicalML: 'ML Clásico y Fraude',
   quizFilterLowLatency: 'Latencia Ultrabaja y ONNX',
@@ -163,9 +170,9 @@ export const es: Record<TranslationKey, string> = {
   quizStatsMastery: 'Progreso de Dominio',
   quizProgressResetBtn: 'Restablecer Datos del Quiz',
   quizProgressResetTitle: '¿Restablecer Progreso del Quiz?',
-  quizProgressResetSubtitle: 'Revertir las 150 preguntas al estado no respondido',
+  quizProgressResetSubtitle: 'Revertir las 200 preguntas al estado no respondido',
   quizProgressResetConfirm:
-    '¿Estás seguro de que deseas restablecer todas tus respuestas, notas y progreso del Banco de 150 Preguntas? Esta acción no se puede deshacer.',
+    '¿Estás seguro de que deseas restablecer todas tus respuestas, notas y progreso del Banco de 200 Preguntas? Esta acción no se puede deshacer.',
   quizSearchPlaceholder: 'Buscar preguntas, opciones, explicaciones, criterios...',
   quizFilterStatus: 'Filtrar por Estado',
   quizFilterAllStatus: 'Todos los Estados',
@@ -215,7 +222,7 @@ export const es: Record<TranslationKey, string> = {
   flashcardMarkKnow: 'Ya lo Sé',
   flashcardMarkReview: 'Marcar para Repasar',
   flashcardMarkedReview: 'Marcado para Repasar',
-  flashcardDeckAll: 'Las 150 Tarjetas',
+  flashcardDeckAll: 'Las 200 Tarjetas',
   flashcardDeckReview: 'Por Repasar',
   flashcardDeckUnmastered: 'Aún No Dominadas',
   flashcardShuffle: 'Barajar Mazo',

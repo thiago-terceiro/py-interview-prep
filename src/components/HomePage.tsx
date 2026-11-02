@@ -16,7 +16,7 @@ import {
   Lightbulb,
   GraduationCap,
 } from 'lucide-react';
-import { trackMeta, allQuestions } from '../data/questions';
+import { trackMeta } from '../data/trackMeta';
 import type { Track } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -87,7 +87,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 hover:from-sky-500 hover:to-purple-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-600/25 transition-transform active:scale-95 no-underline cursor-pointer"
           >
             <GraduationCap className="w-4 h-4 text-sky-200" />
-            <span>100 Qs AI & ML Bank</span>
+            <span>{t('navQuiz')}</span>
           </Link>
 
           <Link
@@ -144,7 +144,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* Production ML & Full-Stack AI 100 Qs Bank Banner */}
+      {/* 200 Qs Machine Learning Question Bank Banner */}
       <section className="px-4">
         <div className="bg-gradient-to-r from-indigo-950/40 via-[#0d1117] to-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
           <div className="space-y-3 max-w-2xl">
@@ -162,7 +162,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-sky-600/30 transition-all hover:scale-105 active:scale-95 shrink-0 no-underline cursor-pointer"
           >
             <GraduationCap className="w-4 h-4" />
-            <span>Launch 100 Qs Bank</span>
+            <span>{t('homeLaunchQuizBtn')}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -187,7 +187,6 @@ export const HomePage: React.FC<HomePageProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {tracks.map(({ key, icon: Icon }) => {
             const meta = trackMeta[key];
-            const trackQuestions = allQuestions.filter(q => q.track === key);
             return (
               <Link
                 key={key}
@@ -205,7 +204,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <Icon className={`w-5 h-5 ${meta.color}`} />
                     </div>
                     <span className="text-[11px] font-mono font-bold text-slate-400">
-                      {trackQuestions.length} Questions
+                      {meta.count} Questions
                     </span>
                   </div>
 

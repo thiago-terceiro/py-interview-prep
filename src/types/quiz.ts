@@ -1,6 +1,11 @@
 export type QuizQuestionType = 'multiple-choice' | 'open-ended';
 
 export type QuizSection =
+  | 'Level 1: Introductory'
+  | 'Level 2: Beginner'
+  | 'Level 3: Intermediate'
+  | 'Level 4: Advanced'
+  | 'Level 5: Master'
   | 'Machine Learning Fundamentals & Beginner Concepts'
   | 'Classical ML, Feature Engineering & Fraud/Anomaly Detection'
   | 'Ultra-Low-Latency Inference, ONNX & Real-Time Data Stores'

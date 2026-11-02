@@ -12,14 +12,16 @@ import {
   useSearch,
   useRouterState,
 } from '@tanstack/react-router';
-import { allQuestions, getQuestionById } from './data/questions';
-import { HomePage } from './components/HomePage';
-import { QuestionCatalog } from './components/QuestionCatalog';
-import { ProblemArena } from './components/ProblemArena';
-import { VisualizerHub } from './components/Visualizers/VisualizerHub';
-import { CheatsheetView } from './components/CheatsheetView';
-import { AlgoPatternsView } from './components/AlgoPatterns/AlgoPatternsView';
-import { QuizHub } from './components/Quiz/QuizHub';
+import { TOTAL_QUESTIONS_COUNT } from './data/trackMeta';
+
+// Lazy-loaded routes for optimal initial chunk size & fast FCP
+const HomePage = React.lazy(() => import('./components/HomePage').then(m => ({ default: m.HomePage })));
+const QuestionCatalog = React.lazy(() => import('./components/QuestionCatalog').then(m => ({ default: m.QuestionCatalog })));
+const ArenaRouteView = React.lazy(() => import('./components/ArenaRouteView'));
+const VisualizerHub = React.lazy(() => import('./components/Visualizers/VisualizerHub').then(m => ({ default: m.VisualizerHub })));
+const CheatsheetView = React.lazy(() => import('./components/CheatsheetView').then(m => ({ default: m.CheatsheetView })));
+const AlgoPatternsView = React.lazy(() => import('./components/AlgoPatterns/AlgoPatternsView').then(m => ({ default: m.AlgoPatternsView })));
+const QuizHub = React.lazy(() => import('./components/Quiz/QuizHub').then(m => ({ default: m.QuizHub })));
 import { pyodideRunner, type PyodideStatus } from './services/pyodideRunner';
 import type { Track } from './types';
 import { ThemeProvider } from './context/ThemeProvider';
@@ -68,6 +70,21 @@ export const useAppNavigation = () => {
   }
   return ctx;
 };
+
+function PageLoadingFallback() {
+  return (
+    <div
+      className="w-full flex items-center justify-center min-h-[350px] py-12 select-none"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-sky-400/20 border-t-sky-400 animate-spin" />
+        <span className="text-xs font-mono text-slate-400">Loading module...</span>
+      </div>
+    </div>
+  );
+}
 
 // --- Route Definitions ---
 
@@ -180,12 +197,9 @@ function RootLayout() {
   const [pyStatus, setPyStatus] = useState<PyodideStatus>('idle');
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
 
-  // Pyodide status subscription
+  // Pyodide status subscription (initialization deferred until entering ProblemArena)
   useEffect(() => {
     const unsub = pyodideRunner.subscribeStatus(status => setPyStatus(status));
-    pyodideRunner.init().catch(err => {
-      console.warn('Background Pyodide init error:', err);
-    });
     return () => unsub();
   }, []);
 
@@ -266,7 +280,7 @@ function RootLayout() {
                     PyInterview <span className="text-sky-400">Pro</span>
                   </h1>
                   <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                    {allQuestions.length} Track
+                    {TOTAL_QUESTIONS_COUNT} Track
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-400 hidden sm:block">
@@ -320,6 +334,8 @@ function RootLayout() {
                   ? t('pythonEngineReady')
                   : pyStatus === 'error'
                   ? t('pythonEngineError')
+                  : pyStatus === 'idle'
+                  ? t('pythonEngineIdle')
                   : t('pythonEngineInitializing')}
               </span>
             </div>
@@ -327,11 +343,11 @@ function RootLayout() {
             {/* Solved Progress Pill - Non-wrapping and compact */}
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#161b22] border border-slate-800 text-xs select-none whitespace-nowrap shrink-0"
-              title={`Questions solved out of ${allQuestions.length} total`}
+              title={`Questions solved out of ${TOTAL_QUESTIONS_COUNT} total`}
             >
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span className="font-mono font-bold text-white whitespace-nowrap">
-                {solvedQuestionIds.length} <span className="text-slate-500 font-normal">/ {allQuestions.length}</span>
+                {solvedQuestionIds.length} <span className="text-slate-500 font-normal">/ {TOTAL_QUESTIONS_COUNT}</span>
               </span>
             </div>
 
@@ -384,7 +400,9 @@ function RootLayout() {
 
       {/* Main Routed Outlet View */}
       <main className="flex-1 w-full max-w-[1700px] mx-auto p-4 sm:p-6">
-        <Outlet />
+        <React.Suspense fallback={<PageLoadingFallback />}>
+          <Outlet />
+        </React.Suspense>
       </main>
 
       {/* Footer */}
@@ -455,68 +473,11 @@ function CatalogRouteComponent() {
 }
 
 function ArenaQuestionRouteComponent() {
-  const { questionId } = useParams({ from: '/arena/$questionId' });
-  const {
-    activeQuestionId,
-    setActiveQuestionId,
-    codeDrafts,
-    handleCodeChange,
-    handleQuestionSolved,
-    handleSelectQuestion,
-    handleOpenVisualizer,
-    handleOpenPattern,
-  } = useAppNavigation();
-
-  useEffect(() => {
-    if (questionId && questionId !== activeQuestionId) {
-      setActiveQuestionId(questionId);
-    }
-  }, [questionId, activeQuestionId, setActiveQuestionId]);
-
-  const targetId = questionId || activeQuestionId;
-  const activeQuestion = getQuestionById(targetId) || allQuestions[0];
-  const currentCode = codeDrafts[activeQuestion.id] ?? activeQuestion.starterCode;
-
-  return (
-    <ProblemArena
-      question={activeQuestion}
-      allQuestions={allQuestions}
-      userCode={currentCode}
-      onCodeChange={handleCodeChange}
-      onQuestionSolved={handleQuestionSolved}
-      onSelectQuestion={handleSelectQuestion}
-      onOpenVisualizer={handleOpenVisualizer}
-      onOpenPattern={handleOpenPattern}
-    />
-  );
+  return <ArenaRouteView />;
 }
 
 function ArenaRouteComponent() {
-  const {
-    activeQuestionId,
-    codeDrafts,
-    handleCodeChange,
-    handleQuestionSolved,
-    handleSelectQuestion,
-    handleOpenVisualizer,
-    handleOpenPattern,
-  } = useAppNavigation();
-
-  const activeQuestion = getQuestionById(activeQuestionId) || allQuestions[0];
-  const currentCode = codeDrafts[activeQuestion.id] ?? activeQuestion.starterCode;
-
-  return (
-    <ProblemArena
-      question={activeQuestion}
-      allQuestions={allQuestions}
-      userCode={currentCode}
-      onCodeChange={handleCodeChange}
-      onQuestionSolved={handleQuestionSolved}
-      onSelectQuestion={handleSelectQuestion}
-      onOpenVisualizer={handleOpenVisualizer}
-      onOpenPattern={handleOpenPattern}
-    />
-  );
+  return <ArenaRouteView />;
 }
 
 function PatternsItemRouteComponent() {

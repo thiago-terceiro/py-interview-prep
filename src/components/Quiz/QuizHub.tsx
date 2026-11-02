@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { quizQuestions } from '../../data/quizQuestions';
 import type { UserQuizProgress, QuizViewMode } from '../../types/quiz';
 import { useLanguage } from '../../context/LanguageContext';
@@ -20,7 +20,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 
-const QUIZ_STORAGE_KEY = 'py_interview_pro_quiz_v1';
+const QUIZ_STORAGE_KEY = 'py_interview_pro_quiz_v2';
 
 export const QuizHub: React.FC = () => {
   const { t } = useLanguage();
@@ -185,26 +185,46 @@ export const QuizHub: React.FC = () => {
     }
   };
 
+  // Memoized MCQ questions and Sets for O(1) lookups
+  const mcqQuestions = useMemo(
+    () => quizQuestions.filter(q => q.type === 'multiple-choice'),
+    []
+  );
+
+  const completedSet = useMemo(
+    () => new Set(progress.completedIds),
+    [progress.completedIds]
+  );
+
+  const bookmarkedSet = useMemo(
+    () => new Set(progress.bookmarkedIds),
+    [progress.bookmarkedIds]
+  );
+
   // Stats calculation
-  const totalQuestions = quizQuestions.length; // 100
-  const mcqQuestions = quizQuestions.filter(q => q.type === 'multiple-choice');
-  const answeredMCQCount = Object.keys(progress.selectedAnswers).length;
+  const { totalQuestions, answeredMCQCount, correctMCQCount, accuracyRate, completedTotal, overallPercent } =
+    useMemo(() => {
+      const totalQuestions = quizQuestions.length;
+      const answeredMCQCount = Object.keys(progress.selectedAnswers).length;
 
-  let correctMCQCount = 0;
-  for (const q of mcqQuestions) {
-    if (progress.selectedAnswers[q.id] === q.answer) {
-      correctMCQCount++;
-    }
-  }
+      let correctMCQCount = 0;
+      for (const q of mcqQuestions) {
+        if (progress.selectedAnswers[q.id] === q.answer) {
+          correctMCQCount++;
+        }
+      }
 
-  const accuracyRate =
-    answeredMCQCount > 0 ? Math.round((correctMCQCount / answeredMCQCount) * 100) : 0;
-  const completedTotal = progress.completedIds.length;
-  const overallPercent = Math.round((completedTotal / totalQuestions) * 100);
+      const accuracyRate =
+        answeredMCQCount > 0 ? Math.round((correctMCQCount / answeredMCQCount) * 100) : 0;
+      const completedTotal = progress.completedIds.length;
+      const overallPercent = Math.round((completedTotal / totalQuestions) * 100);
+
+      return { totalQuestions, answeredMCQCount, correctMCQCount, accuracyRate, completedTotal, overallPercent };
+    }, [mcqQuestions, progress.selectedAnswers, progress.completedIds]);
 
   const currentQuestion = quizQuestions[currentIndex] || quizQuestions[0];
-  const isCurrentBookmarked = progress.bookmarkedIds.includes(currentQuestion.id);
-  const isCurrentCompleted = progress.completedIds.includes(currentQuestion.id);
+  const isCurrentBookmarked = bookmarkedSet.has(currentQuestion.id);
+  const isCurrentCompleted = completedSet.has(currentQuestion.id);
 
   const quizModes: TabItem<QuizViewMode>[] = [
     {
@@ -229,7 +249,7 @@ export const QuizHub: React.FC = () => {
       {/* Reusable Fixed-Height Header Card - Zero CLS */}
       <PageHeaderCard
         badgeIcon={GraduationCap}
-        badgeText="150 Technical Qs Knowledge Bank"
+        badgeText={t('quizHeroBadge')}
         badgeColor="text-indigo-400"
         title={t('quizHeroTitle')}
         description={t('quizHeroDesc')}
@@ -333,14 +353,14 @@ export const QuizHub: React.FC = () => {
         )}
       </div>
 
-      {/* Interactive 150-Question Mini Map (Expandable) */}
+      {/* Interactive 200-Question Mini Map (Expandable) */}
       {showQuestionMap && viewMode !== 'list' && (
         <section
           className="bg-[#161b22] border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl animate-fadeIn"
-          aria-label="150 Questions Fast Jump Navigator"
+          aria-label="200 Questions Fast Jump Navigator"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono text-slate-400 mb-3 pb-2 border-b border-slate-800">
-            <span className="font-bold text-slate-200 shrink-0">150 Questions Navigator</span>
+            <span className="font-bold text-slate-200 shrink-0">200 Questions Navigator</span>
             <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[11px]">
               <span className="flex items-center gap-1.5 shrink-0">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" /> Correct
@@ -349,10 +369,10 @@ export const QuizHub: React.FC = () => {
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shrink-0" /> Incorrect
               </span>
               <span className="flex items-center gap-1.5 shrink-0">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 shrink-0" /> System Design
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400 shrink-0" /> Saved
               </span>
               <span className="flex items-center gap-1.5 shrink-0">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-700 shrink-0" /> Unanswered MCQ
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-700 shrink-0" /> Unanswered
               </span>
             </div>
           </div>
@@ -362,9 +382,9 @@ export const QuizHub: React.FC = () => {
               const isSelected = idx === currentIndex;
               const isMCQ = q.type === 'multiple-choice';
               const userAns = isMCQ ? progress.selectedAnswers[q.id] : undefined;
-              const isAns = isMCQ ? userAns !== undefined : progress.completedIds.includes(q.id);
+              const isAns = isMCQ ? userAns !== undefined : completedSet.has(q.id);
               const isCorr = isMCQ && userAns === q.answer;
-              const isBookmarked = progress.bookmarkedIds.includes(q.id);
+              const isBookmarked = bookmarkedSet.has(q.id);
 
               let bgClass = 'bg-[#0d1117] text-slate-400 border-slate-800 hover:border-slate-600';
               if (isMCQ) {
@@ -377,7 +397,7 @@ export const QuizHub: React.FC = () => {
                 }
               } else {
                 // System Design questions (IDs 71-100)
-                if (progress.completedIds.includes(q.id)) {
+                if (completedSet.has(q.id)) {
                   bgClass = 'bg-purple-600/40 text-purple-200 border-purple-400 font-bold shadow-sm shadow-purple-500/20';
                 } else if (
                   progress.openEndedNotes[q.id] &&

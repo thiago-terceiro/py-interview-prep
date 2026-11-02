@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import Editor from '@monaco-editor/react';
-import confetti from 'canvas-confetti';
 import type { Question, ExecutionResult, ConsoleEntry, ScriptRunResult } from '../types';
 import { pyodideRunner, type PyodideStatus } from '../services/pyodideRunner';
 import { useLanguage } from '../context/LanguageContext';
@@ -75,11 +74,14 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
   const consoleEndRef = useRef<HTMLDivElement>(null);
   const consoleInputRef = useRef<HTMLInputElement>(null);
 
-  // Subscribe to Python runtime status
+  // Subscribe to Python runtime status & ensure Pyodide runtime is ready in ProblemArena
   useEffect(() => {
     const unsubscribe = pyodideRunner.subscribeStatus((status, message) => {
       setPyStatus(status);
       if (message) setStatusMessage(message);
+    });
+    pyodideRunner.init().catch(err => {
+      console.warn('ProblemArena Pyodide runtime initialization notice:', err);
     });
     return () => unsubscribe();
   }, []);
@@ -239,12 +241,14 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
 
     if (result.success) {
       onQuestionSolved(question.id);
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#10b981', '#38bdf8', '#a855f7'],
-      });
+      import('canvas-confetti').then(({ default: confetti }) => {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#10b981', '#38bdf8', '#a855f7'],
+        });
+      }).catch(() => {});
     }
   };
 

@@ -10,7 +10,7 @@ export const ptBR: Record<TranslationKey, string> = {
   navPatterns: 'Padrões de Algoritmos',
   navVisualizers: 'Visualizadores de Algoritmos',
   navCheatsheet: 'Guia Rápido',
-  navQuiz: 'Banco de 150 Questões',
+  navQuiz: 'Banco de 200 Questões',
   resetProgress: 'Limpar Dados Locais',
 
   // Seletor de Idioma & A11y
@@ -52,6 +52,7 @@ export const ptBR: Record<TranslationKey, string> = {
   // Status
   pythonEngineReady: 'Python 3.12 (Pyodide) Pronto',
   pythonEngineInitializing: 'Inicializando Python 3.12...',
+  pythonEngineIdle: 'Python 3.12 (Sob Demanda)',
   pythonEngineError: 'Erro no Motor Python',
 
   // Página de Padrões
@@ -115,6 +116,7 @@ export const ptBR: Record<TranslationKey, string> = {
   homePatternBannerTitle: 'Aprenda Algoritmos por Padrões, Não por Decoreba',
   homePatternBannerDesc: 'Pare de tentar decorar centenas de problemas no LeetCode. Conheça as estruturas mentais por trás de nossas 45 questões com 4 camadas de explicação e visualizadores interativos.',
   homeExplorePatternsBtn: 'Acessar Central de Padrões',
+  homeLaunchQuizBtn: 'Abrir Banco de 200 Questões',
 
   // UI Geral
   practiceProblem: 'Problema de Prática',
@@ -139,15 +141,20 @@ export const ptBR: Record<TranslationKey, string> = {
   patternIntermediate: 'Intermediário',
   patternAdvanced: 'Avançado',
 
-  // Banco de 150 Questões (AI & ML)
-  quizHeroBadge: 'Banco de Questões: ML em Produção & IA Full-Stack',
-  quizHeroTitle: '150 Questões de ML em Produção & IA Full-Stack',
+  // Banco de 200 Questões (Machine Learning)
+  quizHeroBadge: 'Banco de 200 Questões Técnicas de ML',
+  quizHeroTitle: '200 Questões de Entrevista de Machine Learning',
   quizHeroDesc:
-    '120 questões aprofundadas de múltipla escolha com feedback imediato e explicações minuciosas (incluindo 50 conceitos fundamentais para iniciantes em ML), além de 30 cenários reais de design de sistemas com rubricas de avaliação.',
+    '200 questões progressivas de múltipla escolha em 5 níveis de dificuldade (Introdutório, Iniciante, Intermediário, Avançado e Mestre), com explicações aprofundadas, fórmulas e flashcards.',
   quizModeQuiz: 'Quiz Interativo',
   quizModeFlashcard: 'Flashcards',
   quizModeList: 'Ver Todas',
-  quizFilterAll: 'Todas as 150 Questões',
+  quizFilterAll: 'Todas as 200 Questões',
+  quizFilterLevelIntro: 'Nível 1: Introdutório (Q1–40)',
+  quizFilterLevelBeginner: 'Nível 2: Iniciante (Q41–80)',
+  quizFilterLevelInterm: 'Nível 3: Intermediário (Q81–120)',
+  quizFilterLevelAdv: 'Nível 4: Avançado (Q121–160)',
+  quizFilterLevelMaster: 'Nível 5: Mestre (Q161–200)',
   quizFilterMLFundamentals: 'Fundamentos de ML (Iniciante)',
   quizFilterClassicalML: 'ML Clássico e Fraude',
   quizFilterLowLatency: 'Ultrabaixa Latência e ONNX',
@@ -163,9 +170,9 @@ export const ptBR: Record<TranslationKey, string> = {
   quizStatsMastery: 'Progresso de Domínio',
   quizProgressResetBtn: 'Redefinir Dados do Quiz',
   quizProgressResetTitle: 'Redefinir Progresso do Quiz?',
-  quizProgressResetSubtitle: 'Reverter todas as 150 questões ao estado não respondido',
+  quizProgressResetSubtitle: 'Reverter todas as 200 questões ao estado não respondido',
   quizProgressResetConfirm:
-    'Tem certeza de que deseja redefinir todas as respostas, anotações e progresso do Banco de 150 Questões? Esta ação não pode ser desfeita.',
+    'Tem certeza de que deseja redefinir todas as respostas, anotações e progresso do Banco de 200 Questões? Esta ação não pode ser desfeita.',
   quizSearchPlaceholder: 'Buscar perguntas, opções, explicações, critérios...',
   quizFilterStatus: 'Filtrar por Status',
   quizFilterAllStatus: 'Todos os Status',
@@ -215,7 +222,7 @@ export const ptBR: Record<TranslationKey, string> = {
   flashcardMarkKnow: 'Já Dominei',
   flashcardMarkReview: 'Marcar para Revisão',
   flashcardMarkedReview: 'Marcado para Revisão',
-  flashcardDeckAll: 'Todos os 150 Cartões',
+  flashcardDeckAll: 'Todos os 200 Cartões',
   flashcardDeckReview: 'Precisa de Revisão',
   flashcardDeckUnmastered: 'Ainda Não Dominados',
   flashcardShuffle: 'Embaralhar Baralho',

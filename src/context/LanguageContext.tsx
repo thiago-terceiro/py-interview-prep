@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { translations, type Language, type TranslationKey } from '../locales';
 
 export const LANGUAGE_STORAGE_KEY = 'py_interview_pro_lang';
@@ -45,9 +45,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [language]);
 
-  const setLanguage = (newLang: Language) => {
+  const setLanguage = useCallback((newLang: Language) => {
     setLanguageState(newLang);
-  };
+  }, []);
 
   const t = useMemo(() => {
     const currentDict = translations[language] || translations.en;
@@ -58,7 +58,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const value = useMemo(
     () => ({ language, setLanguage, t }),
-    [language, t]
+    [language, setLanguage, t]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

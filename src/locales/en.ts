@@ -8,7 +8,7 @@ export const en = {
   navPatterns: 'Algo Patterns',
   navVisualizers: 'Algorithm Visualizers',
   navCheatsheet: 'Cheatsheet',
-  navQuiz: '150 Qs Bank',
+  navQuiz: '200 Qs Bank',
   resetProgress: 'Clear Local Data',
 
   // Language & A11y switcher
@@ -50,6 +50,7 @@ export const en = {
   // Status
   pythonEngineReady: 'Pyodide Python 3.12 Ready',
   pythonEngineInitializing: 'Initializing Python 3.12...',
+  pythonEngineIdle: 'Python 3.12 (On Demand)',
   pythonEngineError: 'Engine Error',
 
   // Algo Patterns Page
@@ -113,6 +114,7 @@ export const en = {
   homePatternBannerTitle: 'Learn Algorithms via Patterns, Not Rote Memorization',
   homePatternBannerDesc: 'Stop grinding LeetCode blindly. Discover the 10 structural blueprints behind our 45 interview questions with 4 distinct explanation layers and interactive step visualizers.',
   homeExplorePatternsBtn: 'Explore Algo Patterns Hub',
+  homeLaunchQuizBtn: 'Launch 200 Qs Bank',
 
   // General UI
   practiceProblem: 'Practice Problem',
@@ -137,15 +139,20 @@ export const en = {
   patternIntermediate: 'Intermediate',
   patternAdvanced: 'Advanced',
 
-  // 150 Qs Question Bank (AI & ML)
-  quizHeroBadge: 'Production ML & Full-Stack AI Question Bank',
-  quizHeroTitle: '150 Production ML & Full-Stack AI Questions',
+  // 200 Qs Question Bank (Machine Learning)
+  quizHeroBadge: '200 ML Technical Qs Knowledge Bank',
+  quizHeroTitle: '200 Machine Learning Interview Questions',
   quizHeroDesc:
-    '120 technical multiple-choice questions with instant feedback and comprehensive explanations (including 50 ML beginner fundamentals), plus 30 real-world system design scenarios with grading rubrics.',
+    '200 progressive multiple-choice questions across 5 difficulty levels (Introductory, Beginner, Intermediate, Advanced, and Master), featuring in-depth explanations, formulas, and flashcards.',
   quizModeQuiz: 'Interactive Quiz',
   quizModeFlashcard: 'Flashcards',
   quizModeList: 'Browse All',
-  quizFilterAll: 'All 150 Questions',
+  quizFilterAll: 'All 200 Questions',
+  quizFilterLevelIntro: 'Level 1: Introductory (Q1–40)',
+  quizFilterLevelBeginner: 'Level 2: Beginner (Q41–80)',
+  quizFilterLevelInterm: 'Level 3: Intermediate (Q81–120)',
+  quizFilterLevelAdv: 'Level 4: Advanced (Q121–160)',
+  quizFilterLevelMaster: 'Level 5: Master (Q161–200)',
   quizFilterMLFundamentals: 'ML Fundamentals (Beginner)',
   quizFilterClassicalML: 'Classical ML & Fraud',
   quizFilterLowLatency: 'Ultra-Low-Latency & ONNX',
@@ -161,9 +168,9 @@ export const en = {
   quizStatsMastery: 'Mastery Progress',
   quizProgressResetBtn: 'Reset Quiz Data',
   quizProgressResetTitle: 'Reset Quiz Progress?',
-  quizProgressResetSubtitle: 'Revert all 150 questions to unanswered state',
+  quizProgressResetSubtitle: 'Revert all 200 questions to unanswered state',
   quizProgressResetConfirm:
-    'Are you sure you want to reset all answers, notes, and progress in the 150 Questions Bank? This action cannot be undone.',
+    'Are you sure you want to reset all answers, notes, and progress in the 200 Questions Bank? This action cannot be undone.',
   quizSearchPlaceholder: 'Search questions, options, explanations, criteria...',
   quizFilterStatus: 'Filter by Status',
   quizFilterAllStatus: 'All Statuses',
@@ -213,7 +220,7 @@ export const en = {
   flashcardMarkKnow: 'I Know This',
   flashcardMarkReview: 'Mark for Review',
   flashcardMarkedReview: 'Marked for Review',
-  flashcardDeckAll: 'All 150 Cards',
+  flashcardDeckAll: 'All 200 Cards',
   flashcardDeckReview: 'Needs Review',
   flashcardDeckUnmastered: 'Unmastered Only',
   flashcardShuffle: 'Shuffle Deck',
