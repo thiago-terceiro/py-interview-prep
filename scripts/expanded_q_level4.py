@@ -76,7 +76,7 @@ Interview Takeaway: Because GRUs eliminate one gate and merge hidden representat
     129: """Core Principle: The Scaled Dot-Product Attention equation introduced in "Attention Is All You Need" (Vaswani et al. 2017) is: Attention(Q, K, V) = softmax( (Q * K^T) / sqrt(d_k) ) * V. Here, Q (Queries), K (Keys), and V (Values) are linear projections of input tokens, and d_k is the dimensionality of the key vectors.
 
 Why Others Are Incorrect:
-• softmax(Q K^T) V (A) is unscaled dot-product attention, which suffers from vanishing gradients for large d_k.
+• softmax($Q K^T$) V (A) is unscaled dot-product attention, which suffers from vanishing gradients for large d_k.
 • ReLU(Q + K + V) (C) is additive linear combination.
 • tanh(Q V^T / d_k) K (D) is mathematically invalid attention formulation.
 
@@ -91,19 +91,19 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Without the 1/sqrt(d_k) scaling factor, deep Transformer models fail to train when using standard head dimensions. The scaling ensures gradients flow through the softmax layer with stable magnitude regardless of vector dimension d_k.""",
 
-    131: """Core Principle: In standard dense self-attention, every token queries every other token across the sequence of length N. Computing the matrix product Q K^T (where Q in R^{N x d} and K in R^{N x d}) requires O(N^2 * d) floating point operations and materializes an explicit N x N attention matrix. Storing this attention matrix and its softmax activations in VRAM requires O(N^2) memory complexity.
+    131: """Core Principle: In standard dense self-attention, every token queries every other token across the sequence of length N. Computing the matrix product $Q K^T$ (where Q in R^{N x d} and K in R^{N x d}) requires O(N^2 * d) floating point operations and materializes an explicit N x N attention matrix. Storing this attention matrix and its softmax activations in VRAM requires $\mathcal{O}(N^2)$ memory complexity.
 
 Why Others Are Incorrect:
-• O(N) (A) is achieved by linear attention approximations or state space models (Mamba), not standard dense self-attention.
+• $\mathcal{O}(N)$ (A) is achieved by linear attention approximations or state space models (Mamba), not standard dense self-attention.
 • O(N log N) (B) is achieved by sparse tree or FFT methods.
 • O(2^N) (D) is exponential complexity.
 
-Interview Takeaway: The quadratic O(N^2) complexity is the fundamental computational bottleneck of Transformers. Doubling the sequence length from 4k to 8k tokens quadruples attention memory and FLOP requirements, driving innovations like FlashAttention, sliding window attention, and linear attention.""",
+Interview Takeaway: The quadratic $\mathcal{O}(N^2)$ complexity is the fundamental computational bottleneck of Transformers. Doubling the sequence length from 4k to 8k tokens quadruples attention memory and FLOP requirements, driving innovations like FlashAttention, sliding window attention, and linear attention.""",
 
     132: """Core Principle: Instead of performing a single attention function over d_model dimensions, Multi-Head Attention linearly projects Queries, Keys, and Values h times into lower-dimensional representation subspaces (where d_k = d_v = d_model / h). Each attention head operates independently in parallel, allowing the model to jointly attend to information from different representation subspaces at different positions simultaneously (e.g., one head tracks syntactic dependencies, another tracks co-reference, and another tracks local punctuation).
 
 Why Others Are Incorrect:
-• It does not reduce asymptotic complexity from O(N^2) to O(N) (A); complexity remains O(N^2).
+• It does not reduce asymptotic complexity from $\mathcal{O}(N^2)$ to $\mathcal{O}(N)$ (A); complexity remains $\mathcal{O}(N^2)$.
 • It does not eliminate Feed-Forward Networks (C); each Transformer block contains both MHA and FFN sublayers.
 • It does not replace dropout (D).
 
@@ -125,7 +125,7 @@ Why Others Are Incorrect:
 • Padding masks (C) mask variable-length sequence padding, not future tokens.
 • Setting 15% of tokens to [MASK] (D) describes BERT's Masked Language Model (MLM) pre-training objective.
 
-Interview Takeaway: The causal mask preserves the autoregressive property during parallel training, allowing the model to train on all N next-token predictions in an O(1) single parallel matrix multiplication rather than requiring an unrolled loop of N sequential steps.""",
+Interview Takeaway: The causal mask preserves the autoregressive property during parallel training, allowing the model to train on all N next-token predictions in an $\mathcal{O}(1)$ single parallel matrix multiplication rather than requiring an unrolled loop of N sequential steps.""",
 
     135: """Core Principle: Batch Normalization normalizes across the batch dimension, coupling different samples together. In NLP and Transformers, sequence lengths vary widely (requiring arbitrary padding), and batch sizes during distributed training or single-sample inference can be very small, which makes mini-batch mean and variance statistics highly noisy. Layer Normalization (Ba, Kiros, Hinton 2016) computes mean and variance across the feature hidden dimension d_model independently for each individual token sample, making it invariant to batch size and sequence padding.
 
@@ -154,23 +154,23 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Modern LLMs (GPT-4, LLaMA-3) use Byte-level BPE: the base vocabulary consists of all 256 possible byte values. This guarantees that any arbitrary text sequence (including foreign alphabets, emojis, and binary data) can be tokenized with zero OOV tokens.""",
 
-    138: """Core Principle: In standard Adam with L2 regularization, the L2 weight decay gradient lambda * w is added directly to the loss gradient g_t. The optimizer then computes m_t and v_t from this modified gradient, dividing the decay term by sqrt(v_t). Consequently, weights that experience large, frequent historical gradients have their weight decay scaled down, while weights with tiny gradients are decayed excessively. AdamW (Loshchilov & Hutter 2017) decouples weight decay from the adaptive gradient updates, subtracting lambda * w directly from the parameter: theta_{t+1} = theta_t - alpha * [ m_hat / (sqrt(v_hat) + eps) ] - alpha * lambda * theta_t.
+    138: """Core Principle: In standard Adam with $L_2$ regularization, the $L_2$ weight decay gradient lambda * w is added directly to the loss gradient g_t. The optimizer then computes m_t and v_t from this modified gradient, dividing the decay term by sqrt(v_t). Consequently, weights that experience large, frequent historical gradients have their weight decay scaled down, while weights with tiny gradients are decayed excessively. AdamW (Loshchilov & Hutter 2017) decouples weight decay from the adaptive gradient updates, subtracting lambda * w directly from the parameter: theta_{t+1} = theta_t - alpha * [ m_hat / (sqrt(v_hat) + eps) ] - alpha * lambda * theta_t.
 
 Why Others Are Incorrect:
 • AdamW retains momentum (B is false).
 • AdamW uses standard learning rate schedules, not a constant 1.0 (C).
 • AdamW updates all weights, not just bias terms (D).
 
-Interview Takeaway: Decoupling weight decay in AdamW restores true L2 weight shrinkage proportional to parameter magnitude, significantly improving generalization in deep Transformer architectures. AdamW is the universal default optimizer for pre-training modern LLMs.""",
+Interview Takeaway: Decoupling weight decay in AdamW restores true $L_2$ weight shrinkage proportional to parameter magnitude, significantly improving generalization in deep Transformer architectures. AdamW is the universal default optimizer for pre-training modern LLMs.""",
 
-    139: """Core Principle: Cosine similarity evaluates the cosine of the angle between two non-zero vectors: CosSim(A, B) = (A . B) / (||A|| ||B||). The squared Euclidean distance between two vectors is ||A - B||^2 = ||A||^2 + ||B||^2 - 2(A . B). When all vectors in the embedding space are L2-normalized such that ||A|| = 1 and ||B|| = 1, this simplifies to ||A - B||^2 = 1 + 1 - 2(A . B) = 2 - 2 * CosSim(A, B). Maximizing cosine similarity is mathematically identical to minimizing Euclidean distance.
+    139: """Core Principle: Cosine similarity evaluates the cosine of the angle between two non-zero vectors: CosSim(A, B) = (A . B) / (||A|| ||B||). The squared Euclidean distance between two vectors is ||A - B||^2 = ||A||^2 + ||B||^2 - 2(A . B). When all vectors in the embedding space are $L_2$-normalized such that ||A|| = 1 and ||B|| = 1, this simplifies to ||A - B||^2 = 1 + 1 - 2(A . B) = 2 - 2 * CosSim(A, B). Maximizing cosine similarity is mathematically identical to minimizing Euclidean distance.
 
 Why Others Are Incorrect:
 • They are not always identical regardless of vector norms (B); unnormalized vectors with identical directions but different lengths produce identical cosine similarity but non-zero Euclidean distance.
 • Vector cross products (C) produce orthogonal vectors in 3D, unrelated to distance ranking.
 • Binary vector ratios (D) relate to Jaccard similarity.
 
-Interview Takeaway: In production vector search engines (Milvus, Pinecone, FAISS), embeddings are pre-normalized to unit L2 norm upon ingestion. This allows distance queries to be computed using fast hardware dot products (MKL / BLAS inner products) while guaranteeing exact Euclidean distance ranking.""",
+Interview Takeaway: In production vector search engines (Milvus, Pinecone, FAISS), embeddings are pre-normalized to unit $L_2$ norm upon ingestion. This allows distance queries to be computed using fast hardware dot products (MKL / BLAS inner products) while guaranteeing exact Euclidean distance ranking.""",
 
     140: """Core Principle: The InfoNCE loss (Oord et al. 2018 "Contrastive Predictive Coding", used in SimCLR and CLIP) is a contrastive self-supervised objective. Given a query representation q, a matching positive sample k_+, and a set of K negative samples {k_-}, InfoNCE maximizes mutual information by optimizing categorical cross-entropy over temperature-scaled cosine similarities: L = - log [ exp(sim(q, k_+) / tau) / ( exp(sim(q, k_+) / tau) + sum_{i=1}^K exp(sim(q, k_i^-) / tau) ) ].
 
@@ -185,7 +185,7 @@ Interview Takeaway: The temperature hyperparameter tau scales the sharpness of t
 
 Why Others Are Incorrect:
 • Discriminator plus generator loss (B) belongs to GANs.
-• L1 plus L2 weight penalty (C) is Elastic Net regularization.
+• $L_1$ plus $L_2$ weight penalty (C) is Elastic Net regularization.
 • Cosine plus Euclidean distance (D) are geometric distance metrics.
 
 Interview Takeaway: The KL divergence term prevents the encoder from memorizing specific latent coordinates for each input (which would act as a standard deterministic autoencoder), enforcing a continuous, smooth, isotropic Gaussian latent manifold where interpolation produces plausible novel samples.""",
@@ -337,7 +337,7 @@ Interview Takeaway: Mathematical equivalence: predicting the noise epsilon is di
     157: """Core Principle: The Vision Transformer (ViT, Dosovitskiy et al. 2020) adapts the standard Transformer encoder directly to 2D images with minimal architectural modifications. It splits an image of size H x W x C into a grid of non-overlapping patches of size P x P (e.g., 16 x 16 pixels). Each flattened patch (dimension P^2 * C) is linearly projected into a vector of dimension d_model, producing a sequence of N = (H * W) / P^2 patch tokens. A learnable [CLS] token and 1D learnable positional embeddings are prepended/added, and the resulting sequence is processed by standard Transformer encoder blocks.
 
 Why Others Are Incorrect:
-• Pixel-by-pixel self-attention (A) would require N = H * W = 256 * 256 = 65,536 tokens, which is computationally intractable under O(N^2) attention.
+• Pixel-by-pixel self-attention (A) would require N = H * W = 256 * 256 = 65,536 tokens, which is computationally intractable under $\mathcal{O}(N^2)$ attention.
 • Replacing attention with 3x3 convolutions (C) is a standard CNN.
 • Converting images to ASCII descriptions (D) is multimodal prompting.
 

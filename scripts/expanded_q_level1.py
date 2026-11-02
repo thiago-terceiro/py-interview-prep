@@ -78,7 +78,7 @@ Why Others Are Incorrect:
 • Regularization (C) is a technique used specifically to combat and prevent overfitting.
 • Feature scaling (D) normalizes feature scales.
 
-Interview Takeaway: Overfitting is a symptom of high model variance. Common remediation strategies include simplifying the model architecture, acquiring more training data, applying L1/L2 regularization, dropout, pruning decision trees, or early stopping.""",
+Interview Takeaway: Overfitting is a symptom of high model variance. Common remediation strategies include simplifying the model architecture, acquiring more training data, applying $L_1$/$L_2$ regularization, dropout, pruning decision trees, or early stopping.""",
 
     10: """Core Principle: Underfitting occurs when a model lacks sufficient expressive hypothesis capacity (high inductive bias) to capture the underlying patterns in the training data. This results in poor performance and high systematic error on both training and test sets.
 
@@ -105,7 +105,7 @@ Why Others Are Incorrect:
 • Global loss (C) is a single scalar summary metric computed across samples.
 • Activation layers (D) are structural layers in neural networks.
 
-Interview Takeaway: In mathematical formulations, X in R^{n x d} denotes the design matrix where row x_i^T represents the i-th instance and column X_{*, j} represents the j-th feature across all n samples.""",
+Interview Takeaway: In mathematical formulations, $X \in \mathbb{R}^{n \times d}$ denotes the design matrix where row x_i^T represents the i-th instance and column X_{*, j} represents the j-th feature across all n samples.""",
 
     13: """Core Principle: Linear Regression models the relationship between explanatory variables x and continuous scalar outcome y by fitting a linear hyperplane: y = w_0 + w_1 x_1 + ... + w_d x_d + epsilon = w^T x + b. It minimizes the sum of squared residuals via Ordinary Least Squares (OLS) or gradient descent.
 
@@ -114,7 +114,7 @@ Why Others Are Incorrect:
 • Cluster centroids (C) are fitted by K-Means.
 • Markov sequences (D) belong to Markov chains or HMMs.
 
-Interview Takeaway: The closed-form analytical OLS solution (the Normal Equation) is w = (X^T X)^{-1} X^T y. When X^T X is non-invertible due to multicollinearity or when d > n, regularization (Ridge regression) is required to guarantee a unique, stable solution.""",
+Interview Takeaway: The closed-form analytical OLS solution (the Normal Equation) is $w = ($X^T X$)^{-1} X^T y$. When $X^T X$ is non-invertible due to multicollinearity or when d > n, regularization (Ridge regression) is required to guarantee a unique, stable solution.""",
 
     14: """Core Principle: Despite containing "regression" in its name, Logistic Regression is fundamentally a discriminative classification algorithm. It models the log-odds (logit) of a binary outcome as a linear combination of inputs: log(p / (1 - p)) = w^T x + b, which transforms via the sigmoid function into a posterior probability P(y=1|x) in (0, 1).
 
@@ -131,7 +131,7 @@ Why Others Are Incorrect:
 • Pruning binary tree branches (C) applies to decision trees.
 • Multiplying hidden layer matrices (D) applies to neural networks.
 
-Interview Takeaway: k-NN has O(1) training time but an expensive O(n * d) inference cost per query point. In high dimensions, k-NN suffers heavily from the "curse of dimensionality," where distances between all points become approximately equidistant, degrading performance.""",
+Interview Takeaway: k-NN has $\mathcal{O}(1)$ training time but an expensive $\mathcal{O}(n \cdot d)$ inference cost per query point. In high dimensions, k-NN suffers heavily from the "curse of dimensionality," where distances between all points become approximately equidistant, degrading performance.""",
 
     16: """Core Principle: A loss function (or cost function when aggregated across a dataset) quantitatively evaluates how poorly a model's predictions match the true targets: L(y_hat, y). It provides a mathematical error surface whose gradients guide parameter updates during optimization.
 
@@ -142,7 +142,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: The choice of loss function directly defines the model's inductive bias: Mean Squared Error penalizes large outliers quadratically, Mean Absolute Error penalizes errors linearly, and Cross-Entropy maximizes the likelihood of predicted probabilities under Bernoulli or Categorical distributions.""",
 
-    17: """Core Principle: Accuracy is the most basic classification metric, calculated as the ratio of correct predictions to total predictions: (TP + TN) / (TP + TN + FP + FN). It represents the empirical probability that the model correctly classifies a randomly chosen instance.
+    17: """Core Principle: Accuracy is the most basic classification metric, calculated as the ratio of correct predictions to total predictions: $\frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}$. It represents the empirical probability that the model correctly classifies a randomly chosen instance.
 
 Why Others Are Incorrect:
 • Average squared error of continuous predictions (B) defines Mean Squared Error (MSE).
@@ -246,7 +246,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: The standard data lifecycle splits data into: Train (to learn model weights) -> Validation (to select best model/hyperparameters) -> Test (to report final, unbiased production readiness metrics). Touching the test set during tuning causes data snooping bias.""",
 
-    29: """Core Principle: Mean Squared Error (MSE) is a foundational regression loss and evaluation metric defined as the expected value of squared residuals: MSE = (1/n) * sum_{i=1}^n (y_i - y_hat_i)^2. It is strictly non-negative, with zero representing perfect prediction.
+    29: """Core Principle: Mean Squared Error (MSE) is a foundational regression loss and evaluation metric defined as the expected value of squared residuals: $\text{MSE} = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2$. It is strictly non-negative, with zero representing perfect prediction.
 
 Why Others Are Incorrect:
 • Percentage of correctly classified samples (A) is classification accuracy.
@@ -255,16 +255,16 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Because errors are squared before averaging, MSE has a convex, smooth, differentiable quadratic surface that makes it ideal for gradient descent optimization. However, its units are squared (e.g., dollars^2), which is why Root Mean Squared Error (RMSE = sqrt(MSE)) is preferred for human interpretation.""",
 
-    30: """Core Principle: Mean Absolute Error (MAE) computes the average of the absolute differences between predicted continuous values and actual ground-truth targets: MAE = (1/n) * sum_{i=1}^n |y_i - y_hat_i|. It expresses error in the exact same physical units as the original target variable.
+    30: """Core Principle: Mean Absolute Error (MAE) computes the average of the absolute differences between predicted continuous values and actual ground-truth targets: $\text{MAE} = \frac{1}{n} \sum_{i=1}^n |y_i - \hat{y}_i|$. It expresses error in the exact same physical units as the original target variable.
 
 Why Others Are Incorrect:
 • Square root of classification accuracy (B) is a nonsensical metric.
 • Maximum error across samples (C) is Max Error (L_infinity norm).
-• Sum of squared model weights (D) is the L2 weight decay regularization penalty.
+• Sum of squared model weights (D) is the $L_2$ weight decay regularization penalty.
 
 Interview Takeaway: Mathematically, minimizing MSE corresponds to estimating the conditional mean E[y|x], whereas minimizing MAE corresponds to estimating the conditional median. This makes MAE far more robust against heavy-tailed outlier noise.""",
 
-    31: """Core Principle: Because MSE squares each residual (e_i^2 = (y_i - y_hat_i)^2), large errors are penalized quadratically rather than linearly. For instance, an error of 10 adds 100 to the MSE calculation, whereas an error of 1 adds only 1. Under MAE, an error of 10 adds exactly 10.
+    31: """Core Principle: Because MSE squares each residual ($e_i^2 = (y_i - \hat{y}_i)^2$), large errors are penalized quadratically rather than linearly. For instance, an error of 10 adds 100 to the MSE calculation, whereas an error of 1 adds only 1. Under MAE, an error of 10 adds exactly 10.
 
 Why Others Are Incorrect:
 • MSE does not ignore outliers (A); it is hyper-sensitive to them.
@@ -325,7 +325,7 @@ Why Others Are Incorrect:
 • Binary file format (C) relates to serialized byte streams.
 • Clustering with two iterations (D) is K-Means with max_iter=2.
 
-Interview Takeaway: Binary classifiers typically compute a single scalar logit z = w^T x + b, passed through a sigmoid function sigma(z) to output P(y = 1 | x). The default decision threshold is 0.50, but it can be tuned to prioritize Precision or Recall based on business cost asymmetries.""",
+Interview Takeaway: Binary classifiers typically compute a single scalar logit $z = w^T x + b$, passed through a sigmoid function sigma(z) to output P(y = 1 | x). The default decision threshold is 0.50, but it can be tuned to prioritize Precision or Recall based on business cost asymmetries.""",
 
     38: """Core Principle: Multi-class classification assigns each input instance to exactly one out of K discrete mutually exclusive classes, where K >= 3 (e.g., classifying an image as a Cat, Dog, or Bird; or classifying text as English, Spanish, or German).
 

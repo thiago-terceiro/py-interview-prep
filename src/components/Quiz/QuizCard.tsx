@@ -1,6 +1,7 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import type { MultipleChoiceQuestion } from '../../types/quiz';
 import { useLanguage } from '../../context/LanguageContext';
+import { MathText } from '../MathText';
 import {
   CheckCircle2,
   XCircle,
@@ -41,8 +42,41 @@ export const QuizCard: React.FC<QuizCardProps> = ({
   totalCount,
 }) => {
   const { t } = useLanguage();
-  const isAnswered = selectedOption !== undefined;
-  const isCorrect = selectedOption === question.answer;
+  const [clearingForQId, setClearingForQId] = useState<number | null>(null);
+
+  // Derive isClearing purely during render - zero cascading useEffect renders
+  const isClearing = clearingForQId === question.id;
+  const effectiveSelectedOption = isClearing ? undefined : selectedOption;
+  const isAnswered = effectiveSelectedOption !== undefined;
+  const isCorrect = effectiveSelectedOption === question.answer;
+
+  const handleNextWithClear = useCallback(() => {
+    if (!hasNext || !onNext || isClearing) return;
+
+    if (selectedOption !== undefined) {
+      // Clear visual state first so user sees selection cleared before new question appears
+      setClearingForQId(question.id);
+      setTimeout(() => {
+        onNext();
+      }, 120);
+    } else {
+      onNext();
+    }
+  }, [hasNext, onNext, isClearing, selectedOption, question.id]);
+
+  const handlePrevWithClear = useCallback(() => {
+    if (!hasPrev || !onPrev || isClearing) return;
+
+    if (selectedOption !== undefined) {
+      // Clear visual state first
+      setClearingForQId(question.id);
+      setTimeout(() => {
+        onPrev();
+      }, 120);
+    } else {
+      onPrev();
+    }
+  }, [hasPrev, onPrev, isClearing, selectedOption, question.id]);
 
   // Keyboard shortcut listener
   const handleKeyDown = useCallback(
@@ -55,13 +89,13 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         return;
       }
 
-      if (e.key === 'ArrowLeft' && hasPrev && onPrev) {
+      if (e.key === 'ArrowLeft' && hasPrev) {
         e.preventDefault();
-        onPrev();
-      } else if (e.key === 'ArrowRight' && hasNext && onNext) {
+        handlePrevWithClear();
+      } else if (e.key === 'ArrowRight' && hasNext) {
         e.preventDefault();
-        onNext();
-      } else if (!isAnswered) {
+        handleNextWithClear();
+      } else if (!isAnswered && !isClearing) {
         const key = e.key.toUpperCase();
         if (key === 'A' || key === '1') {
           e.preventDefault();
@@ -78,7 +112,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
         }
       }
     },
-    [onSelectOption, onPrev, onNext, hasPrev, hasNext, isAnswered]
+    [onSelectOption, handlePrevWithClear, handleNextWithClear, hasPrev, hasNext, isAnswered, isClearing]
   );
 
   useEffect(() => {
@@ -141,14 +175,14 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           id={`quiz-q-${question.id}-title`}
           className="text-base sm:text-lg lg:text-xl font-bold text-white leading-relaxed mb-6"
         >
-          {question.question}
+          <MathText text={question.question} as="span" />
         </h2>
 
         {/* Option Buttons */}
         <div className="space-y-3 mb-6" role="radiogroup" aria-label={t('quizSelectOptionPrompt')}>
           {optionKeys.map((key) => {
             const optionText = question.options[key];
-            const isThisSelected = selectedOption === key;
+            const isThisSelected = effectiveSelectedOption === key;
             const isThisCorrect = question.answer === key;
 
             let buttonStyle =
@@ -172,17 +206,17 @@ export const QuizCard: React.FC<QuizCardProps> = ({
               <button
                 key={key}
                 onClick={() => {
-                  if (!isAnswered) {
+                  if (!isAnswered && !isClearing) {
                     onSelectOption(key);
                   }
                 }}
-                disabled={isAnswered}
+                disabled={isAnswered || isClearing}
                 className={`w-full text-left p-3.5 sm:p-4 rounded-xl border flex items-start gap-3.5 transition-all text-sm sm:text-base leading-snug group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 ${
                   isAnswered ? 'cursor-default' : ''
                 } ${buttonStyle}`}
                 role="radio"
                 aria-checked={isThisSelected}
-                aria-disabled={isAnswered}
+                aria-disabled={isAnswered || isClearing}
                 aria-label={`${key}: ${optionText}`}
               >
                 {/* Key indicator pill */}
@@ -205,7 +239,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
                 </span>
 
                 <div className="flex-1">
-                  <span className="font-medium">{optionText}</span>
+                  <MathText text={optionText} className="font-medium" as="span" />
                 </div>
               </button>
             );
@@ -243,7 +277,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
               )}
             </div>
             <div className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans whitespace-pre-line select-text">
-              {question.explanation}
+              <MathText text={question.explanation} as="div" />
             </div>
           </div>
         )}
@@ -258,10 +292,10 @@ export const QuizCard: React.FC<QuizCardProps> = ({
 
         <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end ml-auto">
           <button
-            onClick={onPrev}
-            disabled={!hasPrev}
+            onClick={handlePrevWithClear}
+            disabled={!hasPrev || isClearing}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-              hasPrev
+              hasPrev && !isClearing
                 ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
                 : 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed opacity-50'
             }`}
@@ -272,10 +306,10 @@ export const QuizCard: React.FC<QuizCardProps> = ({
           </button>
 
           <button
-            onClick={onNext}
-            disabled={!hasNext}
+            onClick={handleNextWithClear}
+            disabled={!hasNext || isClearing}
             className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold transition-all ${
-              hasNext
+              hasNext && !isClearing
                 ? 'bg-sky-600 hover:bg-sky-500 text-white shadow-lg shadow-sky-600/20'
                 : 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed opacity-50'
             }`}

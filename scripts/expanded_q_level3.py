@@ -10,7 +10,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Continuous features are evaluated by sorting unique values and testing midpoints between adjacent sorted values. For a feature with M unique values, M-1 candidate thresholds are evaluated, requiring O(M log M) sorting time per continuous feature.""",
 
-    82: """Core Principle: Gini Impurity measures the probability that a randomly chosen element from a node would be incorrectly labeled if it were randomly labeled according to the empirical class probability distribution of that subset: Gini = 1 - sum_{i=1}^C p_i^2, where p_i is the proportion of samples belonging to class i.
+    82: """Core Principle: Gini Impurity measures the probability that a randomly chosen element from a node would be incorrectly labeled if it were randomly labeled according to the empirical class probability distribution of that subset: $\text{Gini} = 1 - \sum_{i=1}^C p_i^2$, where p_i is the proportion of samples belonging to class i.
 
 Why Others Are Incorrect:
 • -sum p_i log_2(p_i) (B) is Shannon Entropy.
@@ -142,9 +142,9 @@ Why Others Are Incorrect:
 • Speeding up decision tree splits (C) relates to GPU histogram binning.
 • Normalizing target labels (D) is label standardization.
 
-Interview Takeaway: For example, the Radial Basis Function (RBF) kernel K(x, z) = exp(-gamma ||x - z||^2) corresponds to an inner product in an infinite-dimensional feature space. Computing exp(-gamma ||x - z||^2) takes O(d) time, avoiding the impossible task of materializing an infinite-dimensional vector.""",
+Interview Takeaway: For example, the Radial Basis Function (RBF) kernel K(x, z) = $\exp(-\gamma \|x - z\|^2)$ corresponds to an inner product in an infinite-dimensional feature space. Computing $\exp(-\gamma \|x - z\|^2)$ takes $\mathcal{O}(d)$ time, avoiding the impossible task of materializing an infinite-dimensional vector.""",
 
-    97: """Core Principle: In the RBF kernel K(x, z) = exp(-gamma ||x - z||^2), gamma = 1 / (2 sigma^2) dictates the bell-curve radius of influence around each individual support vector. A very large gamma makes the Gaussian bell curves extremely narrow and sharp, meaning a point exerts influence only in its immediate micro-neighborhood, creating tight, fragmented decision islands around individual training samples (extreme overfitting).
+    97: """Core Principle: In the RBF kernel K(x, z) = $\exp(-\gamma \|x - z\|^2)$, gamma = 1 / (2 sigma^2) dictates the bell-curve radius of influence around each individual support vector. A very large gamma makes the Gaussian bell curves extremely narrow and sharp, meaning a point exerts influence only in its immediate micro-neighborhood, creating tight, fragmented decision islands around individual training samples (extreme overfitting).
 
 Why Others Are Incorrect:
 • Smooth, nearly linear boundaries (A) occur when gamma is very small (wide Gaussian bells).
@@ -158,18 +158,18 @@ Interview Takeaway: Hyperparameter tuning in SVMs requires balancing C and gamma
 Why Others Are Incorrect:
 • Maximizing class separability using labels (B) defines Linear Discriminant Analysis (LDA), which is supervised.
 • Clustering into K groups (C) defines K-Means.
-• Inducing sparsity in original columns (D) is L1 feature selection or Sparse PCA.
+• Inducing sparsity in original columns (D) is $L_1$ feature selection or Sparse PCA.
 
 Interview Takeaway: PCA is strictly unsupervised—it does not use target labels y. The first principal component PC_1 captures the direction of greatest variance; PC_2 captures the second greatest variance orthogonal (perpendicular) to PC_1, and so on.""",
 
-    99: """Core Principle: Mathematically, PCA computes the sample covariance matrix of the centered data: Sigma = (1 / (n-1)) X^T X. The principal components (loadings) correspond to the orthonormal eigenvectors of Sigma, and the variance explained by each principal component is equal to its corresponding eigenvalue lambda_j, ordered such that lambda_1 >= lambda_2 >= ... >= lambda_d.
+    99: """Core Principle: Mathematically, PCA computes the sample covariance matrix of the centered data: Sigma = (1 / (n-1)) $X^T X$. The principal components (loadings) correspond to the orthonormal eigenvectors of Sigma, and the variance explained by each principal component is equal to its corresponding eigenvalue lambda_j, ordered such that lambda_1 >= lambda_2 >= ... >= lambda_d.
 
 Why Others Are Incorrect:
 • Inverse of the target vector (B) is nonsensical.
 • Support vectors (C) belong to SVMs.
 • Leaf nodes (D) belong to decision trees.
 
-Interview Takeaway: In modern implementations (like Scikit-learn's PCA), PCA is calculated via Singular Value Decomposition (SVD) of the centered design matrix X = U S V^T. The right singular vectors V correspond directly to the eigenvectors of X^T X, which avoids explicitly materializing the d x d covariance matrix and offers superior numerical stability.""",
+Interview Takeaway: In modern implementations (like Scikit-learn's PCA), PCA is calculated via Singular Value Decomposition (SVD) of the centered design matrix X = U S V^T. The right singular vectors V correspond directly to the eigenvectors of $X^T X$, which avoids explicitly materializing the d x d covariance matrix and offers superior numerical stability.""",
 
     100: """Core Principle: In t-SNE, high-dimensional pairwise affinities are modeled using a Gaussian distribution, while low-dimensional affinities are modeled using a heavy-tailed Student-t distribution with 1 degree of freedom (Cauchy distribution). In high dimensions, the volume of a hypersphere grows exponentially with radius, meaning many moderately distant neighbors exist; in 2D space, there is insufficient area to place them without crowding into a dense center. The heavy tails of the Student-t distribution allow moderate distances to spread out naturally.
 
@@ -198,7 +198,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Marvin Minsky and Seymour Papert proved this limitation in their 1969 book "Perceptrons," triggering the first "AI Winter." The limitation was overcome by Multi-Layer Perceptrons (MLPs), where hidden layers warp the input space into a representation where XOR becomes linearly separable.""",
 
-    103: """Core Principle: Any composition of linear functions is mathematically equivalent to a single linear function. If layer 1 computes h = W_1 x + b_1 and layer 2 computes y = W_2 h + b_2, substituting h yields y = W_2 (W_1 x + b_1) + b_2 = (W_2 W_1) x + (W_2 b_1 + b_2) = W' x + b'. A 100-layer neural network with linear activations can only represent linear relationships, possessing no more expressive capacity than a single-layer linear model.
+    103: """Core Principle: Any composition of linear functions is mathematically equivalent to a single linear function. If layer 1 computes $h = W_1 x + b_1$ and layer 2 computes y = W_2 h + b_2, substituting h yields y = W_2 (W_1 x + b_1) + b_2 = (W_2 W_1) x + (W_2 b_1 + b_2) = W' x + b'. A 100-layer neural network with linear activations can only represent linear relationships, possessing no more expressive capacity than a single-layer linear model.
 
 Why Others Are Incorrect:
 • Linear activations do not cause GPU memory overflow (B).
@@ -216,7 +216,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: ReLU's introduction in AlexNet (2012) was the critical catalyst that unlocked training of deep convolutional networks without requiring layer-wise unsupervised pre-training.""",
 
-    105: """Core Principle: The "Dying ReLU" problem occurs when a neuron's weights are updated such that its pre-activation z = w^T x + b is negative for all instances in the dataset. Because the derivative of ReLU is exactly 0 for z < 0, no gradient flows through the neuron during backpropagation. The neuron's weights never update again, rendering it permanently inactive ("dead"). Leaky ReLU (f(x) = max(alpha * x, x) where alpha ~ 0.01) solves this by providing a small, non-zero slope for negative inputs.
+    105: """Core Principle: The "Dying ReLU" problem occurs when a neuron's weights are updated such that its pre-activation $z = w^T x + b$ is negative for all instances in the dataset. Because the derivative of ReLU is exactly 0 for z < 0, no gradient flows through the neuron during backpropagation. The neuron's weights never update again, rendering it permanently inactive ("dead"). Leaky ReLU (f(x) = max(alpha * x, x) where alpha ~ 0.01) solves this by providing a small, non-zero slope for negative inputs.
 
 Why Others Are Incorrect:
 • Neurons outputting infinity (B) is exploding activations/gradients.
@@ -297,7 +297,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: BatchNorm stabilizes training, smooths the optimization loss landscape (Santurkar et al. 2018), and allows significantly higher learning rates. However, it couples samples within a batch, making it unsuitable for small batch sizes (B < 8) and variable-length NLP sequences, where Layer Normalization is preferred.""",
 
-    114: """Core Principle: On severely imbalanced datasets (e.g., 0.05% fraud), the number of True Negatives (TN) is massive (millions). In the ROC formula, False Positive Rate is FPR = FP / (FP + TN). Because TN is huge, even thousands of False Positives produce an FPR near 0.001, making the ROC curve hug the top-left corner and yielding an artificially inflated ROC-AUC of 0.98. Precision-Recall AUC (PR-AUC) evaluates Precision (TP / (TP + FP)) against Recall (TP / (TP + FN)), completely ignoring TN and immediately exposing the thousands of false alarms.
+    114: """Core Principle: On severely imbalanced datasets (e.g., 0.05% fraud), the number of True Negatives (TN) is massive (millions). In the ROC formula, False Positive Rate is $\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}$. Because TN is huge, even thousands of False Positives produce an FPR near 0.001, making the ROC curve hug the top-left corner and yielding an artificially inflated ROC-AUC of 0.98. Precision-Recall AUC (PR-AUC) evaluates Precision (TP / (TP + FP)) against Recall (TP / (TP + FN)), completely ignoring TN and immediately exposing the thousands of false alarms.
 
 Why Others Are Incorrect:
 • PR-AUC does not ignore False Positives (B); Precision directly penalizes FP.

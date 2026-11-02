@@ -1,14 +1,14 @@
 # Expanded Explanations for Level 5: Master (Questions 161 to 200)
 
 LEVEL_5_EXPLANATIONS = {
-    161: """Core Principle: Standard attention computes Q K^T in High Bandwidth Memory (HBM), writes an N x N matrix to HBM, reads it back to compute softmax, writes it back, and reads it again to multiply by V. The GPU compute cores (SRAM) sit idle waiting for slow HBM memory transfers (memory-bandwidth bound). FlashAttention (Dao et al. 2022) is an IO-aware exact algorithm: it tiles Q, K, and V into small blocks that fit entirely inside fast on-chip GPU SRAM (100 KB - 200 KB per SM). Using the online softmax trick (Milakov & Gimelshein 2018), it maintains running local max and normalizer scalars, updating intermediate attention outputs incrementally without ever materializing or writing the intermediate N x N attention matrix to slow HBM.
+    161: """Core Principle: Standard attention computes $Q K^T$ in High Bandwidth Memory (HBM), writes an N x N matrix to HBM, reads it back to compute softmax, writes it back, and reads it again to multiply by V. The GPU compute cores (SRAM) sit idle waiting for slow HBM memory transfers (memory-bandwidth bound). FlashAttention (Dao et al. 2022) is an IO-aware exact algorithm: it tiles Q, K, and V into small blocks that fit entirely inside fast on-chip GPU SRAM (100 KB - 200 KB per SM). Using the online softmax trick (Milakov & Gimelshein 2018), it maintains running local max and normalizer scalars, updating intermediate attention outputs incrementally without ever materializing or writing the intermediate N x N attention matrix to slow HBM.
 
 Why Others Are Incorrect:
 • Replacing softmax with linear kernels (A) describes Linear Attention (Performer, Katharopoulos), which is an approximation. FlashAttention computes exact attention.
 • Dropping 90% of scores (C) is sparse thresholding.
 • 1-bit quantization (D) is BitNet.
 
-Interview Takeaway: FlashAttention achieves 2x to 4x wall-clock speedups and reduces memory complexity from O(N^2) to O(N). Because it computes the mathematically exact attention output, it requires zero model retraining or approximation tolerance.""",
+Interview Takeaway: FlashAttention achieves 2x to 4x wall-clock speedups and reduces memory complexity from $\mathcal{O}(N^2)$ to $\mathcal{O}(N)$. Because it computes the mathematically exact attention output, it requires zero model retraining or approximation tolerance.""",
 
     162: """Core Principle: Rotary Position Embedding (RoPE, Su et al. 2021) incorporates positional information by rotating 2D coordinate pairs of Query and Key vectors in the complex plane. For a 2D chunk [q_1, q_2]^T at token position m, RoPE multiplies it by a 2D rotation matrix R_{Theta, m}: R_m q_m = [ [cos(m theta), -sin(m theta)], [sin(m theta), cos(m theta)] ] [q_1, q_2]^T. Because the inner product <R_m q, R_n k> = q^T R_m^T R_n k = q^T R_{n - m} k, the resulting attention score depends naturally and strictly on the relative distance (m - n).
 
@@ -19,7 +19,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: RoPE combines the advantages of absolute positional encodings (easy parallel tensor multiplication during pre-training) and relative positional encodings (decaying attention scores as relative token distance increases). It is used in LLaMA, Mistral, Qwen, and DeepSeek.""",
 
-    163: """Core Principle: RoPE encodes positions across frequency bands theta_i = 10000^{-2(i-1)/d}. When extending an LLM's context window from L to L' = s * L, naive linear interpolation scales all position indices by 1/s (m' = m / s). This dilutes high-frequency dimensions (which capture critical local syntactic order between adjacent words), destroying local coherence. NTK-aware interpolation and YaRN (Yet another RoPE extensioN, Peng et al. 2023) exploit the Neural Tangent Kernel insight: high-frequency dimensions are left un-interpolated to preserve local token distinctions, while low-frequency dimensions are scaled to expand the long-range context horizon.
+    163: """Core Principle: RoPE encodes positions across frequency bands $\theta_i = 10000^{-2(i-1)/d}$. When extending an LLM's context window from L to L' = s * L, naive linear interpolation scales all position indices by 1/s (m' = m / s). This dilutes high-frequency dimensions (which capture critical local syntactic order between adjacent words), destroying local coherence. NTK-aware interpolation and YaRN (Yet another RoPE extensioN, Peng et al. 2023) exploit the Neural Tangent Kernel insight: high-frequency dimensions are left un-interpolated to preserve local token distinctions, while low-frequency dimensions are scaled to expand the long-range context horizon.
 
 Why Others Are Incorrect:
 • YaRN does not switch to ALiBi (B); it operates entirely within RoPE.
@@ -38,7 +38,7 @@ Why Others Are Incorrect:
 Interview Takeaway: GQA (used in LLaMA-2-70B, LLaMA-3, Mistral) reduces KV-cache memory bandwidth and VRAM footprint by 4x to 8x, dramatically increasing serving throughput and maximum batch size while maintaining performance indistinguishable from full MHA.""",
 
     165: """Core Principle: The exact size of the KV-cache for a Decoder-only Transformer during autoregressive inference is given by the formula:
-Size_bytes = 2 * L * G * d_h * S * B * bytes_per_element
+$\text{Size}_{\text{bytes}} = 2 \cdot L \cdot G \cdot d_h \cdot S \cdot B \cdot \text{bytes\_per\_element}$
 where:
 • 2 accounts for both Keys and Values
 • L = 32 layers
@@ -70,7 +70,7 @@ Why Others Are Incorrect:
 Interview Takeaway: In DeepSeek-V2/V3, MLA achieves superior KV-cache compression than MQA while outperforming standard Multi-Head Attention in representational capacity, allowing DeepSeek models to serve massive concurrent context windows at a fraction of traditional GPU memory costs.""",
 
     167: """Core Principle: LLM generation consists of two distinct phases:
-1. Prefill Phase: processes the entire prompt of length N in parallel via large Matrix-Matrix multiplications (GEMM). FLOPs scale as O(N^2), yielding high Arithmetic Intensity (FLOPs per byte read from memory), fully saturating GPU tensor cores (compute-bound).
+1. Prefill Phase: processes the entire prompt of length N in parallel via large Matrix-Matrix multiplications (GEMM). FLOPs scale as $\mathcal{O}(N^2)$, yielding high Arithmetic Intensity (FLOPs per byte read from memory), fully saturating GPU tensor cores (compute-bound).
 2. Decode Phase: generates tokens autoregressively one by one. To generate a single token (batch size 1), the GPU must read all model parameters (e.g., 70B parameters = 140 GB in FP16) and the entire historical KV-cache from High Bandwidth Memory (HBM) into on-chip registers just to perform a single Matrix-Vector multiplication (GEMV). The arithmetic intensity is tiny (~1 FLOP/byte), meaning the GPU spend > 95% of its time waiting for memory bus transfers (memory-bandwidth bound).
 
 Why Others Are Incorrect:
@@ -105,7 +105,7 @@ Why Others Are Incorrect:
 • If both are zero (C), gradients with respect to A would be zero initially (symmetry problem).
 • SVD of W_0 (D) is used in PiSSA or initialization variants, not standard LoRA.
 
-Interview Takeaway: Because B = 0, Delta W = B * A = 0 at step 0, ensuring the model's forward pass is initially identical to W_0. Non-zero gradients immediately flow into B through matrix A: partial L / partial B = (partial L / partial Delta W) * A^T, initiating stable gradient updates immediately.""",
+Interview Takeaway: Because B = 0, $\Delta W = B \cdot A = 0$ at step 0, ensuring the model's forward pass is initially identical to W_0. Non-zero gradients immediately flow into B through matrix A: partial L / partial B = (partial L / partial Delta W) * A^T, initiating stable gradient updates immediately.""",
 
     171: """Core Principle: QLoRA (Dettmers et al. 2023) enables fine-tuning massive models (e.g., 65B parameters) on a single 48 GB GPU by introducing three core innovations:
 1. 4-bit NormalFloat (NF4): an information-theoretically optimal quantile quantization data type for zero-mean, normally distributed neural network weights.
@@ -254,14 +254,14 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Activation checkpointing is a pure compute-for-memory trade-off. In modern LLM pre-training, memory is the primary constraint; spending 33% more FLOPs enables training 4x to 10x longer sequences or larger batch sizes on existing hardware.""",
 
-    185: """Core Principle: Structured State Space Sequence Models (S4, Gu et al. 2021) and Mamba (Gu & Dao 2023) model sequential data by discretizing continuous linear time-invariant state space equations: h'(t) = A h(t) + B x(t); y(t) = C h(t). Mamba introduces a Selective State Space mechanism where matrices (Delta, B, C) are dynamic functions of the input token x_t. To train efficiently, it leverages a hardware-aware Parallel Associative Scan on GPUs that solves the recurrence in O(N) linear time and O(log N) depth. During autoregressive inference, it unrolls as a recurrent state update h_t = A_bar h_{t-1} + B_bar x_t, maintaining a constant O(1) recurrent memory state that does not grow with sequence length.
+    185: """Core Principle: Structured State Space Sequence Models (S4, Gu et al. 2021) and Mamba (Gu & Dao 2023) model sequential data by discretizing continuous linear time-invariant state space equations: $h'(t) = A h(t) + B x(t); \quad y(t) = C h(t)$. Mamba introduces a Selective State Space mechanism where matrices (Delta, B, C) are dynamic functions of the input token x_t. To train efficiently, it leverages a hardware-aware Parallel Associative Scan on GPUs that solves the recurrence in $\mathcal{O}(N)$ linear time and O(log N) depth. During autoregressive inference, it unrolls as a recurrent state update h_t = A_bar h_{t-1} + B_bar x_t, maintaining a constant $\mathcal{O}(1)$ recurrent memory state that does not grow with sequence length.
 
 Why Others Are Incorrect:
 • Sliding window of 4 tokens (A) is local windowed attention.
 • Attention matrices are not quantized to binary (C); Mamba eliminates attention matrices entirely.
 • It does not replace sequence modeling with Bag-of-Words (D).
 
-Interview Takeaway: Because Mamba has no attention matrix, it eliminates the O(N^2) memory bottleneck and does not require a growing KV-cache during inference. Its per-token generation memory remains O(1) whether generating token 10 or token 1,000,000.""",
+Interview Takeaway: Because Mamba has no attention matrix, it eliminates the $\mathcal{O}(N^2)$ memory bottleneck and does not require a growing KV-cache during inference. Its per-token generation memory remains $\mathcal{O}(1)$ whether generating token 10 or token 1,000,000.""",
 
     186: """Core Principle: Flow Matching (Lipman et al. 2022, Albergo & Vanden-Eijck 2022) and Rectified Flow (Liu et al. 2022, used in Stable Diffusion 3 and Flux) generalize continuous generative modeling by replacing the curved, stochastic Brownian motion trajectories of Diffusion SDEs with straight-line trajectories governed by Ordinary Differential Equations (ODEs). It defines a probability flow between noise x_0 ~ N(0, I) and clean data x_1 along a linear interpolation path x_t = (1 - t) x_0 + t x_1. A neural network v_theta(x_t, t) is trained via simple regression to predict the constant velocity vector field v = x_1 - x_0.
 
@@ -290,7 +290,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Compute-optimal training (Chinchilla) minimizes training FLOPs for a given loss. However, for models intended for massive production deployment, "inference-optimal" training over-trains smaller models (e.g., 8B trained on 15T tokens) beyond the Chinchilla frontier to minimize downstream serving latency and hosting costs.""",
 
-    189: """Core Principle: In Mechanistic Interpretability, the Superposition Hypothesis (Elhage et al. 2022, Anthropic) posits that neural networks represent far more independent features than they have physical activation dimensions (M >> d) by assigning features to non-orthogonal, nearly independent directions in activation space. Consequently, individual neurons become "polysemantic"—a single neuron fires for unrelated concepts (e.g., academic citations, Korean text, and baseball). Sparse Autoencoders (SAEs) resolve this by projecting activations into a much wider, overcomplete sparse dictionary (e.g., 16x to 32x the layer width) trained with an L1 sparsity penalty: min ||x - D f(x)||^2 + lambda ||f(x)||_1, successfully disentangling polysemantic neurons into interpretable, monosemantic feature directions.
+    189: """Core Principle: In Mechanistic Interpretability, the Superposition Hypothesis (Elhage et al. 2022, Anthropic) posits that neural networks represent far more independent features than they have physical activation dimensions (M >> d) by assigning features to non-orthogonal, nearly independent directions in activation space. Consequently, individual neurons become "polysemantic"—a single neuron fires for unrelated concepts (e.g., academic citations, Korean text, and baseball). Sparse Autoencoders (SAEs) resolve this by projecting activations into a much wider, overcomplete sparse dictionary (e.g., 16x to 32x the layer width) trained with an $L_1$ sparsity penalty: min ||x - D f(x)||^2 + lambda ||f(x)||_1, successfully disentangling polysemantic neurons into interpretable, monosemantic feature directions.
 
 Why Others Are Incorrect:
 • Weights existing in quantum states (B) is pseudo-science.
@@ -362,14 +362,14 @@ Why Others Are Incorrect:
 
 Interview Takeaway: The second descent occurs because in the overparameterized regime (p >> n), there are infinite parameter configurations that achieve zero training error. The implicit regularization of Stochastic Gradient Descent selects the minimum-norm interpolating solution, which has smooth curvature and high generalization performance.""",
 
-    197: """Core Principle: Grokking (Power et al. 2022, OpenAI) is an algorithmic learning phenomenon observed when training neural networks on modular arithmetic and algorithmic datasets (e.g., modular addition, permutation groups). The model initially memorizes the training data rapidly, achieving 100% training accuracy while validation accuracy hovers near chance (0-10%). However, if training is continued for thousands or tens of thousands of additional epochs beyond zero training error in the presence of weight decay (L2 regularization), validation accuracy suddenly transitions in a sharp phase change from random to 100% generalization.
+    197: """Core Principle: Grokking (Power et al. 2022, OpenAI) is an algorithmic learning phenomenon observed when training neural networks on modular arithmetic and algorithmic datasets (e.g., modular addition, permutation groups). The model initially memorizes the training data rapidly, achieving 100% training accuracy while validation accuracy hovers near chance (0-10%). However, if training is continued for thousands or tens of thousands of additional epochs beyond zero training error in the presence of weight decay ($L_2$ regularization), validation accuracy suddenly transitions in a sharp phase change from random to 100% generalization.
 
 Why Others Are Incorrect:
 • Hardware overheating errors (B) cause GPU thermal throttling.
 • Early stopping after epoch 1 (C) is premature termination.
 • Fine-tuning on corrupted labels (D) is label memorization analysis.
 
-Interview Takeaway: Mechanistic interpretability (Nanda et al. 2023) revealed the mechanism behind grokking: early in training, the network uses dense memorization circuits. Weight decay slowly penalizes the large L2 norms of these memorization circuits, gradually clearing the loss landscape until the network discovers a compact, low-norm generalized Fourier/trigonometric circuit.""",
+Interview Takeaway: Mechanistic interpretability (Nanda et al. 2023) revealed the mechanism behind grokking: early in training, the network uses dense memorization circuits. Weight decay slowly penalizes the large $L_2$ norms of these memorization circuits, gradually clearing the loss landscape until the network discovers a compact, low-norm generalized Fourier/trigonometric circuit.""",
 
     198: """Core Principle: Standard distributed attention requires materializing or gathering the entire sequence across GPUs, creating severe inter-node communication bottlenecks for million-token contexts. Ring Attention (Liu et al. 2023) partitions an ultra-long sequence across P devices arranged in a logical communication ring. Each device holds a local chunk of Q, K, and V of length N / P. In step 0, each device computes FlashAttention between its local Q and local K, V blocks. Concurrently, it asynchronously transmits its K, V block to its downstream neighbor in the ring using non-blocking peer-to-peer communication. In step 1, it computes attention on the newly received K, V block while sending it to the next neighbor. Computation and communication overlap 100%.
 

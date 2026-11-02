@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import type { QuizQuestion, UserQuizProgress } from '../../types/quiz';
 import { useLanguage } from '../../context/LanguageContext';
+import { MathText } from '../MathText';
 import {
   CheckCircle2,
   ChevronLeft,
@@ -722,7 +723,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                   <div className="space-y-5">
                     {/* Question Prompt */}
                     <h2 className="text-lg sm:text-2xl font-bold text-white leading-relaxed">
-                      {currentQ.question}
+                      <MathText text={currentQ.question} as="span" />
                     </h2>
 
                     {/* Optional Multiple-Choice Hint Drawer */}
@@ -760,7 +761,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                                   {letter}
                                 </span>
                                 <span className="leading-snug">
-                                  {currentQ.options[letter]}
+                                  <MathText text={currentQ.options[letter]} as="span" />
                                 </span>
                               </div>
                             ))}
@@ -794,7 +795,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                             <span className="text-emerald-400 font-mono mr-2">
                               [{currentQ.answer}]
                             </span>
-                            {currentQ.options[currentQ.answer]}
+                            <MathText text={currentQ.options[currentQ.answer]} as="span" />
                           </div>
                         </div>
 
@@ -805,7 +806,7 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                             <span>{t('quizWhyExplanation')}</span>
                           </div>
                           <div className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans whitespace-pre-line select-text">
-                            {currentQ.explanation}
+                            <MathText text={currentQ.explanation} as="div" />
                           </div>
                         </div>
                       </div>

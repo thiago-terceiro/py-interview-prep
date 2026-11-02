@@ -13,12 +13,12 @@ Interview Takeaway: Normalizing features to uniform scale ensures loss contours 
 
 Why Others Are Incorrect:
 • k-NN and K-Means (A) compute geometric Euclidean distances across all dimensions simultaneously, which vary drastically under non-uniform scaling.
-• SVMs with RBF kernels (C) compute exp(-gamma ||x - z||^2), making distance scaling critical.
+• SVMs with RBF kernels (C) compute $\exp(-\gamma \|x - z\|^2)$, making distance scaling critical.
 • PCA (D) finds axes of maximal variance; unscaled large-variance features artificially dominate the principal components.
 
 Interview Takeaway: The scale invariance of tree-based models is a primary reason they dominate competitive tabular benchmarks like Kaggle—they require virtually zero numerical feature scaling or outlier clipping to perform well.""",
 
-    43: """Core Principle: Standardization (Z-score normalization) rescales a continuous feature so its empirical distribution has a mean of zero and a standard deviation of one: z = (x - mu) / sigma. It shifts the center of the distribution to 0 and scales the spread so that one unit represents one standard deviation.
+    43: """Core Principle: Standardization (Z-score normalization) rescales a continuous feature so its empirical distribution has a mean of zero and a standard deviation of one: $z = \\frac{x - \\mu}{\\sigma}$. It shifts the center of the distribution to 0 and scales the spread so that one unit represents one standard deviation.
 
 Why Others Are Incorrect:
 • Scaling strictly between 0 and 1 (A) describes Min-Max normalization.
@@ -134,7 +134,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: The harmonic mean ensures that an algorithm cannot game the metric by achieving 100% Precision at the expense of capturing only 1 positive sample, or 100% Recall by predicting positive for every sample.""",
 
-    56: """Core Principle: The Receiver Operating Characteristic (ROC) curve evaluates a binary classifier across all possible classification probability thresholds from 1.0 down to 0.0. It plots the True Positive Rate (Recall, y-axis) against the False Positive Rate (FPR = FP / (FP + TN), x-axis).
+    56: """Core Principle: The Receiver Operating Characteristic (ROC) curve evaluates a binary classifier across all possible classification probability thresholds from 1.0 down to 0.0. It plots the True Positive Rate (Recall, y-axis) against the False Positive Rate ($\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}$, x-axis).
 
 Why Others Are Incorrect:
 • Precision vs. Recall (A) is the Precision-Recall (PR) curve.
@@ -184,7 +184,7 @@ Why Others Are Incorrect:
 • Ignoring training data (A) and learning only linear boundaries (C) characterize high bias.
 • High training error and high test error (D) characterize underfitting.
 
-Interview Takeaway: To reduce high variance, collect more training data, apply regularization (L1/L2), prune decision trees, apply dropout, or use ensemble bagging (Random Forests) which explicitly reduces variance without increasing bias.""",
+Interview Takeaway: To reduce high variance, collect more training data, apply regularization ($L_1$/$L_2$), prune decision trees, apply dropout, or use ensemble bagging (Random Forests) which explicitly reduces variance without increasing bias.""",
 
     62: """Core Principle: Gradient Descent is a first-order iterative numerical optimization algorithm that minimizes an objective loss function L(theta). At each step, it calculates the gradient vector nabla L(theta) (the direction of steepest ascent) and updates parameters in the exact opposite direction: theta = theta - alpha * nabla L(theta), where alpha is the learning rate.
 
@@ -231,30 +231,30 @@ Why Others Are Incorrect:
 
 Interview Takeaway: Occam's Razor states that among competing hypotheses that explain the data equally well, the simplest should be selected. Regularization mathematically enforces Occam's Razor by penalizing unnecessary parameter complexity.""",
 
-    67: """Core Principle: L2 Regularization (Ridge regression, weight decay) adds a penalty proportional to the sum of the squared values of the model parameters: lambda * sum_{j=1}^d w_j^2 = lambda * ||w||_2^2.
+    67: """Core Principle: $L_2$ Regularization (Ridge regression, weight decay) adds a penalty proportional to the sum of the squared values of the model parameters: $\lambda \sum_{j=1}^d w_j^2 = \lambda \|w\|_2^2$.
 
 Why Others Are Incorrect:
-• Sum of absolute values (A) is L1 (Lasso) regularization.
+• Sum of absolute values (A) is $L_1$ (Lasso) regularization.
 • Number of rows (C) and learning rate (D) are not penalty terms.
 
-Interview Takeaway: In gradient descent, the gradient of the L2 penalty is 2 * lambda * w. The update becomes w = w * (1 - 2 * alpha * lambda) - alpha * nabla L(w). The term (1 - 2 * alpha * lambda) shrinks weights toward zero proportionally to their current size (weight decay), effectively handling multicollinearity by shrinking correlated weights together without forcing them to exact zero.""",
+Interview Takeaway: In gradient descent, the gradient of the $L_2$ penalty is 2 * lambda * w. The update becomes w = w * (1 - 2 * alpha * lambda) - alpha * nabla L(w). The term (1 - 2 * alpha * lambda) shrinks weights toward zero proportionally to their current size (weight decay), effectively handling multicollinearity by shrinking correlated weights together without forcing them to exact zero.""",
 
-    68: """Core Principle: L1 Regularization (Lasso) adds a penalty proportional to the sum of the absolute values of the weights: lambda * sum_{j=1}^d |w_j| = lambda * ||w||_1. Because the derivative of |w| is a constant (+1 or -1 regardless of magnitude), it continues driving small weights all the way to absolute zero, producing sparse models that perform automated feature selection.
+    68: """Core Principle: $L_1$ Regularization (Lasso) adds a penalty proportional to the sum of the absolute values of the weights: $\lambda \sum_{j=1}^d |w_j| = \lambda \|w\|_1$. Because the derivative of |w| is a constant (+1 or -1 regardless of magnitude), it continues driving small weights all the way to absolute zero, producing sparse models that perform automated feature selection.
 
 Why Others Are Incorrect:
 • Sum of squared weights (A) is Ridge regularization.
 • Product of weights (C) and log of weights (D) are not standard regularization penalties.
 
-Interview Takeaway: Geometrically, the L1 constraint region is an acute diamond (rhombus) with sharp corners on the coordinate axes. The contours of the loss function frequently intersect these sharp corners first, forcing non-informative feature weights to exactly 0.0.""",
+Interview Takeaway: Geometrically, the $L_1$ constraint region is an acute diamond (rhombus) with sharp corners on the coordinate axes. The contours of the loss function frequently intersect these sharp corners first, forcing non-informative feature weights to exactly 0.0.""",
 
-    69: """Core Principle: Elastic Net combines both L1 (Lasso) and L2 (Ridge) regularization penalties into a unified objective: lambda_1 * ||w||_1 + lambda_2 * ||w||_2^2. It introduces a mixing parameter alpha (or l1_ratio) that balances sparsity with grouping stability.
+    69: """Core Principle: Elastic Net combines both $L_1$ (Lasso) and $L_2$ (Ridge) regularization penalties into a unified objective: $\lambda_1 \|w\|_1 + \lambda_2 \|w\|_2^2$. It introduces a mixing parameter alpha (or l1_ratio) that balances sparsity with grouping stability.
 
 Why Others Are Incorrect:
 • Dynamic learning rate schedules (B) relate to optimizers.
 • Clustering for elastic time-series (C) relates to Dynamic Time Warping (DTW).
 • Pruning Random Forests (D) is ensemble post-pruning.
 
-Interview Takeaway: When features are highly correlated (e.g., gene expression data where 100 genes belong to the same pathway), Lasso tends to arbitrarily select one gene and zero out the remaining 99. Elastic Net uses its L2 component to retain the entire correlated group while using its L1 component to enforce overall sparsity.""",
+Interview Takeaway: When features are highly correlated (e.g., gene expression data where 100 genes belong to the same pathway), Lasso tends to arbitrarily select one gene and zero out the remaining 99. Elastic Net uses its $L_2$ component to retain the entire correlated group while using its $L_1$ component to enforce overall sparsity.""",
 
     70: """Core Principle: Naive Bayes is based on Bayes' Theorem: P(y|x) = P(x|y)P(y) / P(x). The "naive" assumption is that all input features x_1, x_2, ..., x_d are mutually conditionally independent given the class label y: P(x_1, ..., x_d | y) = product_{j=1}^d P(x_j | y).
 
@@ -283,7 +283,7 @@ Why Others Are Incorrect:
 
 Interview Takeaway: When the elbow curve is ambiguous or smooth, combine it with the Silhouette Analysis, which evaluates both cluster cohesion (compactness) and separation (distance to nearest neighboring clusters), with scores ranging from -1 (poor) to +1 (dense, well-separated clusters).""",
 
-    73: """Core Principle: The Sigmoid (Logistic) activation function is defined as sigma(z) = 1 / (1 + e^{-z}). It takes any real-valued logit input z in (-infinity, +infinity) and maps it monotonically into a smooth, S-shaped curve bounded strictly within (0, 1), representing a valid probability distribution for binary events.
+    73: """Core Principle: The Sigmoid (Logistic) activation function is defined as $\\sigma(z) = \\frac{1}{1 + e^{-z}}$. It takes any real-valued logit input z in (-infinity, +infinity) and maps it monotonically into a smooth, S-shaped curve bounded strictly within (0, 1), representing a valid probability distribution for binary events.
 
 Why Others Are Incorrect:
 • ReLU (A) maps negative numbers to 0 and positive numbers to x (range [0, infinity)).
@@ -292,25 +292,25 @@ Why Others Are Incorrect:
 
 Interview Takeaway: In Logistic Regression, the log-odds log(p / (1-p)) = w^T x. Solving for p yields p = sigma(w^T x). The derivative of the sigmoid function has an elegant analytical form: d(sigma)/dz = sigma(z) * (1 - sigma(z)), which makes gradient calculations computationally efficient.""",
 
-    74: """Core Principle: The Coefficient of Determination (R^2) measures the proportion of total variance in the dependent variable y that is predictable from the independent variables X: R^2 = 1 - (SS_res / SS_tot), where SS_res = sum(y_i - y_hat_i)^2 (residual sum of squares) and SS_tot = sum(y_i - y_bar)^2 (total sum of squares around the mean).
+    74: """Core Principle: The Coefficient of Determination ($R^2$) measures the proportion of total variance in the dependent variable y that is predictable from the independent variables X: $R^2$ = 1 - (\text{SS}_{\text{res}} / \text{SS}_{\text{tot}})$, where SS_res = sum(y_i - y_hat_i)^2 (residual sum of squares) and SS_tot = sum(y_i - y_bar)^2 (total sum of squares around the mean).
 
 Why Others Are Incorrect:
-• SS_res / SS_tot (B) is the unexplained variance ratio (1 - R^2).
+• SS_res / SS_tot (B) is the unexplained variance ratio (1 - $R^2$).
 • sqrt(MSE) (C) is Root Mean Squared Error (RMSE).
 • MAE / MSE (D) is an uncalibrated error ratio.
 
-Interview Takeaway: An R^2 of 1.0 means the model explains 100% of variance. An R^2 of 0.0 means the model performs no better than simply predicting the mean y_bar for every sample. Crucially, on unseen test data, R^2 can be negative if the model's predictions are worse than the simple baseline mean.""",
+Interview Takeaway: An $R^2$ of 1.0 means the model explains 100% of variance. An $R^2$ of 0.0 means the model performs no better than simply predicting the mean y_bar for every sample. Crucially, on unseen test data, $R^2$ can be negative if the model's predictions are worse than the simple baseline mean.""",
 
-    75: """Core Principle: In Ordinary Least Squares (OLS) regression, adding any predictor—even purely random noise—will mathematically never decrease R^2 on training data, and almost always increases it slightly, because the model gains an additional degree of freedom to fit residual variance. Adjusted R^2 corrects for this by penalizing model complexity: R^2_adj = 1 - [(1 - R^2)(n - 1) / (n - p - 1)], where p is the number of features and n is sample size.
+    75: """Core Principle: In Ordinary Least Squares (OLS) regression, adding any predictor—even purely random noise—will mathematically never decrease $R^2$ on training data, and almost always increases it slightly, because the model gains an additional degree of freedom to fit residual variance. Adjusted $R^2$ corrects for this by penalizing model complexity: $R^2_{\text{adj}} = 1 - \left[\frac{(1 - $R^2$)(n - 1)}{n - p - 1}\right]$, where p is the number of features and n is sample size.
 
 Why Others Are Incorrect:
 • Random features do not reduce dataset variance to zero (B).
-• OLS linear regression does not automatically drop random features (C); that requires L1 regularization or stepwise feature selection.
-• R^2 is a regression metric (D).
+• OLS linear regression does not automatically drop random features (C); that requires $L_1$ regularization or stepwise feature selection.
+• $R^2$ is a regression metric (D).
 
-Interview Takeaway: When performing feature selection in multiple linear regression, never evaluate candidate feature sets using standard training R^2. Always compare models using Adjusted R^2, AIC (Akaike Information Criterion), BIC, or cross-validated RMSE.""",
+Interview Takeaway: When performing feature selection in multiple linear regression, never evaluate candidate feature sets using standard training $R^2$. Always compare models using Adjusted $R^2$, AIC (Akaike Information Criterion), BIC, or cross-validated RMSE.""",
 
-    76: """Core Principle: Multicollinearity occurs in multiple regression when two or more independent explanatory features are highly linearly correlated with each other. This causes the matrix X^T X to become ill-conditioned and close to singular (non-invertible), resulting in wildly inflated standard errors, extreme sensitivity of coefficient estimates to tiny data shifts, and uninterpretable p-values.
+    76: """Core Principle: Multicollinearity occurs in multiple regression when two or more independent explanatory features are highly linearly correlated with each other. This causes the matrix $X^T X$ to become ill-conditioned and close to singular (non-invertible), resulting in wildly inflated standard errors, extreme sensitivity of coefficient estimates to tiny data shifts, and uninterpretable p-values.
 
 Why Others Are Incorrect:
 • Having multiple targets (A) is multi-target regression.
@@ -333,9 +333,9 @@ Interview Takeaway: A VIF of 1 indicates complete absence of collinearity. A VIF
 Why Others Are Incorrect:
 • Its decision boundary is not a straight line in 2D (A); it is a polynomial curve.
 • Polynomial models can easily overfit data (C) if degree d is high.
-• Polynomial regression uses standard OLS by default, not L1 regularization (D).
+• Polynomial regression uses standard OLS by default, not $L_1$ regularization (D).
 
-Interview Takeaway: Because polynomial regression is linear in its weights, it retains all analytical properties of linear models—including closed-form Normal Equations w = (X^T X)^{-1} X^T y and convex global optimization—by simply mapping inputs into a higher-dimensional polynomial feature space.""",
+Interview Takeaway: Because polynomial regression is linear in its weights, it retains all analytical properties of linear models—including closed-form Normal Equations $w = ($X^T X$)^{-1} X^T y$ and convex global optimization—by simply mapping inputs into a higher-dimensional polynomial feature space.""",
 
     79: """Core Principle: Binary Cross-Entropy (BCE, or Log Loss) is the standard loss function for binary classification models that output probability estimates p in [0, 1]. Defined as Loss = - (1/n) * sum [y_i log(p_i) + (1 - y_i) log(1 - p_i)], it originates directly from the negative log-likelihood of a Bernoulli distribution, heavily penalizing confident wrong predictions (e.g., predicting p=0.01 when true label is 1).
 
@@ -353,5 +353,5 @@ Why Others Are Incorrect:
 • Terminating a decision tree at depth 1 (C) creates a decision stump.
 • Dropping columns (D) is feature pruning.
 
-Interview Takeaway: Early stopping mathematically acts like L2 regularization: by stopping training at epoch T, parameters are constrained to a neighborhood around their initialization, effectively bounding their L2 norm without requiring manual tuning of a weight decay penalty lambda."""
+Interview Takeaway: Early stopping mathematically acts like $L_2$ regularization: by stopping training at epoch T, parameters are constrained to a neighborhood around their initialization, effectively bounding their $L_2$ norm without requiring manual tuning of a weight decay penalty lambda."""
 }

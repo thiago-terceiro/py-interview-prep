@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { QuizQuestion, UserQuizProgress } from '../../types/quiz';
 import { useLanguage } from '../../context/LanguageContext';
+import { MathText } from '../MathText';
 import {
   Search,
   CheckCircle2,
@@ -274,7 +275,7 @@ export const QuizListView: React.FC<QuizListViewProps> = ({
                   </div>
 
                   <p className="text-sm sm:text-base font-semibold text-slate-200 group-hover:text-white transition-colors leading-snug line-clamp-2">
-                    {q.question}
+                    <MathText text={q.question} as="span" />
                   </p>
                 </div>
 

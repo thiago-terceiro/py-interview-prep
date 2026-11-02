@@ -441,6 +441,7 @@ export const QuizHub: React.FC = () => {
         <div>
           {currentQuestion.type === 'multiple-choice' ? (
             <QuizCard
+              key={currentQuestion.id}
               question={currentQuestion}
               selectedOption={progress.selectedAnswers[currentQuestion.id]}
               isBookmarked={isCurrentBookmarked}
