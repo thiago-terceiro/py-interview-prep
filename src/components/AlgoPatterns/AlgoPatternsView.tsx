@@ -152,6 +152,7 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value as any)}
             className="bg-[#0d1117] border border-slate-700 text-xs text-slate-200 rounded-xl px-3 py-2 focus:outline-none focus:border-sky-500"
+            aria-label={t('category')}
           >
             <option value="all">{t('allCategories')}</option>
             {categories
@@ -189,7 +190,7 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
             </span>
           </div>
 
-          <div className="space-y-2 max-h-[780px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[780px] overflow-y-auto pr-1" tabIndex={0} role="region" aria-label="Pattern List">
             {filteredPatterns.map(pattern => {
               const isSelected = pattern.id === activePattern.id;
               return (
@@ -250,7 +251,7 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
         </aside>
 
         {/* Right Active Pattern Detail (8 cols) */}
-        <main className="lg:col-span-8">
+        <section className="lg:col-span-8" aria-label="Pattern Detail">
           {activePattern ? (
             <PatternDetail
               pattern={activePattern}
@@ -262,7 +263,7 @@ export const AlgoPatternsView: React.FC<AlgoPatternsViewProps> = ({
               {t('selectPatternToExplore')}
             </div>
           )}
-        </main>
+        </section>
       </div>
     </div>
   );

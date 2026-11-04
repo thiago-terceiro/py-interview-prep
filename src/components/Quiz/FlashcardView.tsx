@@ -800,7 +800,12 @@ export const FlashcardView: React.FC<FlashcardViewProps> = ({
                         </div>
 
                         {/* Technical Invariant & Rationale */}
-                        <div className="p-4 sm:p-5 rounded-xl bg-[#0d1117] border border-slate-800 max-h-[380px] sm:max-h-[440px] overflow-y-auto">
+                        <div
+                          className="p-4 sm:p-5 rounded-xl bg-[#0d1117] border border-slate-800 max-h-[380px] sm:max-h-[440px] overflow-y-auto"
+                          tabIndex={0}
+                          role="region"
+                          aria-label={t('quizWhyExplanation')}
+                        >
                           <div className="text-xs font-bold text-sky-400 uppercase tracking-wider font-mono mb-2.5 flex items-center gap-1.5 sticky top-0 bg-[#0d1117] pb-1 z-10">
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>{t('quizWhyExplanation')}</span>

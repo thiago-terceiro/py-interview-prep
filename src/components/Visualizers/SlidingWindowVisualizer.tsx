@@ -91,8 +91,8 @@ export const SlidingWindowVisualizer: React.FC = () => {
   const sampleStrings = ['abcabcbb', 'pwwkew', 'abba', 'tmmzuxt'];
 
   return (
-    <div className="bg-[#161b22] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+    <div className="bg-[#161b22] border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl space-y-6 overflow-hidden max-w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-xs bg-sky-500/20 text-sky-400 border border-sky-500/40">
@@ -105,15 +105,15 @@ export const SlidingWindowVisualizer: React.FC = () => {
           </p>
         </div>
 
-        {/* Input String Selector */}
-        <div className="flex items-center gap-3">
-          <label className="text-xs text-slate-400 font-medium">Select String:</label>
-          <div className="flex gap-1.5">
+        {/* Input String Selector - Responsive Wrap to Prevent Overflow */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <label className="text-xs text-slate-400 font-medium shrink-0">Select String:</label>
+          <div className="flex flex-wrap gap-1.5">
             {sampleStrings.map(s => (
               <button
                 key={s}
                 onClick={() => setInputString(s)}
-                className={`px-2.5 py-1 text-xs rounded font-mono font-medium transition ${
+                className={`px-2.5 py-1 text-xs rounded font-mono font-medium transition cursor-pointer ${
                   inputString === s
                     ? 'bg-sky-500 text-slate-950 font-bold shadow-md shadow-sky-500/20'
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -126,9 +126,9 @@ export const SlidingWindowVisualizer: React.FC = () => {
         </div>
       </div>
 
-      {/* String Characters Track */}
-      <div className="py-6 px-4 bg-[#0d1117] rounded-xl border border-slate-800/80 overflow-x-auto">
-        <div className="flex justify-center items-center gap-2.5 min-w-[500px]">
+      {/* String Characters Track - Responsive without horizontal scrollbar */}
+      <div className="py-6 px-3 sm:px-4 bg-[#0d1117] rounded-xl border border-slate-800/80 overflow-hidden">
+        <div className="flex justify-center items-center gap-1.5 sm:gap-2.5 max-w-full">
           {inputString.split('').map((ch, idx) => {
             const inWindow = idx >= curr.left && idx <= curr.right;
             const isLeft = idx === curr.left;
@@ -136,10 +136,10 @@ export const SlidingWindowVisualizer: React.FC = () => {
             const isCollision = curr.duplicateFound && isRight;
 
             return (
-              <div key={idx} className="flex flex-col items-center">
+              <div key={idx} className="flex flex-col items-center shrink-0">
                 <span className="text-[10px] font-mono text-slate-500 mb-1">{idx}</span>
                 <div
-                  className={`w-12 h-14 rounded-lg flex flex-col items-center justify-center font-mono text-lg font-bold transition-all duration-300 relative ${
+                  className={`w-9 sm:w-12 h-11 sm:h-14 rounded-lg flex flex-col items-center justify-center font-mono text-base sm:text-lg font-bold transition-all duration-300 relative ${
                     isCollision
                       ? 'bg-rose-500/20 text-rose-300 border-2 border-rose-500 shadow-lg shadow-rose-500/20 animate-pulse'
                       : inWindow
@@ -228,6 +228,7 @@ export const SlidingWindowVisualizer: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
+            aria-label="Previous step"
             disabled={currentStepIndex === 0}
             onClick={() => {
               setIsPlaying(false);
@@ -247,6 +248,7 @@ export const SlidingWindowVisualizer: React.FC = () => {
           </button>
 
           <button
+            aria-label="Next step"
             disabled={currentStepIndex >= steps.length - 1}
             onClick={() => {
               setIsPlaying(false);

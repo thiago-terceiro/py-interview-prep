@@ -142,7 +142,7 @@ export const CheatsheetView: React.FC = () => {
   ];
 
   return (
-    <main className="max-w-[1700px] w-full mx-auto space-y-6 pb-16">
+    <div className="max-w-[1700px] w-full mx-auto space-y-6 pb-16">
       {/* Reusable Fixed-Height Header Card - Zero CLS */}
       <PageHeaderCard
         badgeIcon={BookOpen}
@@ -258,7 +258,7 @@ export const CheatsheetView: React.FC = () => {
                       onClick={() => toggleExpand(item.id)}
                       className="self-end sm:self-center text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition min-h-[36px]"
                       aria-expanded={isExpanded}
-                      aria-label={`${item.title} details`}
+                      aria-label={`${isExpanded ? 'Collapse' : 'Details'} ${item.title}`}
                     >
                       <span>{isExpanded ? 'Collapse' : 'Details'}</span>
                       {isExpanded ? (
@@ -294,7 +294,7 @@ export const CheatsheetView: React.FC = () => {
                           <div className="flex items-center justify-between px-3 py-1.5 bg-rose-950/30 border-b border-rose-500/20 text-[11px] text-rose-400 font-semibold">
                             <span>{t('cheatsheetFlawedCode')}</span>
                           </div>
-                          <pre className="p-3 font-mono text-xs text-rose-200/90 overflow-x-auto leading-relaxed">
+                          <pre className="p-3 font-mono text-xs text-rose-200/90 overflow-x-auto leading-relaxed" tabIndex={0} role="region" aria-label="Flawed code snippet">
                             <code>{item.badCode}</code>
                           </pre>
                         </div>
@@ -308,7 +308,7 @@ export const CheatsheetView: React.FC = () => {
                               onClick={() => handleCopy(item.id, item.goodCode)}
                               className="text-slate-400 hover:text-white flex items-center gap-1 p-1 rounded transition"
                               title={t('cheatsheetCopyCode')}
-                              aria-label={t('cheatsheetCopyCode')}
+                              aria-label={copiedId === item.id ? t('cheatsheetCopied') : t('cheatsheetCopyCode')}
                             >
                               {copiedId === item.id ? (
                                 <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -318,7 +318,7 @@ export const CheatsheetView: React.FC = () => {
                               <span>{copiedId === item.id ? t('cheatsheetCopied') : ''}</span>
                             </button>
                           </div>
-                          <pre className="p-3 font-mono text-xs text-emerald-300/90 overflow-x-auto leading-relaxed">
+                          <pre className="p-3 font-mono text-xs text-emerald-300/90 overflow-x-auto leading-relaxed" tabIndex={0} role="region" aria-label="Clean code snippet">
                             <code>{item.goodCode}</code>
                           </pre>
                         </div>
@@ -388,7 +388,7 @@ export const CheatsheetView: React.FC = () => {
                       onClick={() => toggleExpand(item.id)}
                       className="self-end sm:self-center text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 transition min-h-[36px]"
                       aria-expanded={isExpanded}
-                      aria-label={`${item.title} details`}
+                      aria-label={`${isExpanded ? 'Collapse' : 'Details'} ${item.title}`}
                     >
                       <span>{isExpanded ? 'Collapse' : 'Details'}</span>
                       {isExpanded ? (
@@ -443,7 +443,7 @@ export const CheatsheetView: React.FC = () => {
                             onClick={() => handleCopy(item.id, item.codeSnippet)}
                             className="text-slate-400 hover:text-white flex items-center gap-1 p-1 rounded transition"
                             title={t('cheatsheetCopyCode')}
-                            aria-label={t('cheatsheetCopyCode')}
+                            aria-label={copiedId === item.id ? t('cheatsheetCopied') : t('cheatsheetCopyCode')}
                           >
                             {copiedId === item.id ? (
                               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -453,7 +453,7 @@ export const CheatsheetView: React.FC = () => {
                             <span>{copiedId === item.id ? t('cheatsheetCopied') : ''}</span>
                           </button>
                         </div>
-                        <pre className="p-3 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed">
+                        <pre className="p-3 font-mono text-xs text-slate-200 overflow-x-auto leading-relaxed" tabIndex={0} role="region" aria-label="Code implementation">
                           <code>{item.codeSnippet}</code>
                         </pre>
                       </div>
@@ -484,7 +484,7 @@ export const CheatsheetView: React.FC = () => {
           </div>
 
           <div className="bg-[#161b22] border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto" tabIndex={0} role="region" aria-label={t('cheatsheetTabComplexity')}>
               <table className="w-full text-left text-xs font-mono">
                 <thead>
                   <tr className="border-b border-slate-700 text-slate-400">
@@ -547,7 +547,7 @@ export const CheatsheetView: React.FC = () => {
                   <h3>{tip.title}</h3>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">{tip.desc}</p>
-                <div className="bg-[#0d1117] border border-slate-700/60 rounded-xl p-3 font-mono text-xs text-sky-200 overflow-x-auto">
+                <div className="bg-[#0d1117] border border-slate-700/60 rounded-xl p-3 font-mono text-xs text-sky-200 overflow-x-auto" tabIndex={0} role="region" aria-label="NumPy Code Snippet">
                   <code>{tip.code}</code>
                 </div>
               </article>
@@ -555,7 +555,7 @@ export const CheatsheetView: React.FC = () => {
           </div>
         </section>
       )}
-    </main>
+    </div>
   );
 };
 

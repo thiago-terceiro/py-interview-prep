@@ -41,7 +41,7 @@ export const BinarySearchVisualizer: React.FC = () => {
           high,
           found: true,
           sortedHalf: isLeftSorted ? 'left' : 'right',
-          message: `Target ${target} found at index ${mid}! O(log N) search terminated.`,
+          message: `Target ${target} found at index ${mid} (nums[${mid}] = ${array[mid]})! O(log N) search terminated.`,
         });
         break;
       }
@@ -55,7 +55,7 @@ export const BinarySearchVisualizer: React.FC = () => {
             high,
             found: false,
             sortedHalf: 'left',
-            message: `Left half [${low}..${mid}] is sorted (${array[low]} <= ${array[mid]}). Target ${target} lies within [${array[low]}..${array[mid]}). Discard right half by setting high = ${mid - 1}.`,
+            message: `Left half [index ${low}..${mid}] is sorted (values ${array[low]} <= ${array[mid]}). Target ${target} lies within value range [${array[low]}..${array[mid]}). Discard right half by setting high pointer to index ${mid - 1} (value nums[${mid - 1}] = ${array[mid - 1]}).`,
           });
           high = mid - 1;
         } else {
@@ -65,7 +65,7 @@ export const BinarySearchVisualizer: React.FC = () => {
             high,
             found: false,
             sortedHalf: 'left',
-            message: `Left half [${low}..${mid}] is sorted, but target ${target} is NOT in [${array[low]}..${array[mid]}). Search right half by setting low = ${mid + 1}.`,
+            message: `Left half [index ${low}..${mid}] is sorted (values ${array[low]} <= ${array[mid]}), but target ${target} is NOT in value range [${array[low]}..${array[mid]}). Search right half by setting low pointer to index ${mid + 1} (value nums[${mid + 1}] = ${array[mid + 1]}).`,
           });
           low = mid + 1;
         }
@@ -78,7 +78,7 @@ export const BinarySearchVisualizer: React.FC = () => {
             high,
             found: false,
             sortedHalf: 'right',
-            message: `Right half [${mid}..${high}] is sorted (${array[mid]} <= ${array[high]}). Target ${target} lies within (${array[mid]}..${array[high]}]. Discard left half by setting low = ${mid + 1}.`,
+            message: `Right half [index ${mid}..${high}] is sorted (values ${array[mid]} <= ${array[high]}). Target ${target} lies within value range (${array[mid]}..${array[high]}]. Discard left half by setting low pointer to index ${mid + 1} (value nums[${mid + 1}] = ${array[mid + 1]}).`,
           });
           low = mid + 1;
         } else {
@@ -88,7 +88,7 @@ export const BinarySearchVisualizer: React.FC = () => {
             high,
             found: false,
             sortedHalf: 'right',
-            message: `Right half [${mid}..${high}] is sorted, but target ${target} is NOT in (${array[mid]}..${array[high]}]. Discard right half by setting high = ${mid - 1}.`,
+            message: `Right half [index ${mid}..${high}] is sorted (values ${array[mid]} <= ${array[high]}), but target ${target} is NOT in value range (${array[mid]}..${array[high]}]. Discard right half by setting high pointer to index ${mid - 1} (value nums[${mid - 1}] = ${array[mid - 1]}).`,
           });
           high = mid - 1;
         }
@@ -102,7 +102,7 @@ export const BinarySearchVisualizer: React.FC = () => {
         high,
         found: false,
         sortedHalf: 'left',
-        message: `low (${low}) > high (${high}): Target ${target} does not exist in array. Return -1.`,
+        message: `low pointer (index ${low}) > high pointer (index ${high}): Search range exhausted. Target ${target} does not exist in array. Return -1.`,
       });
     }
 
@@ -131,8 +131,8 @@ export const BinarySearchVisualizer: React.FC = () => {
   };
 
   return (
-    <div className="bg-[#161b22] border border-slate-800 rounded-xl p-6 shadow-xl space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-4">
+    <div className="bg-[#161b22] border border-slate-800 rounded-xl p-4 sm:p-6 shadow-xl space-y-6 overflow-hidden max-w-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h3 className="text-xl font-bold text-white flex items-center gap-2">
             <span className="px-2 py-0.5 rounded text-xs bg-violet-500/20 text-violet-400 border border-violet-500/40">
@@ -145,15 +145,15 @@ export const BinarySearchVisualizer: React.FC = () => {
           </p>
         </div>
 
-        {/* Target Buttons */}
-        <div className="flex items-center gap-3">
-          <label className="text-xs text-slate-400 font-medium">Select Target:</label>
-          <div className="flex gap-1.5">
+        {/* Target Buttons - Responsive Wrap */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <label className="text-xs text-slate-400 font-medium shrink-0">Select Target:</label>
+          <div className="flex flex-wrap gap-1.5">
             {[0, 6, 2, 3].map(t => (
               <button
                 key={t}
                 onClick={() => setTarget(t)}
-                className={`px-2.5 py-1 text-xs rounded font-mono font-medium transition ${
+                className={`px-2.5 py-1 text-xs rounded font-mono font-medium transition cursor-pointer ${
                   target === t
                     ? 'bg-violet-500 text-slate-950 font-bold shadow-md shadow-violet-500/20'
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
@@ -166,9 +166,9 @@ export const BinarySearchVisualizer: React.FC = () => {
         </div>
       </div>
 
-      {/* Visual Array Track */}
-      <div className="py-6 px-4 bg-[#0d1117] rounded-xl border border-slate-800/80 overflow-x-auto">
-        <div className="flex justify-center items-end gap-3 min-w-[500px]">
+      {/* Visual Array Track - Responsive & Fully Contained */}
+      <div className="py-6 px-3 sm:px-4 bg-[#0d1117] rounded-xl border border-slate-800/80 overflow-hidden">
+        <div className="flex justify-center items-end gap-1.5 sm:gap-3 max-w-full">
           {array.map((val, idx) => {
             const isMid = idx === curr.mid;
             const isLow = idx === curr.low;
@@ -177,7 +177,7 @@ export const BinarySearchVisualizer: React.FC = () => {
             const isFound = curr.found && isMid;
 
             return (
-              <div key={idx} className="flex flex-col items-center">
+              <div key={idx} className="flex flex-col items-center shrink-0">
                 {/* Flags Header */}
                 <div className="h-10 flex flex-col items-center justify-end">
                   {isMid && (
@@ -190,11 +190,11 @@ export const BinarySearchVisualizer: React.FC = () => {
                   )}
                 </div>
 
-                {/* Number Box */}
+                {/* Number Box - Black index number on bright green */}
                 <div
-                  className={`w-14 h-14 rounded-lg flex flex-col items-center justify-center font-mono text-base font-bold transition-all duration-300 relative ${
+                  className={`w-11 sm:w-14 h-11 sm:h-14 rounded-lg flex flex-col items-center justify-center font-mono text-sm sm:text-base font-bold transition-all duration-300 relative ${
                     isFound
-                      ? 'bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/30 scale-105'
+                      ? 'bg-emerald-500 text-slate-950 ring-4 ring-emerald-500/30 scale-105 shadow-lg shadow-emerald-500/20'
                       : isMid
                       ? 'bg-violet-500/20 text-violet-300 border-2 border-violet-400 shadow-lg shadow-violet-500/20'
                       : inActiveRange
@@ -202,8 +202,10 @@ export const BinarySearchVisualizer: React.FC = () => {
                       : 'bg-slate-900/30 text-slate-700 border border-slate-900 opacity-30 line-through'
                   }`}
                 >
-                  {val}
-                  <span className="text-[10px] font-normal text-slate-500 -mt-0.5">[{idx}]</span>
+                  <span className={isFound ? 'text-black font-extrabold' : ''}>{val}</span>
+                  <span className={`text-[10px] font-mono -mt-0.5 ${isFound ? 'text-black font-bold' : 'text-slate-500'}`}>
+                    [{idx}]
+                  </span>
                   {isLow && inActiveRange && (
                     <span className="absolute -bottom-5 text-[9px] font-bold text-sky-400 bg-sky-950/80 px-1 rounded border border-sky-500/30">
                       LOW
@@ -221,18 +223,21 @@ export const BinarySearchVisualizer: React.FC = () => {
         </div>
       </div>
 
-      {/* State Cards */}
+      {/* State Cards - Clarifying Indices vs Values */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <div className="bg-[#0d1117] p-3 rounded-lg border border-slate-800">
-          <div className="text-xs text-slate-400">Search Window:</div>
-          <div className="font-mono text-base font-bold text-white mt-0.5">
-            [{curr.low} .. {curr.high}]
+          <div className="text-xs text-slate-400">Search Window (Indices):</div>
+          <div className="font-mono text-sm sm:text-base font-bold text-white mt-0.5">
+            index [{curr.low} .. {curr.high}]
+          </div>
+          <div className="text-[11px] font-mono text-slate-400 mt-0.5">
+            values: [{array[curr.low]} .. {array[curr.high]}]
           </div>
         </div>
         <div className="bg-[#0d1117] p-3 rounded-lg border border-slate-800">
-          <div className="text-xs text-slate-400">Mid Index & Value:</div>
-          <div className="font-mono text-base font-bold text-violet-400 mt-0.5">
-            idx {curr.mid} = {array[curr.mid]}
+          <div className="text-xs text-slate-400">Mid Pointer:</div>
+          <div className="font-mono text-sm sm:text-base font-bold text-violet-400 mt-0.5">
+            index {curr.mid} &rarr; nums[{curr.mid}] = {array[curr.mid]}
           </div>
         </div>
         <div className="bg-[#0d1117] p-3 rounded-lg border border-slate-800">
@@ -280,6 +285,7 @@ export const BinarySearchVisualizer: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
+            aria-label="Previous step"
             disabled={currentStepIndex === 0}
             onClick={() => {
               setIsPlaying(false);
@@ -299,6 +305,7 @@ export const BinarySearchVisualizer: React.FC = () => {
           </button>
 
           <button
+            aria-label="Next step"
             disabled={currentStepIndex >= steps.length - 1}
             onClick={() => {
               setIsPlaying(false);

@@ -279,6 +279,7 @@ export const BfsGridVisualizer: React.FC = () => {
 
         <div className="flex items-center gap-2">
           <button
+            aria-label="Previous step"
             disabled={currentStepIndex === 0}
             onClick={() => {
               setIsPlaying(false);
@@ -298,6 +299,7 @@ export const BfsGridVisualizer: React.FC = () => {
           </button>
 
           <button
+            aria-label="Next step"
             disabled={currentStepIndex >= steps.length - 1}
             onClick={() => {
               setIsPlaying(false);

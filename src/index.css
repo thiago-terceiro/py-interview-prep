@@ -44,10 +44,10 @@ html.light .bg-\[\#0d1117\] {
 /* Slate 900 / 950 surfaces (progress tracks, tags, step banners) */
 html.light .bg-slate-900,
 html.light .bg-slate-950,
-html.light .bg-slate-900\/60,
-html.light .bg-slate-950\/70,
-html.light .bg-slate-950\/20 {
-  background-color: #e2e8f0 !important;
+html.light [class*="bg-slate-900"],
+html.light [class*="bg-slate-950"],
+html.light [class*="bg-slate-800"] {
+  background-color: #f1f5f9 !important;
   border-color: #cbd5e1 !important;
   color: #1e293b !important;
 }
@@ -62,7 +62,8 @@ html.light [class*="bg-slate-900"][class*="rounded-full"] {
 /* Dark tinted containers in light mode */
 html.light .bg-indigo-950\/60,
 html.light .bg-indigo-950\/70,
-html.light .bg-indigo-950\/80 {
+html.light .bg-indigo-950\/80,
+html.light [class*="bg-indigo-950"] {
   background-color: #eef2ff !important;
   border-color: #c7d2fe !important;
   color: #4338ca !important;
@@ -70,7 +71,8 @@ html.light .bg-indigo-950\/80 {
 
 html.light .bg-emerald-950\/20,
 html.light .bg-emerald-950\/30,
-html.light .bg-emerald-950\/40 {
+html.light .bg-emerald-950\/40,
+html.light [class*="bg-emerald-950"] {
   background-color: #ecfdf5 !important;
   border-color: #a7f3d0 !important;
   color: #065f46 !important;
@@ -78,10 +80,43 @@ html.light .bg-emerald-950\/40 {
 
 html.light .bg-rose-950\/20,
 html.light .bg-rose-950\/30,
-html.light .bg-rose-950\/40 {
+html.light .bg-rose-950\/40,
+html.light [class*="bg-rose-950"] {
   background-color: #fff1f2 !important;
   border-color: #fecdd3 !important;
   color: #9f1239 !important;
+}
+
+html.light [class*="bg-sky-950"] {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+  color: #0369a1 !important;
+}
+
+html.light [class*="bg-purple-950"] {
+  background-color: #faf5ff !important;
+  border-color: #e9d5ff !important;
+  color: #6d28d9 !important;
+}
+
+html.light [class*="bg-amber-950"] {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+  color: #b45309 !important;
+}
+
+/* High contrast primary buttons (WCAG AA >= 4.5:1 with white text) */
+.bg-sky-600 {
+  background-color: #0369a1 !important;
+}
+.bg-sky-600:hover {
+  background-color: #0284c7 !important;
+}
+.bg-emerald-600 {
+  background-color: #047857 !important;
+}
+.bg-emerald-600:hover {
+  background-color: #059669 !important;
 }
 
 /* Hero / Header Gradients */
@@ -112,16 +147,29 @@ html.light h4:not([class*='bg-gradient']) {
   color: #0f172a !important;
 }
 
-html.light .text-slate-400 {
-  color: #64748b !important;
+/* High-contrast accessible text in Dark Mode */
+.text-slate-500 {
+  color: #8fa0b5;
+}
+.text-slate-600 {
+  color: #94a3b8;
 }
 
-html.light .text-slate-300 {
+html.light .text-slate-400,
+html.light .text-slate-500 {
   color: #334155 !important;
 }
 
-html.light .text-slate-200 {
+html.light .text-slate-600 {
   color: #1e293b !important;
+}
+
+html.light .text-slate-300 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-200 {
+  color: #0f172a !important;
 }
 
 html.light .text-slate-100 {
@@ -173,14 +221,69 @@ html.light .hover\:bg-slate-800\/30:hover {
   background-color: #e2e8f0 !important;
 }
 
-/* Visualizer pastel text contrast fix in light mode */
-html.light .text-sky-300 { color: #0284c7 !important; }
-html.light .text-emerald-300 { color: #059669 !important; }
-html.light .text-purple-300 { color: #7c3aed !important; }
-html.light .text-amber-300 { color: #d97706 !important; }
-html.light .text-indigo-300 { color: #4f46e5 !important; }
-html.light .text-violet-300 { color: #7c3aed !important; }
-html.light .text-rose-300 { color: #e11d48 !important; }
+/* Maintain pure white text for all solid dark buttons and active badges */
+html.light .bg-sky-600,
+html.light .bg-sky-600 *,
+html.light .bg-sky-500.text-white,
+html.light .bg-sky-500.text-white *,
+html.light .bg-indigo-600,
+html.light .bg-indigo-600 *,
+html.light .bg-emerald-600,
+html.light .bg-emerald-600 *,
+html.light .bg-rose-600,
+html.light .bg-rose-600 *,
+html.light .bg-purple-600,
+html.light .bg-purple-600 * {
+  color: #ffffff !important;
+}
+
+/* Light mode badge background overrides */
+html.light .bg-sky-500\/10,
+html.light .bg-sky-500\/20 {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+}
+html.light .bg-emerald-500\/10,
+html.light .bg-emerald-500\/20 {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+html.light .bg-indigo-500\/10,
+html.light .bg-indigo-500\/20 {
+  background-color: #eef2ff !important;
+  border-color: #c7d2fe !important;
+}
+html.light .bg-purple-500\/10,
+html.light .bg-purple-500\/20 {
+  background-color: #faf5ff !important;
+  border-color: #e9d5ff !important;
+}
+html.light .bg-amber-500\/10,
+html.light .bg-amber-500\/20 {
+  background-color: #fffbeb !important;
+  border-color: #fde68a !important;
+}
+html.light .bg-rose-500\/10,
+html.light .bg-rose-500\/20 {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+/* Visualizer and UI pastel text contrast fix in light mode (all >= 4.5:1 against light surfaces) */
+html.light .text-sky-300,
+html.light .text-sky-400 { color: #0369a1 !important; }
+html.light .text-emerald-300,
+html.light .text-emerald-400 { color: #047857 !important; }
+html.light .text-purple-300,
+html.light .text-purple-400 { color: #6d28d9 !important; }
+html.light .text-amber-300,
+html.light .text-amber-400 { color: #b45309 !important; }
+html.light .text-indigo-300,
+html.light .text-indigo-400 { color: #4338ca !important; }
+html.light .text-violet-300,
+html.light .text-violet-400 { color: #6d28d9 !important; }
+html.light .text-rose-300,
+html.light .text-rose-400 { color: #be123c !important; }
 
 /* SVG grid lines for visualizers in light mode */
 html.light svg line[stroke="#30363d"] {

@@ -451,7 +451,7 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
           </div>
 
           {/* Panel Scrollable Content */}
-          <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4 text-sm text-slate-300">
+          <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4 text-sm text-slate-300" tabIndex={0} role="region" aria-label="Problem Description">
             {activeTab === 'description' && (
               <div className="space-y-4">
                 <div>
@@ -891,13 +891,14 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
                 role="tabpanel"
                 id="panel-test-results"
                 aria-labelledby="tab-test-results"
+                tabIndex={0}
                 className="p-4 overflow-y-auto flex-1 font-mono text-xs space-y-3"
               >
                 {!executionResult && !isRunning && (
                   <div className="h-full flex flex-col items-center justify-center text-slate-500 text-center space-y-1">
                     <Terminal className="w-8 h-8 opacity-40 mb-1" />
                     <p>Click "Run Tests" to execute your code against test cases.</p>
-                    <p className="text-[11px] text-slate-600">
+                    <p className="text-[11px] text-slate-400">
                       Runs 100% locally in browser via Python 3.12 WebAssembly
                     </p>
                   </div>
@@ -1007,6 +1008,7 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
                 role="tabpanel"
                 id="panel-script-console"
                 aria-labelledby="tab-script-console"
+                tabIndex={0}
                 className="p-4 overflow-y-auto flex-1 font-mono text-xs space-y-3 bg-[#0d1117]"
               >
                 {!scriptResult && !isScriptRunning && (
@@ -1081,7 +1083,7 @@ export const ProblemArena: React.FC<ProblemArenaProps> = ({
                 className="flex-1 flex flex-col min-h-0 bg-[#0d1117]"
               >
                 {/* Scrollable Console Output Stream */}
-                <div className="flex-1 overflow-y-auto p-3.5 font-mono text-xs space-y-2.5 min-h-[100px]">
+                <div className="flex-1 overflow-y-auto p-3.5 font-mono text-xs space-y-2.5 min-h-[100px]" tabIndex={0} role="region" aria-label="REPL Output Stream">
                   {consoleEntries.length === 0 ? (
                     <div className="h-full min-h-[110px] flex flex-col items-center justify-center text-center p-3">
                       <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-2">

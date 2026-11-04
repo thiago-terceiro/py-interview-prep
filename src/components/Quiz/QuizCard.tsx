@@ -256,6 +256,7 @@ export const QuizCard: React.FC<QuizCardProps> = ({
             }`}
             role="region"
             aria-live="polite"
+            aria-label={t('quizWhyExplanation')}
           >
             <div className="flex items-center gap-2 mb-2">
               {isCorrect ? (

@@ -270,7 +270,7 @@ export const PatternDetail: React.FC<PatternDetailProps> = ({
               </div>
               <span className="text-[10px] text-slate-500 font-mono">Python 3.12 Standard</span>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto text-xs font-mono text-slate-200 leading-relaxed">
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 overflow-x-auto text-xs font-mono text-slate-200 leading-relaxed" tabIndex={0} role="region" aria-label="Python Code Template">
               <pre>{pattern.blueprint.codeTemplate}</pre>
             </div>
           </div>
