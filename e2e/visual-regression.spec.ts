@@ -15,6 +15,9 @@ test.describe('Visual Regression Screenshot Tests Across Viewports', () => {
 
   for (const screen of screens) {
     test(`${screen.name} - Visual Snapshot (Dark Theme)`, async ({ page }) => {
+      await page.addInitScript(() => {
+        localStorage.setItem('py_interview_theme', 'dark');
+      });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto(screen.path);
       await page.waitForLoadState('domcontentloaded');
@@ -38,16 +41,12 @@ test.describe('Visual Regression Screenshot Tests Across Viewports', () => {
     });
 
     test(`${screen.name} - Visual Snapshot (Light Theme)`, async ({ page }) => {
+      await page.addInitScript(() => {
+        localStorage.setItem('py_interview_theme', 'light');
+      });
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto(screen.path);
       await page.waitForLoadState('domcontentloaded');
-
-      // Switch to Light Theme
-      await page.evaluate(() => {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-        document.documentElement.setAttribute('data-theme', 'light');
-      });
       await page.waitForTimeout(300);
       await page.evaluate(() => document.fonts.ready);
 

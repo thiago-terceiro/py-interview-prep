@@ -14,6 +14,9 @@ const screens = [
 test.describe('A11y & Contrast Audits Across Screens (Dark & Light Theme)', () => {
   for (const screen of screens) {
     test(`${screen.name} - Axe WCAG 2.1 AA Audit (Dark Theme)`, async ({ page }) => {
+      await page.addInitScript(() => {
+        localStorage.setItem('py_interview_theme', 'dark');
+      });
       await page.goto(screen.path);
       await page.waitForLoadState('domcontentloaded');
       await page.waitForTimeout(150);
@@ -39,15 +42,11 @@ test.describe('A11y & Contrast Audits Across Screens (Dark & Light Theme)', () =
     });
 
     test(`${screen.name} - Axe WCAG 2.1 AA Audit (Light Theme)`, async ({ page }) => {
+      await page.addInitScript(() => {
+        localStorage.setItem('py_interview_theme', 'light');
+      });
       await page.goto(screen.path);
       await page.waitForLoadState('domcontentloaded');
-
-      // Switch to Light Theme via DOM data-theme attribute
-      await page.evaluate(() => {
-        document.documentElement.classList.remove('dark');
-        document.documentElement.classList.add('light');
-        document.documentElement.setAttribute('data-theme', 'light');
-      });
       await page.waitForTimeout(200);
 
       const accessibilityScanResults = await new AxeBuilder({ page })
